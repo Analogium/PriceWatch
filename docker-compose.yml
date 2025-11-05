@@ -1,0 +1,95 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  db:
+    image: postgres:15-alpine
+    container_name: pricewatch_db
+    environment:
+      POSTGRES_USER: pricewatch
+      POSTGRES_PASSWORD: pricewatch
+      POSTGRES_DB: pricewatch
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U pricewatch"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis (for Celery)
+  redis:
+    image: redis:7-alpine
+    container_name: pricewatch_redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # FastAPI Backend
+  backend:
+    build:
+      context: ./Backend
+      dockerfile: Dockerfile
+    container_name: pricewatch_backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./Backend:/app
+    environment:
+      - DATABASE_URL=postgresql://pricewatch:pricewatch@db:5432/pricewatch
+      - REDIS_URL=redis://redis:6379/0
+    env_file:
+      - ./Backend/.env
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+  # Celery Worker (for background tasks)
+  celery_worker:
+    build:
+      context: ./Backend
+      dockerfile: Dockerfile
+    container_name: pricewatch_celery_worker
+    volumes:
+      - ./Backend:/app
+    environment:
+      - DATABASE_URL=postgresql://pricewatch:pricewatch@db:5432/pricewatch
+      - REDIS_URL=redis://redis:6379/0
+    env_file:
+      - ./Backend/.env
+    depends_on:
+      - db
+      - redis
+      - backend
+    command: celery -A tasks worker --loglevel=info
+
+  # Celery Beat (for scheduled tasks)
+  celery_beat:
+    build:
+      context: ./Backend
+      dockerfile: Dockerfile
+    container_name: pricewatch_celery_beat
+    volumes:
+      - ./Backend:/app
+    environment:
+      - DATABASE_URL=postgresql://pricewatch:pricewatch@db:5432/pricewatch
+      - REDIS_URL=redis://redis:6379/0
+    env_file:
+      - ./Backend/.env
+    depends_on:
+      - db
+      - redis
+      - backend
+    command: celery -A tasks beat --loglevel=info
+
+volumes:
+  postgres_data:

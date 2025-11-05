@@ -1,0 +1,183 @@
+from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks
+from sqlalchemy.orm import Session
+from typing import List
+from datetime import datetime
+from app.db.base import get_db
+from app.schemas.product import ProductCreate, ProductUpdate, ProductResponse
+from app.models.product import Product
+from app.models.user import User
+from app.api.dependencies import get_current_user
+from app.services.scraper import scraper
+from app.services.email import email_service
+
+router = APIRouter()
+
+
+@router.get("", response_model=List[ProductResponse])
+def get_products(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Get all products tracked by the current user."""
+    products = db.query(Product).filter(Product.user_id == current_user.id).all()
+    return products
+
+
+@router.post("", response_model=ProductResponse, status_code=status.HTTP_201_CREATED)
+def create_product(
+    product_data: ProductCreate,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Add a new product to track."""
+    # Scrape product information
+    scraped_data = scraper.scrape_product(product_data.url)
+
+    if not scraped_data:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Unable to extract product information from URL. Please check the URL and try again."
+        )
+
+    # Create new product
+    new_product = Product(
+        user_id=current_user.id,
+        name=scraped_data.name,
+        url=product_data.url,
+        image=scraped_data.image,
+        current_price=scraped_data.price,
+        target_price=product_data.target_price,
+        last_checked=datetime.utcnow()
+    )
+
+    db.add(new_product)
+    db.commit()
+    db.refresh(new_product)
+
+    return new_product
+
+
+@router.get("/{product_id}", response_model=ProductResponse)
+def get_product(
+    product_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Get a specific product by ID."""
+    product = db.query(Product).filter(
+        Product.id == product_id,
+        Product.user_id == current_user.id
+    ).first()
+
+    if not product:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Product not found"
+        )
+
+    return product
+
+
+@router.put("/{product_id}", response_model=ProductResponse)
+def update_product(
+    product_id: int,
+    product_data: ProductUpdate,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Update a product (name or target price)."""
+    product = db.query(Product).filter(
+        Product.id == product_id,
+        Product.user_id == current_user.id
+    ).first()
+
+    if not product:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Product not found"
+        )
+
+    # Update fields
+    if product_data.name is not None:
+        product.name = product_data.name
+    if product_data.target_price is not None:
+        product.target_price = product_data.target_price
+
+    db.commit()
+    db.refresh(product)
+
+    return product
+
+
+@router.delete("/{product_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_product(
+    product_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Delete a product from tracking."""
+    product = db.query(Product).filter(
+        Product.id == product_id,
+        Product.user_id == current_user.id
+    ).first()
+
+    if not product:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Product not found"
+        )
+
+    db.delete(product)
+    db.commit()
+
+    return None
+
+
+@router.post("/{product_id}/check", response_model=ProductResponse)
+def check_product_price(
+    product_id: int,
+    background_tasks: BackgroundTasks,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Manually check and update the price of a product."""
+    product = db.query(Product).filter(
+        Product.id == product_id,
+        Product.user_id == current_user.id
+    ).first()
+
+    if not product:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Product not found"
+        )
+
+    # Scrape current price
+    scraped_data = scraper.scrape_product(product.url)
+
+    if not scraped_data:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Unable to fetch current price"
+        )
+
+    old_price = product.current_price
+    product.current_price = scraped_data.price
+    product.last_checked = datetime.utcnow()
+
+    # Check if price dropped below target
+    if scraped_data.price <= product.target_price and old_price > product.target_price:
+        # Send email notification in background
+        background_tasks.add_task(
+            email_service.send_price_alert,
+            current_user.email,
+            product.name,
+            scraped_data.price,
+            old_price,
+            product.url
+        )
+
+    db.commit()
+    db.refresh(product)
+
+    return product
