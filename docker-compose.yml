@@ -31,6 +31,32 @@ services:
       timeout: 5s
       retries: 5
 
+  # pgAdmin - PostgreSQL Admin Interface
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: pricewatch_pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@pricewatch.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    ports:
+      - "5050:80"
+    depends_on:
+      - db
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+
+  # Redis Commander - Redis Admin Interface
+  redis_commander:
+    image: rediscommander/redis-commander:latest
+    container_name: pricewatch_redis_commander
+    environment:
+      - REDIS_HOSTS=local:redis:6379
+    ports:
+      - "8081:8081"
+    depends_on:
+      - redis
+
   # FastAPI Backend
   backend:
     build:
@@ -93,3 +119,4 @@ services:
 
 volumes:
   postgres_data:
+  pgadmin_data:
