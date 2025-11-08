@@ -23,8 +23,17 @@ Ce document trace l'état d'avancement du backend de PriceWatch, ce qui a été 
   - `POST /api/v1/auth/register` - Inscription
   - `POST /api/v1/auth/login` - Connexion
   - `GET /api/v1/auth/me` - Informations utilisateur
+  - `POST /api/v1/auth/refresh` - Rafraîchir le token ✨ NEW
+  - `POST /api/v1/auth/verify-email` - Vérifier l'email ✨ NEW
+  - `POST /api/v1/auth/forgot-password` - Demander réinitialisation ✨ NEW
+  - `POST /api/v1/auth/reset-password` - Réinitialiser mot de passe ✨ NEW
 - [x] Middleware de vérification du token JWT
 - [x] Gestion des dépendances utilisateur (`get_current_user`)
+- [x] **Refresh tokens** (7 jours) avec access tokens courts (30 min) ✨ NEW
+- [x] **Rate limiting** basé sur Redis (100 req/min par IP) ✨ NEW
+- [x] **Politique de mots de passe forts** (8+ chars, majuscule, minuscule, chiffre, spécial) ✨ NEW
+- [x] **Vérification d'email** avec token unique envoyé par email ✨ NEW
+- [x] **Réinitialisation de mot de passe** avec token temporaire (1h) ✨ NEW
 
 ### 📦 Gestion des Produits
 - [x] CRUD complet pour les produits :
@@ -48,6 +57,8 @@ Ce document trace l'état d'avancement du backend de PriceWatch, ce qui a été 
 - [x] Envoi d'alertes lors de baisse de prix
 - [x] Template d'email avec informations du produit
 - [x] Exécution en tâche de fond (BackgroundTasks)
+- [x] Email de vérification d'inscription ✨ NEW
+- [x] Email de réinitialisation de mot de passe ✨ NEW
 
 ### ⏰ Tâches Planifiées (Celery)
 - [x] Configuration Celery + Redis
@@ -59,6 +70,8 @@ Ce document trace l'état d'avancement du backend de PriceWatch, ce qui a été 
 ### 🗄️ Base de Données
 - [x] Modèle `User` :
   - id, email, password_hash, created_at
+  - is_verified, verification_token ✨ NEW
+  - reset_token, reset_token_expires ✨ NEW
 - [x] Modèle `Product` :
   - id, user_id, name, url, image, current_price, target_price, last_checked, created_at
 - [x] Relations One-to-Many (User → Products)
@@ -68,18 +81,19 @@ Ce document trace l'état d'avancement du backend de PriceWatch, ce qui a été 
 - [x] Schémas utilisateur (UserCreate, UserLogin, UserResponse, Token)
 - [x] Schémas produit (ProductCreate, ProductUpdate, ProductResponse)
 - [x] Validation des emails et données
+- [x] Schémas refresh token, reset password, email verification ✨ NEW
 
 ---
 
 ## 🚧 Fonctionnalités à Implémenter
 
 ### 🔒 Sécurité & Authentification
-- [ ] **Refresh tokens** pour renouveler l'accès sans redemander les identifiants
-- [ ] **Limitation de taux (rate limiting)** pour prévenir les abus
-- [ ] **Vérification d'email** lors de l'inscription (envoi de lien de confirmation)
-- [ ] **Réinitialisation de mot de passe** (forgot password flow)
+- [x] **Refresh tokens** pour renouveler l'accès sans redemander les identifiants ✅
+- [x] **Limitation de taux (rate limiting)** pour prévenir les abus ✅
+- [x] **Vérification d'email** lors de l'inscription (envoi de lien de confirmation) ✅
+- [x] **Réinitialisation de mot de passe** (forgot password flow) ✅
+- [x] **Politique de mots de passe forts** (longueur minimale, complexité) ✅
 - [ ] **OAuth2** - Connexion via Google/GitHub (optionnel)
-- [ ] **Politique de mots de passe forts** (longueur minimale, complexité)
 
 ### 📊 Historique des Prix
 - [ ] **Modèle `PriceHistory`** pour stocker l'évolution des prix
@@ -199,19 +213,26 @@ Ce document trace l'état d'avancement du backend de PriceWatch, ce qui a été 
 
 ## 🎯 Priorités pour les prochaines releases
 
-### Version 1.1 (Court terme)
+### Version 1.1 (Court terme) - ✅ COMPLETÉE
+1. ✅ Rate limiting
+2. ✅ Refresh tokens
+3. ✅ Réinitialisation de mot de passe
+4. ✅ Politique de mots de passe forts
+5. ✅ Vérification d'email
+
+### Version 1.2 (Moyen terme) - EN COURS
 1. Historique des prix
 2. Tests unitaires de base
 3. Migrations Alembic
-4. Rate limiting
-5. Amélioration de la gestion des erreurs
-
-### Version 1.2 (Moyen terme)
-1. Refresh tokens
-2. Réinitialisation de mot de passe
-3. Support Playwright pour scraping JS
-4. Notifications webhook
+4. Support Playwright pour scraping JS
 5. Pagination & filtres API
+
+### Version 1.3 (Moyen terme)
+1. Notifications webhook
+2. Amélioration de la gestion des erreurs
+3. Logging structuré
+4. Retry logic pour scraping
+5. Dashboard admin basique
 
 ### Version 2.0 (Long terme)
 1. Système de plans & abonnements
@@ -237,6 +258,28 @@ Ce document trace l'état d'avancement du backend de PriceWatch, ce qui a été 
 - Celery Beat nécessite Redis running en continu
 - Pas de cache actuellement → envisager Redis pour cache des scraped data
 - Logs pas structurés → implémenter logging.config
+
+---
+
+---
+
+## 📚 Documentation
+
+### Fichiers de documentation disponibles
+
+- **[RoadMap.md](RoadMap.md)** - Ce fichier : Vue d'ensemble du projet et roadmap
+- **[RoadMapDoc/SECURITY_FEATURES.md](RoadMapDoc/SECURITY_FEATURES.md)** - Documentation complète des fonctionnalités de sécurité
+- **[test_security.py](test_security.py)** - Suite de tests pour les fonctionnalités de sécurité
+- **[run_tests.sh](run_tests.sh)** - Script pour lancer les tests facilement
+
+### Lancer les tests de sécurité
+
+```bash
+cd Backend
+./run_tests.sh
+# ou directement
+python test_security.py
+```
 
 ---
 

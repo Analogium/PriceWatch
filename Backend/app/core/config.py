@@ -13,6 +13,18 @@ class Settings(BaseSettings):
     SECRET_KEY: str
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
+    REFRESH_TOKEN_EXPIRE_DAYS: int = 7
+
+    # Password Policy
+    MIN_PASSWORD_LENGTH: int = 8
+    REQUIRE_UPPERCASE: bool = True
+    REQUIRE_LOWERCASE: bool = True
+    REQUIRE_DIGIT: bool = True
+    REQUIRE_SPECIAL_CHAR: bool = True
+
+    # Rate Limiting
+    RATE_LIMIT_REQUESTS: int = 100
+    RATE_LIMIT_PERIOD: int = 60  # seconds
 
     # Email
     SMTP_HOST: str

@@ -45,6 +45,72 @@ class EmailService:
 
         self._send_email(to_email, subject, html_content)
 
+    def send_verification_email(self, to_email: str, token: str):
+        """Send email verification link."""
+        subject = "Vérifiez votre email - PriceWatch"
+
+        # Note: In production, use the actual frontend URL
+        verification_url = f"http://localhost:5173/verify-email?token={token}"
+
+        html_content = f"""
+        <html>
+            <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+                <h2 style="color: #4CAF50;">Bienvenue sur PriceWatch ! 👋</h2>
+                <p>Bonjour,</p>
+                <p>Merci de vous être inscrit sur PriceWatch. Pour activer votre compte, veuillez cliquer sur le bouton ci-dessous :</p>
+                <p style="margin: 30px 0;">
+                    <a href="{verification_url}" style="display: inline-block; padding: 12px 30px; background-color: #4CAF50; color: white; text-decoration: none; border-radius: 5px; font-weight: bold;">
+                        Vérifier mon email
+                    </a>
+                </p>
+                <p>Ou copiez ce lien dans votre navigateur :</p>
+                <p style="background-color: #f4f4f4; padding: 10px; border-radius: 5px; word-break: break-all; font-size: 0.9em;">
+                    {verification_url}
+                </p>
+                <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
+                <p style="font-size: 0.9em; color: #777;">
+                    Si vous n'avez pas créé de compte PriceWatch, vous pouvez ignorer cet email.
+                </p>
+            </body>
+        </html>
+        """
+
+        self._send_email(to_email, subject, html_content)
+
+    def send_password_reset_email(self, to_email: str, token: str):
+        """Send password reset link."""
+        subject = "Réinitialisation de mot de passe - PriceWatch"
+
+        # Note: In production, use the actual frontend URL
+        reset_url = f"http://localhost:5173/reset-password?token={token}"
+
+        html_content = f"""
+        <html>
+            <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+                <h2 style="color: #FF5722;">Réinitialisation de mot de passe</h2>
+                <p>Bonjour,</p>
+                <p>Vous avez demandé la réinitialisation de votre mot de passe. Cliquez sur le bouton ci-dessous pour créer un nouveau mot de passe :</p>
+                <p style="margin: 30px 0;">
+                    <a href="{reset_url}" style="display: inline-block; padding: 12px 30px; background-color: #FF5722; color: white; text-decoration: none; border-radius: 5px; font-weight: bold;">
+                        Réinitialiser mon mot de passe
+                    </a>
+                </p>
+                <p>Ou copiez ce lien dans votre navigateur :</p>
+                <p style="background-color: #f4f4f4; padding: 10px; border-radius: 5px; word-break: break-all; font-size: 0.9em;">
+                    {reset_url}
+                </p>
+                <p style="color: #FF5722; font-weight: bold;">⚠️ Ce lien expire dans 1 heure.</p>
+                <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
+                <p style="font-size: 0.9em; color: #777;">
+                    Si vous n'avez pas demandé cette réinitialisation, vous pouvez ignorer cet email.<br>
+                    Votre mot de passe restera inchangé.
+                </p>
+            </body>
+        </html>
+        """
+
+        self._send_email(to_email, subject, html_content)
+
     def _send_email(self, to_email: str, subject: str, html_content: str):
         """Internal method to send email via SMTP."""
         try:
