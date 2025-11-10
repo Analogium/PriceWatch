@@ -4,11 +4,13 @@ from typing import List
 from datetime import datetime
 from app.db.base import get_db
 from app.schemas.product import ProductCreate, ProductUpdate, ProductResponse
+from app.schemas.price_history import PriceHistoryResponse, PriceHistoryStats
 from app.models.product import Product
 from app.models.user import User
 from app.api.dependencies import get_current_user
 from app.services.scraper import scraper
 from app.services.email import email_service
+from app.services.price_history import price_history_service
 
 router = APIRouter()
 
@@ -53,6 +55,9 @@ def create_product(
     db.add(new_product)
     db.commit()
     db.refresh(new_product)
+
+    # Record initial price in history
+    price_history_service.record_price(db, new_product.id, scraped_data.price)
 
     return new_product
 
@@ -165,6 +170,10 @@ def check_product_price(
     product.current_price = scraped_data.price
     product.last_checked = datetime.utcnow()
 
+    # Record price in history if it has changed
+    if price_history_service.should_record_price(db, product.id, scraped_data.price):
+        price_history_service.record_price(db, product.id, scraped_data.price)
+
     # Check if price dropped below target
     if scraped_data.price <= product.target_price and old_price > product.target_price:
         # Send email notification in background
@@ -181,3 +190,77 @@ def check_product_price(
     db.refresh(product)
 
     return product
+
+
+@router.get("/{product_id}/history", response_model=List[PriceHistoryResponse])
+def get_product_price_history(
+    product_id: int,
+    limit: int = 100,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Get the price history for a specific product.
+
+    Args:
+        product_id: ID of the product
+        limit: Maximum number of history records to return (default: 100)
+
+    Returns:
+        List of price history records, ordered by date (newest first)
+    """
+    # Verify product belongs to current user
+    product = db.query(Product).filter(
+        Product.id == product_id,
+        Product.user_id == current_user.id
+    ).first()
+
+    if not product:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Product not found"
+        )
+
+    # Get price history
+    history = price_history_service.get_product_history(db, product_id, limit)
+
+    return history
+
+
+@router.get("/{product_id}/history/stats", response_model=PriceHistoryStats)
+def get_product_price_statistics(
+    product_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Get price statistics for a specific product.
+
+    Args:
+        product_id: ID of the product
+
+    Returns:
+        Price statistics including lowest, highest, average, and change percentage
+    """
+    # Verify product belongs to current user
+    product = db.query(Product).filter(
+        Product.id == product_id,
+        Product.user_id == current_user.id
+    ).first()
+
+    if not product:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Product not found"
+        )
+
+    # Get statistics
+    stats = price_history_service.get_price_statistics(db, product_id)
+
+    if not stats:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Product not found"
+        )
+
+    return stats

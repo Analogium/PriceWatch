@@ -17,5 +17,6 @@ class Product(Base):
     last_checked = Column(DateTime, default=datetime.utcnow)
     created_at = Column(DateTime, default=datetime.utcnow)
 
-    # Relationship
+    # Relationships
     owner = relationship("User", back_populates="products")
+    price_history = relationship("PriceHistory", back_populates="product", cascade="all, delete-orphan")
