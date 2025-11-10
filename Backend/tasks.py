@@ -11,6 +11,7 @@ from app.models.product import Product
 from app.models.user import User
 from app.services.scraper import scraper
 from app.services.email import email_service
+from app.services.price_history import price_history_service
 
 # Initialize Celery
 celery_app = Celery(
@@ -50,6 +51,10 @@ def check_all_prices():
                     # Update product
                     product.current_price = new_price
                     product.last_checked = datetime.utcnow()
+
+                    # Record price in history if it has changed
+                    if price_history_service.should_record_price(db, product.id, new_price):
+                        price_history_service.record_price(db, product.id, new_price)
 
                     # Check if price dropped below target
                     if new_price <= product.target_price and old_price > product.target_price:
@@ -97,6 +102,10 @@ def check_single_product(product_id: int):
 
             product.current_price = new_price
             product.last_checked = datetime.utcnow()
+
+            # Record price in history if it has changed
+            if price_history_service.should_record_price(db, product.id, new_price):
+                price_history_service.record_price(db, product.id, new_price)
 
             if new_price <= product.target_price and old_price > product.target_price:
                 user = db.query(User).filter(User.id == product.user_id).first()

@@ -26,6 +26,7 @@ docker-compose exec -T db psql -U pricewatch -d pricewatch << 'EOF'
 -- Vider les tables utilisateur (CASCADE pour gérer les clés étrangères)
 TRUNCATE users CASCADE;
 TRUNCATE products CASCADE;
+TRUNCATE price_history CASCADE;
 
 -- Note: On ne touche PAS à alembic_version pour garder le schéma intact
 EOF
@@ -49,7 +50,12 @@ UNION ALL
 SELECT
     'products' as table_name,
     COUNT(*) as count
-FROM products;
+FROM products
+UNION ALL
+SELECT
+    'price_history' as table_name,
+    COUNT(*) as count
+FROM price_history;
 EOF
 
 echo ""

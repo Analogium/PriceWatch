@@ -83,10 +83,6 @@ Ce document trace l'état d'avancement du backend de PriceWatch, ce qui a été 
 - [x] Validation des emails et données
 - [x] Schémas refresh token, reset password, email verification ✨ NEW
 
----
-
-## 🚧 Fonctionnalités à Implémenter
-
 ### 🔒 Sécurité & Authentification
 - [x] **Refresh tokens** pour renouveler l'accès sans redemander les identifiants ✅
 - [x] **Limitation de taux (rate limiting)** pour prévenir les abus ✅
@@ -95,12 +91,20 @@ Ce document trace l'état d'avancement du backend de PriceWatch, ce qui a été 
 - [x] **Politique de mots de passe forts** (longueur minimale, complexité) ✅
 - [ ] **OAuth2** - Connexion via Google/GitHub (optionnel)
 
-### 📊 Historique des Prix
-- [ ] **Modèle `PriceHistory`** pour stocker l'évolution des prix
+---
+
+### 📊 Historique des Prix ✅
+- [x] **Modèle `PriceHistory`** pour stocker l'évolution des prix
   - id, product_id, price, recorded_at
-- [ ] **Endpoint** `GET /api/v1/products/{id}/history` - Récupérer l'historique
-- [ ] Enregistrement automatique des prix à chaque vérification
+- [x] **Endpoint** `GET /api/v1/products/{id}/history` - Récupérer l'historique avec limite configurable ✨ NEW
+- [x] **Endpoint** `GET /api/v1/products/{id}/history/stats` - Statistiques de prix (min, max, moyenne, changement %) ✨ NEW
+- [x] Enregistrement automatique des prix à chaque vérification (produits et tâches Celery) ✨ NEW
+- [x] Évite les duplications (n'enregistre que si le prix a changé) ✨ NEW
 - [ ] Graphiques d'évolution des prix (intégration frontend)
+
+---
+
+## 🚧 Fonctionnalités à Implémenter
 
 ### 🛡️ Gestion des Erreurs Avancée
 - [ ] **Logging structuré** (rotation des logs, niveaux de log)
@@ -221,9 +225,9 @@ Ce document trace l'état d'avancement du backend de PriceWatch, ce qui a été 
 5. ✅ Vérification d'email
 
 ### Version 1.2 (Moyen terme) - EN COURS
-1. Historique des prix
+1. ✅ Historique des prix (avec endpoints et statistiques)
 2. Tests unitaires de base
-3. Migrations Alembic
+3. ✅ Migrations Alembic (système en place et fonctionnel)
 4. Support Playwright pour scraping JS
 5. Pagination & filtres API
 
