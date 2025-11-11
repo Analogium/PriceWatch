@@ -2,7 +2,7 @@
 
 ## 📋 Vue d'ensemble
 
-Ce document trace l'état d'avancement du backend de PriceWatch, ce qui a été implémenté et ce qui reste à faire.
+Ce document trace l'état d'avancement du backend de PriceWatch, ce qui a été implémenté et ce qui reste à faire, **organisé par ordre de priorité**.
 
 ---
 
@@ -46,6 +46,14 @@ Ce document trace l'état d'avancement du backend de PriceWatch, ce qui a été 
 - [x] Extraction automatique des données produit lors de l'ajout (nom, prix, image)
 - [x] Mise à jour de `last_checked` à chaque vérification
 
+### 📊 Historique des Prix
+- [x] **Modèle `PriceHistory`** pour stocker l'évolution des prix
+  - id, product_id, price, recorded_at
+- [x] **Endpoint** `GET /api/v1/products/{id}/history` - Récupérer l'historique avec limite configurable ✨ NEW
+- [x] **Endpoint** `GET /api/v1/products/{id}/history/stats` - Statistiques de prix (min, max, moyenne, changement %) ✨ NEW
+- [x] Enregistrement automatique des prix à chaque vérification (produits et tâches Celery) ✨ NEW
+- [x] Évite les duplications (n'enregistre que si le prix a changé) ✨ NEW
+
 ### 🕷️ Web Scraping
 - [x] Service de scraping implémenté (`app/services/scraper.py`)
 - [x] Support multi-sites (Amazon, Fnac, Darty, etc.)
@@ -66,78 +74,132 @@ Ce document trace l'état d'avancement du backend de PriceWatch, ce qui a été 
 - [x] Tâche `check_single_product` - Vérification d'un produit spécifique
 - [x] Celery Beat configuré (exécution toutes les 24h)
 - [x] Envoi automatique d'alertes si prix ≤ seuil
+- [x] Enregistrement automatique de l'historique des prix ✨ NEW
 
-### 🗄️ Base de Données
+### 🗄️ Base de Données & Migrations
 - [x] Modèle `User` :
   - id, email, password_hash, created_at
   - is_verified, verification_token ✨ NEW
   - reset_token, reset_token_expires ✨ NEW
 - [x] Modèle `Product` :
   - id, user_id, name, url, image, current_price, target_price, last_checked, created_at
-- [x] Relations One-to-Many (User → Products)
-- [x] Création automatique des tables au démarrage
+- [x] Modèle `PriceHistory` : ✨ NEW
+  - id, product_id, price, recorded_at
+- [x] Relations One-to-Many (User → Products, Product → PriceHistory)
+- [x] **Migrations Alembic** configurées et fonctionnelles ✨ NEW
+- [x] Scripts d'automatisation (`migrate.sh`, `reset_db.sh`) ✨ NEW
 
 ### 📝 Schémas Pydantic
 - [x] Schémas utilisateur (UserCreate, UserLogin, UserResponse, Token)
 - [x] Schémas produit (ProductCreate, ProductUpdate, ProductResponse)
-- [x] Validation des emails et données
 - [x] Schémas refresh token, reset password, email verification ✨ NEW
+- [x] Schémas historique des prix (PriceHistoryResponse, PriceHistoryStats) ✨ NEW
+- [x] Validation des emails et données
 
-### 🔒 Sécurité & Authentification
-- [x] **Refresh tokens** pour renouveler l'accès sans redemander les identifiants ✅
-- [x] **Limitation de taux (rate limiting)** pour prévenir les abus ✅
-- [x] **Vérification d'email** lors de l'inscription (envoi de lien de confirmation) ✅
-- [x] **Réinitialisation de mot de passe** (forgot password flow) ✅
-- [x] **Politique de mots de passe forts** (longueur minimale, complexité) ✅
-- [ ] **OAuth2** - Connexion via Google/GitHub (optionnel)
-
----
-
-### 📊 Historique des Prix ✅
-- [x] **Modèle `PriceHistory`** pour stocker l'évolution des prix
-  - id, product_id, price, recorded_at
-- [x] **Endpoint** `GET /api/v1/products/{id}/history` - Récupérer l'historique avec limite configurable ✨ NEW
-- [x] **Endpoint** `GET /api/v1/products/{id}/history/stats` - Statistiques de prix (min, max, moyenne, changement %) ✨ NEW
-- [x] Enregistrement automatique des prix à chaque vérification (produits et tâches Celery) ✨ NEW
-- [x] Évite les duplications (n'enregistre que si le prix a changé) ✨ NEW
-- [ ] Graphiques d'évolution des prix (intégration frontend)
+### 🧪 Tests
+- [x] Suite de tests de sécurité (`tests/test_security.py`)
+- [x] Suite de tests d'historique des prix (`tests/test_price_history.py`)
+- [x] Suite de tests de pagination, filtres et tri (`tests/test_pagination.py`) ✨ NEW
+- [x] Tests API de base (`tests/test_api.py`)
+- [x] Script d'exécution des tests (`run_tests.sh`)
 
 ---
 
-## 🚧 Fonctionnalités à Implémenter
+## 🚧 Fonctionnalités à Implémenter (par priorité)
 
-### 🛡️ Gestion des Erreurs Avancée
+### 🎯 Version 1.2 - En cours (Priorité HAUTE)
+
+#### 📱 API Améliorations - ✅ COMPLÉTÉ
+- [x] **Pagination** pour les listes de produits ✨ NEW
+  - `GET /api/v1/products?page=1&page_size=20`
+  - Métadonnées complètes (total_items, total_pages, has_next, has_previous)
+  - Améliore les performances pour les utilisateurs avec beaucoup de produits
+- [x] **Filtres & tri** (par prix, date d'ajout, nom) ✨ NEW
+  - `GET /api/v1/products?sort_by=current_price&order=asc`
+  - Tri par: name, current_price, target_price, created_at, last_checked
+  - Ordre: asc (ascendant) ou desc (descendant)
+  - Facilite la navigation dans les produits
+- [x] **Recherche** de produits par nom/URL ✨ NEW
+  - `GET /api/v1/products?search=iphone`
+  - Recherche insensible à la casse dans le nom et l'URL
+  - Améliore l'expérience utilisateur
+- [x] **Combinaison de fonctionnalités** ✨ NEW
+  - Possibilité de combiner pagination + tri + recherche
+  - Ex: `GET /api/v1/products?page=1&page_size=10&search=laptop&sort_by=current_price&order=asc`
+
+#### 🧪 Tests & Qualité - PRIORITÉ HAUTE
+- [ ] **Tests unitaires** complets (pytest) pour :
+  - Services (scraper, email, price_history)
+  - Tâches Celery
+  - Endpoints API complets
+- [ ] **Coverage minimum** de 80%
+- [ ] **Linting & formatting** (black, flake8, mypy)
+  - Assure la qualité du code
+  - Facilite la maintenance
+
+#### 🛡️ Gestion des Erreurs - PRIORITÉ HAUTE
 - [ ] **Logging structuré** (rotation des logs, niveaux de log)
+  - Facilite le débogage en production
+  - Permet le monitoring
 - [ ] **Retry logic** pour le scraping en cas d'échec temporaire
-- [ ] **Circuit breaker** pour éviter de surcharger les sites cibles
-- [ ] **Monitoring** - Alertes en cas d'échec massif de scraping
+  - Améliore la fiabilité du système
+  - Évite les faux négatifs
 - [ ] **Gestion des produits indisponibles** (out of stock detection)
+  - Informe l'utilisateur si un produit n'existe plus
 
-### 🕷️ Amélioration du Scraping
+#### 🕷️ Amélioration du Scraping - PRIORITÉ MOYENNE
 - [ ] **Support Playwright/Selenium** pour sites JavaScript dynamiques
+  - Nécessaire pour certains sites modernes
+  - Élargit la compatibilité
 - [ ] **Détection automatique du site** (pattern matching sur URL)
-- [ ] **Gestion des CAPTCHAs** (délégation à service tiers ou proxies rotatifs)
-- [ ] **Proxies rotatifs** pour éviter les blocages IP
-- [ ] **User-Agent rotation** pour simuler différents navigateurs
+  - Simplifie l'ajout de produits
 - [ ] **Support de nouveaux sites** (Cdiscount, Boulanger, Leclerc, etc.)
-- [ ] **Cache des résultats de scraping** (éviter de rescraper trop souvent)
+  - Élargit la couverture
 
-### 📧 Notifications Avancées
-- [ ] **Webhooks** pour intégrations externes (Slack, Discord)
-- [ ] **Notifications push** (via Firebase ou services similaires)
-- [ ] **SMS** via Twilio (optionnel, coût à considérer)
+---
+
+### 🎯 Version 1.3 - Moyen terme (Priorité MOYENNE)
+
+#### 📧 Notifications Avancées
 - [ ] **Préférences de notification par utilisateur** (fréquence, canaux)
+  - Modèle UserPreferences
+  - Endpoint de configuration
 - [ ] **Résumé hebdomadaire** (email récapitulatif des baisses de prix)
-- [ ] **Templates d'emails personnalisables**
+  - Tâche Celery hebdomadaire
+- [ ] **Webhooks** pour intégrations externes (Slack, Discord)
+  - Permet l'intégration avec d'autres outils
 
-### 🔄 Optimisation des Tâches Planifiées
-- [ ] **Tâches par utilisateur** (vérifications à des heures différentes)
-- [ ] **Priorité des vérifications** (produits proches du seuil en premier)
-- [ ] **Parallelisation** du scraping (plusieurs produits en même temps)
+#### 🔄 Optimisation des Tâches Planifiées
 - [ ] **Configuration de fréquence par produit** (toutes les 6h, 12h, 24h)
-- [ ] **Pause automatique** des produits inactifs (non vérifiés depuis longtemps)
+  - Ajoute un champ `check_frequency` au modèle Product
+  - Plus de flexibilité pour l'utilisateur
+- [ ] **Priorité des vérifications** (produits proches du seuil en premier)
+  - Optimise les vérifications les plus importantes
+- [ ] **Parallelisation** du scraping (plusieurs produits en même temps)
+  - Améliore les performances
 
-### 💳 Monétisation & Plans
+#### 📊 Administration & Analytics
+- [ ] **Endpoint admin** pour statistiques globales
+  - Nombre d'utilisateurs, produits, taux de succès scraping
+- [ ] **Dashboard admin** basique
+  - Interface de monitoring
+- [ ] **Export CSV** des données utilisateur (RGPD)
+  - Conformité légale
+
+#### 🔧 DevOps & Déploiement
+- [ ] **CI/CD pipeline** (GitHub Actions / GitLab CI)
+  - Tests automatiques sur chaque commit
+  - Déploiement automatisé
+- [ ] **Healthchecks avancés** (vérification DB, Redis, Celery)
+  - Monitoring de tous les composants
+- [ ] **Monitoring** (Sentry pour erreurs)
+  - Détection rapide des problèmes en production
+
+---
+
+### 🎯 Version 2.0 - Long terme (Priorité BASSE)
+
+#### 💳 Monétisation & Plans
 - [ ] **Modèle `Subscription`** (plan, statut, date d'expiration)
 - [ ] **Limitation par plan** :
   - Free : 5 produits, vérif quotidienne
@@ -145,105 +207,54 @@ Ce document trace l'état d'avancement du backend de PriceWatch, ce qui a été 
   - Business : 500 produits, vérif personnalisée
 - [ ] **Intégration Stripe** pour paiements
 - [ ] **Webhook Stripe** pour mise à jour automatique du statut
-- [ ] **Endpoint** `GET /api/v1/users/subscription` - Info abonnement
-- [ ] **Upgrade/downgrade** de plan
+- [ ] **Rate limiting par utilisateur** selon le plan
 
-### 🧪 Tests & Qualité
-- [ ] **Tests unitaires** (pytest) pour :
-  - Authentification
-  - CRUD produits
-  - Services (scraper, email)
-  - Tâches Celery
-- [ ] **Tests d'intégration** (base de données)
-- [ ] **Tests E2E** (simulation de flux utilisateur complet)
-- [ ] **Coverage minimum** de 80%
-- [ ] **CI/CD pipeline** (GitHub Actions / GitLab CI)
-- [ ] **Linting & formatting** (black, flake8, mypy)
+#### 🕷️ Scraping Avancé
+- [ ] **Gestion des CAPTCHAs** (délégation à service tiers)
+- [ ] **Proxies rotatifs** pour éviter les blocages IP
+- [ ] **User-Agent rotation**
+- [ ] **Cache des résultats de scraping** (éviter rescraper trop souvent)
+- [ ] **Circuit breaker** pour éviter de surcharger les sites
 
-### 📊 Administration & Analytics
-- [ ] **Endpoint admin** pour statistiques globales
-- [ ] **Dashboard admin** :
-  - Nombre d'utilisateurs
-  - Nombre de produits suivis
-  - Taux de réussite du scraping
-  - Alertes envoyées
-- [ ] **Logs d'activité** (qui a ajouté/supprimé quoi)
-- [ ] **Export CSV** des données utilisateur (RGPD)
-
-### 🔧 DevOps & Déploiement
-- [ ] **Migrations Alembic** (gestion des changements de schéma)
-- [ ] **Variables d'environnement sécurisées** (secrets management)
-- [ ] **Healthchecks avancés** (vérification DB, Redis, Celery)
-- [ ] **Backup automatique** de la base de données
-- [ ] **Déploiement production** (AWS, GCP, DigitalOcean)
-- [ ] **Monitoring** (Sentry, New Relic, DataDog)
-- [ ] **Load balancing** pour haute disponibilité
-
-### 📱 API Améliorations
-- [ ] **Pagination** pour les listes de produits
-- [ ] **Filtres & tri** (par prix, date d'ajout, nom)
-- [ ] **Recherche** de produits par nom/URL
-- [ ] **Bulk operations** (ajout/suppression multiple)
-- [ ] **Rate limiting par utilisateur**
-- [ ] **Versioning API** (v2, v3...)
-- [ ] **Documentation OpenAPI enrichie** (exemples, descriptions)
-
-### 🌍 Internationalisation
-- [ ] **Support multi-devises** (EUR, USD, GBP)
-- [ ] **Détection automatique de la devise** depuis l'URL
-- [ ] **Conversion de devises** (API taux de change)
-- [ ] **Support multi-langues** pour les emails/notifications
-
-### 🔎 Fonctionnalités Avancées
+#### 🔎 Fonctionnalités Avancées
 - [ ] **Comparaison de prix** entre plusieurs sites pour un même produit
 - [ ] **Alertes de disponibilité** (produit de nouveau en stock)
 - [ ] **Prédiction de prix** (ML pour anticiper les baisses)
 - [ ] **Partage de listes** (wishlists publiques/privées)
-- [ ] **Import de liste de souhaits** depuis Amazon/autres sites
-- [ ] **Extension navigateur** pour ajout rapide de produits
+- [ ] **Import de liste de souhaits** depuis Amazon
+- [ ] **Extension navigateur** pour ajout rapide
+
+#### 🌍 Internationalisation
+- [ ] **Support multi-devises** (EUR, USD, GBP)
+- [ ] **Détection automatique de la devise** depuis l'URL
+- [ ] **Conversion de devises** (API taux de change)
+- [ ] **Support multi-langues** pour emails/notifications
+
+#### 🚀 Production & Scale
+- [ ] **Variables d'environnement sécurisées** (secrets management)
+- [ ] **Backup automatique** de la base de données
+- [ ] **Déploiement production** (AWS, GCP, DigitalOcean)
+- [ ] **Load balancing** pour haute disponibilité
+- [ ] **Versioning API** (v2, v3...)
 
 ---
 
 ## 🐛 Bugs Connus & Points d'Attention
 
-- [ ] **Gestion des sites qui changent leur structure HTML** (scraping fragile)
-- [ ] **Pas de gestion des produits supprimés/indisponibles** sur le site marchand
+### Bugs Critiques
 - [ ] **Pas de limite sur le nombre de produits par utilisateur** (risque d'abus en Free)
-- [ ] **Pas de validation de l'URL** lors de l'ajout (peut être une URL invalide)
-- [ ] **Emails pas testés en production** (configuration SMTP à valider)
 - [ ] **Celery Beat ne persiste pas l'état** (redémarrage = perte du schedule)
 
----
+### Bugs Importants
+- [ ] **Pas de validation de l'URL** lors de l'ajout (peut être une URL invalide)
+- [ ] **Pas de gestion des produits supprimés/indisponibles** sur le site marchand
+- [ ] **Emails pas testés en production** (configuration SMTP à valider)
 
-## 🎯 Priorités pour les prochaines releases
-
-### Version 1.1 (Court terme) - ✅ COMPLETÉE
-1. ✅ Rate limiting
-2. ✅ Refresh tokens
-3. ✅ Réinitialisation de mot de passe
-4. ✅ Politique de mots de passe forts
-5. ✅ Vérification d'email
-
-### Version 1.2 (Moyen terme) - EN COURS
-1. ✅ Historique des prix (avec endpoints et statistiques)
-2. Tests unitaires de base
-3. ✅ Migrations Alembic (système en place et fonctionnel)
-4. Support Playwright pour scraping JS
-5. Pagination & filtres API
-
-### Version 1.3 (Moyen terme)
-1. Notifications webhook
-2. Amélioration de la gestion des erreurs
-3. Logging structuré
-4. Retry logic pour scraping
-5. Dashboard admin basique
-
-### Version 2.0 (Long terme)
-1. Système de plans & abonnements
-2. Intégration Stripe
-3. Dashboard admin
-4. Comparaison multi-sites
-5. Extension navigateur
+### Améliorations Techniques
+- [ ] **Gestion des sites qui changent leur structure HTML** (scraping fragile)
+- [ ] Le scraping est synchrone (bloquant) → envisager async avec `httpx` ou `aiohttp`
+- [ ] Pas de cache actuellement → envisager Redis pour cache des scraped data
+- [ ] Logs pas structurés → implémenter logging.config
 
 ---
 
@@ -256,35 +267,102 @@ Ce document trace l'état d'avancement du backend de PriceWatch, ce qui a été 
 - BeautifulSoup4 4.12.3
 - Python-jose (JWT)
 - Bcrypt (hachage)
+- Alembic (migrations)
 
-### Points d'attention architecture
-- Le scraping est synchrone (bloquant) → envisager async avec `httpx` ou `aiohttp`
-- Celery Beat nécessite Redis running en continu
-- Pas de cache actuellement → envisager Redis pour cache des scraped data
-- Logs pas structurés → implémenter logging.config
+### Architecture
+- Backend FastAPI avec architecture MVC
+- Base de données PostgreSQL avec ORM SQLAlchemy
+- Redis pour Celery et rate limiting
+- Celery Beat pour tâches planifiées
+- Docker pour conteneurisation
 
 ---
 
----
+## 📚 Documentation & Scripts
 
-## 📚 Documentation
+### Fichiers de documentation
+- **[RoadMap.md](RoadMap.md)** - Ce fichier : Vue d'ensemble et roadmap
+- **[SECURITY_FEATURES.md](SECURITY_FEATURES.md)** - Documentation sécurité
 
-### Fichiers de documentation disponibles
+### Scripts utiles
+- **[migrate.sh](../migrate.sh)** - Génération et application de migrations Alembic
+- **[reset_db.sh](../reset_db.sh)** - Réinitialisation de la base de données (vide les tables)
+- **[run_tests.sh](../run_tests.sh)** - Exécution de tous les tests
 
-- **[RoadMap.md](RoadMap.md)** - Ce fichier : Vue d'ensemble du projet et roadmap
-- **[RoadMapDoc/SECURITY_FEATURES.md](RoadMapDoc/SECURITY_FEATURES.md)** - Documentation complète des fonctionnalités de sécurité
-- **[test_security.py](test_security.py)** - Suite de tests pour les fonctionnalités de sécurité
-- **[run_tests.sh](run_tests.sh)** - Script pour lancer les tests facilement
+### Tests disponibles
+- **[tests/test_security.py](../tests/test_security.py)** - Tests des fonctionnalités de sécurité
+- **[tests/test_price_history.py](../tests/test_price_history.py)** - Tests de l'historique des prix
+- **[tests/test_pagination.py](../tests/test_pagination.py)** - Tests de pagination, filtres et tri
+- **[tests/test_api.py](../tests/test_api.py)** - Tests API de base
 
-### Lancer les tests de sécurité
+### Lancer les tests
 
 ```bash
 cd Backend
+
+# Tous les tests
 ./run_tests.sh
-# ou directement
-python test_security.py
+
+# Tests spécifiques
+python3 tests/test_security.py
+python3 tests/test_price_history.py
+python3 tests/test_pagination.py
+```
+
+### Utiliser l'API avec pagination et filtres
+
+```bash
+# Liste paginée (page 1, 20 items par page)
+GET /api/v1/products?page=1&page_size=20
+
+# Recherche par nom ou URL
+GET /api/v1/products?search=iphone
+
+# Tri par prix (ascendant)
+GET /api/v1/products?sort_by=current_price&order=asc
+
+# Tri par nom (descendant)
+GET /api/v1/products?sort_by=name&order=desc
+
+# Combinaison: recherche + tri + pagination
+GET /api/v1/products?search=laptop&sort_by=current_price&order=asc&page=1&page_size=10
+
+# Réponse exemple:
+{
+  "items": [
+    {
+      "id": 1,
+      "name": "Product Name",
+      "current_price": 199.99,
+      ...
+    }
+  ],
+  "metadata": {
+    "page": 1,
+    "page_size": 20,
+    "total_items": 45,
+    "total_pages": 3,
+    "has_next": true,
+    "has_previous": false
+  }
+}
+```
+
+### Utiliser les migrations
+
+```bash
+cd Backend
+
+# Créer et appliquer une migration
+./migrate.sh "Description de la migration"
+
+# Vérifier l'état actuel
+docker-compose exec backend alembic current
+
+# Réinitialiser la DB (vider toutes les données)
+./reset_db.sh
 ```
 
 ---
 
-**Dernière mise à jour** : 06/11/2025
+**Dernière mise à jour** : 10/11/2025
