@@ -1,9 +1,15 @@
-from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks
+from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks, Query
 from sqlalchemy.orm import Session
-from typing import List
+from sqlalchemy import or_, func
+from typing import List, Optional
 from datetime import datetime
+from math import ceil
 from app.db.base import get_db
-from app.schemas.product import ProductCreate, ProductUpdate, ProductResponse
+from app.schemas.product import (
+    ProductCreate, ProductUpdate, ProductResponse,
+    PaginatedProductsResponse, PaginationMetadata,
+    ProductSortBy, SortOrder
+)
 from app.schemas.price_history import PriceHistoryResponse, PriceHistoryStats
 from app.models.product import Product
 from app.models.user import User
@@ -15,14 +21,63 @@ from app.services.price_history import price_history_service
 router = APIRouter()
 
 
-@router.get("", response_model=List[ProductResponse])
+@router.get("", response_model=PaginatedProductsResponse)
 def get_products(
+    page: int = Query(1, ge=1, description="Page number (starts at 1)"),
+    page_size: int = Query(20, ge=1, le=100, description="Items per page (max 100)"),
+    search: Optional[str] = Query(None, description="Search by product name or URL"),
+    sort_by: ProductSortBy = Query(ProductSortBy.created_at, description="Field to sort by"),
+    order: SortOrder = Query(SortOrder.desc, description="Sort order (asc/desc)"),
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    """Get all products tracked by the current user."""
-    products = db.query(Product).filter(Product.user_id == current_user.id).all()
-    return products
+    """
+    Get paginated products tracked by the current user.
+
+    Supports:
+    - Pagination (page, page_size)
+    - Searching (by name or URL)
+    - Sorting (by name, price, target_price, created_at, last_checked)
+    - Ordering (ascending or descending)
+    """
+    # Base query
+    query = db.query(Product).filter(Product.user_id == current_user.id)
+
+    # Apply search filter
+    if search:
+        search_filter = or_(
+            func.lower(Product.name).contains(func.lower(search)),
+            func.lower(Product.url).contains(func.lower(search))
+        )
+        query = query.filter(search_filter)
+
+    # Get total count before pagination
+    total_items = query.count()
+
+    # Apply sorting
+    sort_column = getattr(Product, sort_by.value)
+    if order == SortOrder.asc:
+        query = query.order_by(sort_column.asc())
+    else:
+        query = query.order_by(sort_column.desc())
+
+    # Apply pagination
+    offset = (page - 1) * page_size
+    products = query.offset(offset).limit(page_size).all()
+
+    # Calculate metadata
+    total_pages = ceil(total_items / page_size) if total_items > 0 else 1
+
+    metadata = PaginationMetadata(
+        page=page,
+        page_size=page_size,
+        total_items=total_items,
+        total_pages=total_pages,
+        has_next=page < total_pages,
+        has_previous=page > 1
+    )
+
+    return PaginatedProductsResponse(items=products, metadata=metadata)
 
 
 @router.post("", response_model=ProductResponse, status_code=status.HTTP_201_CREATED)

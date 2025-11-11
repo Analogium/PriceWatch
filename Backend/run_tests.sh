@@ -42,6 +42,7 @@ tests=(
     "test_api.py:Tests API de base"
     "test_security.py:Tests de sécurité"
     "test_price_history.py:Tests historique des prix"
+    "test_pagination.py:Tests pagination, filtres et tri"
 )
 
 # Exécuter tous les tests
