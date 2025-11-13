@@ -49,6 +49,7 @@ env/
 .pytest_cache/
 .coverage
 htmlcov/
+coverage.xml
 
 # Celery
 celerybeat-schedule

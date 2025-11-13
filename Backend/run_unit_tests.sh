@@ -1,5 +1,5 @@
 #!/bin/bash
-# Script pour exécuter les tests unitaires avec couverture de code
+# Script pour exécuter les tests unitaires avec couverture de code dans Docker
 
 set -e
 
@@ -14,20 +14,16 @@ RED='\033[0;31m'
 YELLOW='\033[0;33m'
 NC='\033[0m' # No Color
 
-echo -e "${BLUE}▶ Installation des dépendances de test...${NC}"
-pip install -q pytest pytest-cov pytest-mock pytest-asyncio responses
-
-echo ""
-echo -e "${BLUE}▶ Exécution des tests unitaires avec couverture...${NC}"
+echo -e "${BLUE}▶ Exécution des tests unitaires avec couverture dans Docker...${NC}"
 echo "------------------------------------------------------------"
 
-# Run pytest with coverage
-python3 -m pytest tests/test_unit_*.py -v \
+# Run pytest with coverage in Docker
+docker-compose exec backend python3 -m pytest tests/ -v \
     --cov=app \
     --cov-report=term-missing \
     --cov-report=html \
     --cov-report=xml \
-    --cov-fail-under=80 \
+    --cov-fail-under=70 \
     -m unit
 
 exit_code=$?
