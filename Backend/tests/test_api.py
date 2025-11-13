@@ -20,7 +20,7 @@ def test_register():
     print("\n🔍 Test 2: User Registration")
     data = {
         "email": "test@example.com",
-        "password": "testpassword123"
+        "password": "TestPassword123!"
     }
     response = requests.post(f"{BASE_URL}/api/v1/auth/register", json=data)
     print(f"Status: {response.status_code}")
@@ -32,7 +32,7 @@ def test_login():
     print("\n🔍 Test 3: User Login")
     data = {
         "email": "test@example.com",
-        "password": "testpassword123"
+        "password": "TestPassword123!"
     }
     response = requests.post(f"{BASE_URL}/api/v1/auth/login", json=data)
     print(f"Status: {response.status_code}")
