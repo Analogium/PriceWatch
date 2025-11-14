@@ -3,6 +3,18 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
 from app.api.endpoints import auth, products
 from app.db.base import Base, engine
+from app.core.logging_config import setup_logging, get_logger
+
+# Setup logging
+setup_logging(
+    log_level=settings.LOG_LEVEL,
+    log_dir=settings.LOG_DIR,
+    enable_json=settings.ENABLE_JSON_LOGS,
+    enable_rotation=settings.ENABLE_LOG_ROTATION,
+)
+
+logger = get_logger(__name__)
+logger.info("Starting PriceWatch API application")
 
 # Create database tables
 Base.metadata.create_all(bind=engine)

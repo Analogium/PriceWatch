@@ -3,40 +3,178 @@ from bs4 import BeautifulSoup
 from typing import Optional
 from app.schemas.product import ProductScrapedData
 import re
+import time
+from app.core.logging_config import get_logger
+
+logger = get_logger(__name__)
+
+
+class ProductUnavailableError(Exception):
+    """Raised when a product is no longer available."""
+
+    pass
 
 
 class PriceScraper:
     """Service for scraping product information from e-commerce websites."""
 
-    def __init__(self):
+    def __init__(self, max_retries: int = 3, retry_delay: int = 2):
+        """
+        Initialize scraper with retry logic.
+
+        Args:
+            max_retries: Maximum number of retry attempts
+            retry_delay: Delay in seconds between retries
+        """
         self.headers = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
         }
+        self.max_retries = max_retries
+        self.retry_delay = retry_delay
 
     def scrape_product(self, url: str) -> Optional[ProductScrapedData]:
         """
-        Scrape product information from a URL.
+        Scrape product information from a URL with retry logic.
         Supports Amazon, Fnac, Darty and other common e-commerce sites.
+
+        Args:
+            url: Product URL to scrape
+
+        Returns:
+            ProductScrapedData if successful, None otherwise
+
+        Raises:
+            ProductUnavailableError: If product is no longer available
         """
-        try:
-            response = requests.get(url, headers=self.headers, timeout=10)
-            response.raise_for_status()
-            soup = BeautifulSoup(response.content, 'html.parser')
+        last_exception = None
 
-            # Detect site and use appropriate scraping strategy
-            if 'amazon' in url.lower():
-                return self._scrape_amazon(soup)
-            elif 'fnac' in url.lower():
-                return self._scrape_fnac(soup)
-            elif 'darty' in url.lower():
-                return self._scrape_darty(soup)
-            else:
-                # Generic scraping strategy
-                return self._scrape_generic(soup)
+        for attempt in range(1, self.max_retries + 1):
+            try:
+                logger.info(f"Scraping attempt {attempt}/{self.max_retries} for URL: {url}")
 
-        except Exception as e:
-            print(f"Error scraping {url}: {str(e)}")
-            return None
+                response = requests.get(url, headers=self.headers, timeout=10)
+                response.raise_for_status()
+                soup = BeautifulSoup(response.content, 'html.parser')
+
+                # Check for product availability
+                if self._is_product_unavailable(soup, url):
+                    logger.warning(f"Product unavailable at URL: {url}")
+                    raise ProductUnavailableError(f"Product is no longer available: {url}")
+
+                # Detect site and use appropriate scraping strategy
+                if 'amazon' in url.lower():
+                    result = self._scrape_amazon(soup)
+                elif 'fnac' in url.lower():
+                    result = self._scrape_fnac(soup)
+                elif 'darty' in url.lower():
+                    result = self._scrape_darty(soup)
+                else:
+                    # Generic scraping strategy
+                    result = self._scrape_generic(soup)
+
+                if result:
+                    logger.info(f"Successfully scraped {url}: {result.name} - €{result.price}")
+                    return result
+                else:
+                    logger.warning(f"Failed to extract product data from {url}")
+                    return None
+
+            except ProductUnavailableError:
+                # Don't retry if product is unavailable
+                raise
+
+            except requests.exceptions.Timeout as e:
+                last_exception = e
+                logger.warning(f"Timeout on attempt {attempt} for {url}: {str(e)}")
+
+            except requests.exceptions.HTTPError as e:
+                last_exception = e
+                status_code = e.response.status_code if e.response else None
+                logger.warning(f"HTTP error {status_code} on attempt {attempt} for {url}")
+
+                # Don't retry on 404 or 410 (gone)
+                if status_code in [404, 410]:
+                    logger.error(f"Product not found (HTTP {status_code}): {url}")
+                    raise ProductUnavailableError(f"Product not found: {url}")
+
+            except Exception as e:
+                last_exception = e
+                logger.warning(f"Error on attempt {attempt} for {url}: {str(e)}")
+
+            # Wait before retry (exponential backoff)
+            if attempt < self.max_retries:
+                wait_time = self.retry_delay * attempt
+                logger.info(f"Waiting {wait_time}s before retry...")
+                time.sleep(wait_time)
+
+        # All retries failed
+        logger.error(f"All {self.max_retries} scraping attempts failed for {url}: {last_exception}")
+        return None
+
+    def _is_product_unavailable(self, soup: BeautifulSoup, url: str) -> bool:
+        """
+        Check if product is unavailable (out of stock or discontinued).
+
+        Args:
+            soup: BeautifulSoup object of the page
+            url: Product URL
+
+        Returns:
+            True if product is unavailable, False otherwise
+        """
+        # Common unavailable indicators
+        unavailable_texts = [
+            "actuellement indisponible",
+            "out of stock",
+            "rupture de stock",
+            "produit indisponible",
+            "n'est plus disponible",
+            "no longer available",
+            "temporarily out of stock",
+            "épuisé",
+            "sold out",
+            "article supprimé",
+            "page introuvable",
+            "404",
+        ]
+
+        # Check page text for unavailable indicators
+        page_text = soup.get_text().lower()
+        for indicator in unavailable_texts:
+            if indicator in page_text:
+                logger.info(f"Found unavailability indicator: '{indicator}' in {url}")
+                return True
+
+        # Amazon-specific checks
+        if 'amazon' in url.lower():
+            availability_elem = soup.find('div', {'id': 'availability'})
+            if availability_elem:
+                availability_text = availability_elem.get_text().lower()
+                if 'unavailable' in availability_text or 'indisponible' in availability_text:
+                    return True
+
+            # Check for "Currently unavailable" message
+            unavailable_msg = soup.find('span', {'class': 'a-size-medium a-color-price'})
+            if unavailable_msg and 'indisponible' in unavailable_msg.get_text().lower():
+                return True
+
+        # Fnac-specific checks
+        if 'fnac' in url.lower():
+            availability_elem = soup.find('div', {'class': 'f-productHeader-buyingArea'})
+            if availability_elem:
+                availability_text = availability_elem.get_text().lower()
+                if 'indisponible' in availability_text or 'épuisé' in availability_text:
+                    return True
+
+        # Darty-specific checks
+        if 'darty' in url.lower():
+            availability_elem = soup.find('div', {'class': 'product_availability'})
+            if availability_elem:
+                availability_text = availability_elem.get_text().lower()
+                if 'indisponible' in availability_text or 'rupture' in availability_text:
+                    return True
+
+        return False
 
     def _scrape_amazon(self, soup: BeautifulSoup) -> Optional[ProductScrapedData]:
         """Scrape Amazon product page."""
@@ -61,12 +199,13 @@ class PriceScraper:
             image = image_elem.get('src') if image_elem else None
 
             if price is None:
+                logger.warning("Failed to extract price from Amazon page")
                 return None
 
             return ProductScrapedData(name=name, price=price, image=image)
 
         except Exception as e:
-            print(f"Error parsing Amazon page: {str(e)}")
+            logger.error(f"Error parsing Amazon page: {str(e)}", exc_info=True)
             return None
 
     def _scrape_fnac(self, soup: BeautifulSoup) -> Optional[ProductScrapedData]:
@@ -82,6 +221,7 @@ class PriceScraper:
                 price_str = price_elem.text.strip().replace('€', '').replace(',', '.').replace(' ', '')
                 price = float(re.sub(r'[^\d.]', '', price_str))
             else:
+                logger.warning("Failed to extract price from Fnac page")
                 return None
 
             # Image
@@ -91,7 +231,7 @@ class PriceScraper:
             return ProductScrapedData(name=name, price=price, image=image)
 
         except Exception as e:
-            print(f"Error parsing Fnac page: {str(e)}")
+            logger.error(f"Error parsing Fnac page: {str(e)}", exc_info=True)
             return None
 
     def _scrape_darty(self, soup: BeautifulSoup) -> Optional[ProductScrapedData]:
@@ -107,6 +247,7 @@ class PriceScraper:
                 price_str = price_elem.text.strip().replace('€', '').replace(',', '.').replace(' ', '')
                 price = float(re.sub(r'[^\d.]', '', price_str))
             else:
+                logger.warning("Failed to extract price from Darty page")
                 return None
 
             # Image
@@ -116,7 +257,7 @@ class PriceScraper:
             return ProductScrapedData(name=name, price=price, image=image)
 
         except Exception as e:
-            print(f"Error parsing Darty page: {str(e)}")
+            logger.error(f"Error parsing Darty page: {str(e)}", exc_info=True)
             return None
 
     def _scrape_generic(self, soup: BeautifulSoup) -> Optional[ProductScrapedData]:
@@ -143,12 +284,13 @@ class PriceScraper:
                 image = image_meta.get('content')
 
             if price is None:
+                logger.warning("Failed to extract price using generic scraper")
                 return None
 
             return ProductScrapedData(name=name, price=price, image=image)
 
         except Exception as e:
-            print(f"Error in generic scraping: {str(e)}")
+            logger.error(f"Error in generic scraping: {str(e)}", exc_info=True)
             return None
 
 

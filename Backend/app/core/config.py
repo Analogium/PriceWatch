@@ -36,6 +36,12 @@ class Settings(BaseSettings):
     # Redis
     REDIS_URL: str = "redis://localhost:6379/0"
 
+    # Logging
+    LOG_LEVEL: str = "INFO"
+    LOG_DIR: Optional[str] = "./logs"
+    ENABLE_JSON_LOGS: bool = False
+    ENABLE_LOG_ROTATION: bool = True
+
     class Config:
         env_file = ".env"
         case_sensitive = True

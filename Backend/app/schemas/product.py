@@ -28,6 +28,8 @@ class ProductResponse(BaseModel):
     target_price: float
     last_checked: datetime
     created_at: datetime
+    is_available: bool = True
+    unavailable_since: Optional[datetime] = None
 
     class Config:
         from_attributes = True

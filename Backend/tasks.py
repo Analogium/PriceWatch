@@ -9,9 +9,12 @@ from app.core.config import settings
 from app.db.base import SessionLocal
 from app.models.product import Product
 from app.models.user import User
-from app.services.scraper import scraper
+from app.services.scraper import scraper, ProductUnavailableError
 from app.services.email import email_service
 from app.services.price_history import price_history_service
+from app.core.logging_config import get_logger
+
+logger = get_logger(__name__)
 
 # Initialize Celery
 celery_app = Celery(
@@ -38,15 +41,28 @@ def check_all_prices():
     db: Session = SessionLocal()
     try:
         products = db.query(Product).all()
+        logger.info(f"Starting price check for {len(products)} products")
+
+        checked_count = 0
+        unavailable_count = 0
+        error_count = 0
 
         for product in products:
             try:
+                logger.info(f"Checking product {product.id}: {product.name}")
+
                 # Scrape current price
                 scraped_data = scraper.scrape_product(product.url)
 
                 if scraped_data:
                     old_price = product.current_price
                     new_price = scraped_data.price
+
+                    # Mark product as available if it was previously unavailable
+                    if not product.is_available:
+                        logger.info(f"Product {product.id} is available again!")
+                        product.is_available = True
+                        product.unavailable_since = None
 
                     # Update product
                     product.current_price = new_price
@@ -69,15 +85,29 @@ def check_all_prices():
                                 old_price,
                                 product.url
                             )
-                            print(f"Alert sent for product {product.id}: {product.name}")
+                            logger.info(f"Alert sent for product {product.id}: {product.name}")
 
                     db.commit()
+                    checked_count += 1
 
-            except Exception as e:
-                print(f"Error checking product {product.id}: {str(e)}")
+            except ProductUnavailableError as e:
+                logger.warning(f"Product {product.id} is unavailable: {str(e)}")
+                # Mark product as unavailable
+                if product.is_available:
+                    product.is_available = False
+                    product.unavailable_since = datetime.utcnow()
+                    product.last_checked = datetime.utcnow()
+                    db.commit()
+                    logger.info(f"Marked product {product.id} as unavailable")
+                unavailable_count += 1
                 continue
 
-        print(f"Price check completed for {len(products)} products")
+            except Exception as e:
+                logger.error(f"Error checking product {product.id}: {str(e)}", exc_info=True)
+                error_count += 1
+                continue
+
+        logger.info(f"Price check completed: {checked_count} checked, {unavailable_count} unavailable, {error_count} errors")
 
     finally:
         db.close()
@@ -91,35 +121,58 @@ def check_single_product(product_id: int):
         product = db.query(Product).filter(Product.id == product_id).first()
 
         if not product:
-            print(f"Product {product_id} not found")
+            logger.warning(f"Product {product_id} not found")
             return
 
-        scraped_data = scraper.scrape_product(product.url)
+        logger.info(f"Checking single product {product_id}: {product.name}")
 
-        if scraped_data:
-            old_price = product.current_price
-            new_price = scraped_data.price
+        try:
+            scraped_data = scraper.scrape_product(product.url)
 
-            product.current_price = new_price
-            product.last_checked = datetime.utcnow()
+            if scraped_data:
+                old_price = product.current_price
+                new_price = scraped_data.price
 
-            # Record price in history if it has changed
-            if price_history_service.should_record_price(db, product.id, new_price):
-                price_history_service.record_price(db, product.id, new_price)
+                # Mark product as available if it was previously unavailable
+                if not product.is_available:
+                    logger.info(f"Product {product_id} is available again!")
+                    product.is_available = True
+                    product.unavailable_since = None
 
-            if new_price <= product.target_price and old_price > product.target_price:
-                user = db.query(User).filter(User.id == product.user_id).first()
-                if user:
-                    email_service.send_price_alert(
-                        user.email,
-                        product.name,
-                        new_price,
-                        old_price,
-                        product.url
-                    )
+                product.current_price = new_price
+                product.last_checked = datetime.utcnow()
 
-            db.commit()
-            print(f"Product {product_id} checked successfully")
+                # Record price in history if it has changed
+                if price_history_service.should_record_price(db, product.id, new_price):
+                    price_history_service.record_price(db, product.id, new_price)
+
+                if new_price <= product.target_price and old_price > product.target_price:
+                    user = db.query(User).filter(User.id == product.user_id).first()
+                    if user:
+                        email_service.send_price_alert(
+                            user.email,
+                            product.name,
+                            new_price,
+                            old_price,
+                            product.url
+                        )
+                        logger.info(f"Alert sent for product {product_id}")
+
+                db.commit()
+                logger.info(f"Product {product_id} checked successfully: €{new_price}")
+
+        except ProductUnavailableError as e:
+            logger.warning(f"Product {product_id} is unavailable: {str(e)}")
+            # Mark product as unavailable
+            if product.is_available:
+                product.is_available = False
+                product.unavailable_since = datetime.utcnow()
+                product.last_checked = datetime.utcnow()
+                db.commit()
+                logger.info(f"Marked product {product_id} as unavailable")
+
+        except Exception as e:
+            logger.error(f"Error checking product {product_id}: {str(e)}", exc_info=True)
 
     finally:
         db.close()

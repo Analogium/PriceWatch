@@ -45,6 +45,7 @@ Ce document trace l'état d'avancement du backend de PriceWatch, ce qui a été 
   - `POST /api/v1/products/{id}/check` - Vérification manuelle du prix
 - [x] Extraction automatique des données produit lors de l'ajout (nom, prix, image)
 - [x] Mise à jour de `last_checked` à chaque vérification
+- [x] Suivi de disponibilité avec `is_available` et `unavailable_since` ✨ NEW
 
 ### 📊 Historique des Prix
 - [x] **Modèle `PriceHistory`** pour stocker l'évolution des prix
@@ -102,14 +103,16 @@ Ce document trace l'état d'avancement du backend de PriceWatch, ce qui a été 
   - [x] Tests de sécurité (`tests/test_security.py`)
   - [x] Tests d'historique des prix (`tests/test_price_history.py`)
   - [x] Tests de pagination, filtres et tri (`tests/test_pagination.py`) ✨ NEW
-- [x] Suite de tests unitaires (58 tests) ✨ NEW
-  - [x] Tests scraper service (17 tests, 86% coverage) ✅
-  - [x] Tests email service (13 tests, 100% coverage) ✅
+- [x] Suite de tests unitaires (76 tests) ✨ NEW
+  - [x] Tests scraper service (17 tests, 85% coverage) ✅
+  - [x] Tests email service (13 tests, 96% coverage) ✅
   - [x] Tests price_history service (13 tests, 100% coverage) ✅
-  - [x] Tests Celery tasks (11 tests) ✅
+  - [x] Tests Celery tasks (10 tests) ✅
+  - [x] Tests error handling (13 tests, retry logic, unavailability detection) ✅ NEW
+  - [x] Tests security (9 tests) ✅
 - [x] Infrastructure de tests ✨ NEW
   - [x] pytest avec markers (unit, integration, scraper, email, celery) ✨ NEW
-  - [x] pytest-cov pour coverage reporting ✨ NEW
+  - [x] pytest-cov pour coverage reporting (71% total) ✨ NEW
   - [x] pytest-mock pour mocking ✨ NEW
 - [x] Scripts d'exécution des tests ✨ NEW
   - [x] `run_tests.sh` - Tests d'intégration
@@ -163,15 +166,24 @@ Ce document trace l'état d'avancement du backend de PriceWatch, ce qui a été 
   - Script run_linting.sh pour vérification automatique
   - Assure la qualité et maintenabilité du code
 
-#### 🛡️ Gestion des Erreurs - PRIORITÉ HAUTE
-- [ ] **Logging structuré** (rotation des logs, niveaux de log)
-  - Facilite le débogage en production
-  - Permet le monitoring
-- [ ] **Retry logic** pour le scraping en cas d'échec temporaire
-  - Améliore la fiabilité du système
-  - Évite les faux négatifs
-- [ ] **Gestion des produits indisponibles** (out of stock detection)
-  - Informe l'utilisateur si un produit n'existe plus
+#### 🛡️ Gestion des Erreurs - ✅ COMPLÉTÉ
+- [x] **Logging structuré** (rotation des logs, niveaux de log) ✨ NEW
+  - Module de logging avec rotation quotidienne (30 jours de rétention)
+  - Support des logs JSON structurés pour parsing facile
+  - Logs séparés pour erreurs (90 jours de rétention)
+  - Configuration via variables d'environnement (LOG_LEVEL, LOG_DIR)
+  - Intégré dans scraper, email, tasks Celery et main
+- [x] **Retry logic** pour le scraping en cas d'échec temporaire ✨ NEW
+  - 3 tentatives maximum par défaut (configurable)
+  - Backoff exponentiel (2s, 4s, 6s...)
+  - Pas de retry sur erreurs 404/410
+  - Logs détaillés de chaque tentative
+- [x] **Gestion des produits indisponibles** (out of stock detection) ✨ NEW
+  - Détection automatique multi-langues (FR/EN)
+  - Support spécifique Amazon, Fnac, Darty
+  - Nouveaux champs: is_available, unavailable_since
+  - Exception ProductUnavailableError pour gérer l'indisponibilité
+  - Marquage automatique dans les tâches Celery
 
 #### 🕷️ Amélioration du Scraping - PRIORITÉ MOYENNE
 - [ ] **Support Playwright/Selenium** pour sites JavaScript dynamiques
@@ -273,14 +285,14 @@ Ce document trace l'état d'avancement du backend de PriceWatch, ce qui a été 
 
 ### Bugs Importants
 - [ ] **Pas de validation de l'URL** lors de l'ajout (peut être une URL invalide)
-- [ ] **Pas de gestion des produits supprimés/indisponibles** sur le site marchand
+- [x] **Pas de gestion des produits supprimés/indisponibles** sur le site marchand ✅ CORRIGÉ
 - [ ] **Emails pas testés en production** (configuration SMTP à valider)
 
 ### Améliorations Techniques
 - [ ] **Gestion des sites qui changent leur structure HTML** (scraping fragile)
 - [ ] Le scraping est synchrone (bloquant) → envisager async avec `httpx` ou `aiohttp`
 - [ ] Pas de cache actuellement → envisager Redis pour cache des scraped data
-- [ ] Logs pas structurés → implémenter logging.config
+- [x] Logs pas structurés → implémenter logging.config ✅ CORRIGÉ
 
 ---
 
@@ -328,9 +340,11 @@ Ce document trace l'état d'avancement du backend de PriceWatch, ce qui a été 
 
 #### Tests unitaires ✨ NEW
 - **[tests/test_unit_scraper.py](../tests/test_unit_scraper.py)** - Tests du service de scraping (17 tests)
-- **[tests/test_unit_email.py](../tests/test_unit_email.py)** - Tests du service email (14 tests)
+- **[tests/test_unit_email.py](../tests/test_unit_email.py)** - Tests du service email (13 tests)
 - **[tests/test_unit_price_history.py](../tests/test_unit_price_history.py)** - Tests du service price_history (13 tests)
-- **[tests/test_unit_celery_tasks.py](../tests/test_unit_celery_tasks.py)** - Tests des tâches Celery (14 tests)
+- **[tests/test_unit_celery_tasks.py](../tests/test_unit_celery_tasks.py)** - Tests des tâches Celery (10 tests)
+- **[tests/test_unit_error_handling.py](../tests/test_unit_error_handling.py)** - Tests de gestion d'erreurs (13 tests) ✨ NEW
+- **[tests/test_unit_security.py](../tests/test_unit_security.py)** - Tests de sécurité (9 tests)
 
 ### Lancer les tests
 
@@ -419,4 +433,4 @@ docker-compose exec backend alembic current
 
 ---
 
-**Dernière mise à jour** : 13/11/2025
+**Dernière mise à jour** : 14/11/2025
