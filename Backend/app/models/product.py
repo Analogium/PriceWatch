@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Float, DateTime, ForeignKey
+from sqlalchemy import Column, Integer, String, Float, DateTime, ForeignKey, Boolean
 from sqlalchemy.orm import relationship
 from datetime import datetime
 from app.db.base import Base
@@ -16,6 +16,8 @@ class Product(Base):
     target_price = Column(Float, nullable=False)
     last_checked = Column(DateTime, default=datetime.utcnow)
     created_at = Column(DateTime, default=datetime.utcnow)
+    is_available = Column(Boolean, default=True, nullable=False)
+    unavailable_since = Column(DateTime, nullable=True)
 
     # Relationships
     owner = relationship("User", back_populates="products")

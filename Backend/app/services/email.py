@@ -2,6 +2,9 @@ import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from app.core.config import settings
+from app.core.logging_config import get_logger
+
+logger = get_logger(__name__)
 
 
 class EmailService:
@@ -114,6 +117,8 @@ class EmailService:
     def _send_email(self, to_email: str, subject: str, html_content: str):
         """Internal method to send email via SMTP."""
         try:
+            logger.info(f"Sending email to {to_email}: {subject}")
+
             message = MIMEMultipart("alternative")
             message["Subject"] = subject
             message["From"] = self.from_email
@@ -127,10 +132,13 @@ class EmailService:
                 server.login(self.smtp_user, self.smtp_password)
                 server.send_message(message)
 
-            print(f"Email sent successfully to {to_email}")
+            logger.info(f"Email sent successfully to {to_email}")
 
+        except smtplib.SMTPException as e:
+            logger.error(f"SMTP error sending email to {to_email}: {str(e)}", exc_info=True)
+            raise
         except Exception as e:
-            print(f"Error sending email to {to_email}: {str(e)}")
+            logger.error(f"Error sending email to {to_email}: {str(e)}", exc_info=True)
             raise
 
 
