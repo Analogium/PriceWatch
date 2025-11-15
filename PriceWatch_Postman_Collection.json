@@ -2,7 +2,7 @@
 	"info": {
 		"_postman_id": "pricewatch-api-collection",
 		"name": "PriceWatch API",
-		"description": "Collection complète pour tester l'API PriceWatch",
+		"description": "Collection complète pour tester l'API PriceWatch - Support de 6 sites e-commerce (Amazon, Fnac, Darty, Cdiscount, Boulanger, E.Leclerc) avec détection automatique, retry logic, et suivi de disponibilité",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
@@ -68,7 +68,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n  \"email\": \"test@example.com\",\n  \"password\": \"password123\"\n}"
+					"raw": "{\n  \"email\": \"test@example.com\",\n  \"password\": \"SecurePass123!\"\n}"
 				},
 				"url": {
 					"raw": "{{baseUrl}}/api/v1/auth/register",
@@ -82,7 +82,7 @@
 						"register"
 					]
 				},
-				"description": "Créer un nouveau compte utilisateur"
+				"description": "Créer un nouveau compte utilisateur (password doit contenir min 8 caractères, majuscule, minuscule, chiffre et caractère spécial)"
 			},
 			"response": []
 		},
@@ -96,6 +96,7 @@
 							"if (pm.response.code === 200) {",
 							"    const response = pm.response.json();",
 							"    pm.environment.set(\"token\", response.access_token);",
+							"    pm.environment.set(\"refreshToken\", response.refresh_token);",
 							"    console.log(\"Token saved:\", response.access_token);",
 							"}"
 						],
@@ -113,7 +114,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n  \"email\": \"test@example.com\",\n  \"password\": \"password123\"\n}"
+					"raw": "{\n  \"email\": \"test@example.com\",\n  \"password\": \"SecurePass123!\"\n}"
 				},
 				"url": {
 					"raw": "{{baseUrl}}/api/v1/auth/login",
@@ -127,7 +128,52 @@
 						"login"
 					]
 				},
-				"description": "Se connecter et obtenir un token JWT (sauvegardé automatiquement)"
+				"description": "Se connecter et obtenir un token JWT (access_token: 30 min, refresh_token: 7 jours - sauvegardés automatiquement)"
+			},
+			"response": []
+		},
+		{
+			"name": "Refresh Token",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"if (pm.response.code === 200) {",
+							"    const response = pm.response.json();",
+							"    pm.environment.set(\"token\", response.access_token);",
+							"    console.log(\"New access token saved:\", response.access_token);",
+							"}"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"refresh_token\": \"{{refreshToken}}\"\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/api/v1/auth/refresh",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"auth",
+						"refresh"
+					]
+				},
+				"description": "Obtenir un nouveau access token à partir du refresh token (quand access token expire)"
 			},
 			"response": []
 		},
@@ -159,7 +205,7 @@
 			"response": []
 		},
 		{
-			"name": "Add Product",
+			"name": "Add Product - Amazon",
 			"event": [
 				{
 					"listen": "test",
@@ -190,7 +236,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n  \"url\": \"https://www.amazon.fr/dp/B0C5VCBLXX\",\n  \"target_price\": 199.99\n}"
+					"raw": "{\n  \"url\": \"https://www.amazon.fr/dp/B0CHXJ7QFT\",\n  \"target_price\": 799.99\n}"
 				},
 				"url": {
 					"raw": "{{baseUrl}}/api/v1/products",
@@ -203,7 +249,109 @@
 						"products"
 					]
 				},
-				"description": "Ajouter un produit à surveiller (le scraping se fait automatiquement)"
+				"description": "Ajouter un produit Amazon à surveiller (scraping automatique avec retry logic 3 tentatives, backoff exponentiel)"
+			},
+			"response": []
+		},
+		{
+			"name": "Add Product - Cdiscount",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"url\": \"https://www.cdiscount.com/informatique/tablettes-tactiles-ebooks/apple-ipad-mini-6-wi-fi-64go-gris-sideral/f-10798-app0194252584576.html\",\n  \"target_price\": 549.99\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/api/v1/products",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"products"
+					]
+				},
+				"description": "Ajouter un produit Cdiscount à surveiller (détection automatique du site)"
+			},
+			"response": []
+		},
+		{
+			"name": "Add Product - Boulanger",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"url\": \"https://www.boulanger.com/ref/1174942\",\n  \"target_price\": 1999.00\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/api/v1/products",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"products"
+					]
+				},
+				"description": "Ajouter un produit Boulanger à surveiller"
+			},
+			"response": []
+		},
+		{
+			"name": "Add Product - Fnac",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"url\": \"https://www.fnac.com/a17252626/Product-Name\",\n  \"target_price\": 299.99\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/api/v1/products",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"products"
+					]
+				},
+				"description": "Ajouter un produit Fnac à surveiller"
 			},
 			"response": []
 		},
@@ -229,7 +377,159 @@
 						"products"
 					]
 				},
-				"description": "Obtenir la liste de tous les produits suivis"
+				"description": "Obtenir la liste de tous les produits suivis (champs is_available et unavailable_since inclus)"
+			},
+			"response": []
+		},
+		{
+			"name": "Get All Products - With Pagination",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{token}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{baseUrl}}/api/v1/products?page=1&page_size=10",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"products"
+					],
+					"query": [
+						{
+							"key": "page",
+							"value": "1"
+						},
+						{
+							"key": "page_size",
+							"value": "10"
+						}
+					]
+				},
+				"description": "Obtenir les produits avec pagination (10 résultats par page)"
+			},
+			"response": []
+		},
+		{
+			"name": "Get All Products - With Search",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{token}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{baseUrl}}/api/v1/products?search=iPhone",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"products"
+					],
+					"query": [
+						{
+							"key": "search",
+							"value": "iPhone"
+						}
+					]
+				},
+				"description": "Rechercher des produits par nom ou URL"
+			},
+			"response": []
+		},
+		{
+			"name": "Get All Products - With Sort",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{token}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{baseUrl}}/api/v1/products?sort_by=current_price&sort_order=asc",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"products"
+					],
+					"query": [
+						{
+							"key": "sort_by",
+							"value": "current_price"
+						},
+						{
+							"key": "sort_order",
+							"value": "asc"
+						}
+					]
+				},
+				"description": "Trier les produits par prix croissant (sort_by: current_price, target_price, created_at, last_checked)"
+			},
+			"response": []
+		},
+		{
+			"name": "Get All Products - Combined Filters",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{token}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{baseUrl}}/api/v1/products?page=1&page_size=20&search=laptop&sort_by=current_price&sort_order=desc",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"products"
+					],
+					"query": [
+						{
+							"key": "page",
+							"value": "1"
+						},
+						{
+							"key": "page_size",
+							"value": "20"
+						},
+						{
+							"key": "search",
+							"value": "laptop"
+						},
+						{
+							"key": "sort_by",
+							"value": "current_price"
+						},
+						{
+							"key": "sort_order",
+							"value": "desc"
+						}
+					]
+				},
+				"description": "Combiner pagination, recherche et tri (recherche 'laptop', triés par prix décroissant, 20 par page)"
 			},
 			"response": []
 		},
@@ -256,7 +556,69 @@
 						"{{productId}}"
 					]
 				},
-				"description": "Obtenir les détails d'un produit spécifique"
+				"description": "Obtenir les détails d'un produit spécifique (inclut is_available et unavailable_since)"
+			},
+			"response": []
+		},
+		{
+			"name": "Get Product Price History",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{token}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{baseUrl}}/api/v1/products/{{productId}}/history",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"products",
+						"{{productId}}",
+						"history"
+					]
+				},
+				"description": "Obtenir l'historique complet des prix d'un produit (tableau de {timestamp, price})"
+			},
+			"response": []
+		},
+		{
+			"name": "Get Product Price Statistics",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{token}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{baseUrl}}/api/v1/products/{{productId}}/history?stats=true",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"products",
+						"{{productId}}",
+						"history"
+					],
+					"query": [
+						{
+							"key": "stats",
+							"value": "true"
+						}
+					]
+				},
+				"description": "Obtenir les statistiques de prix (min_price, max_price, avg_price, price_change_percent)"
 			},
 			"response": []
 		},
@@ -277,7 +639,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n  \"target_price\": 179.99,\n  \"name\": \"Mon produit renommé\"\n}"
+					"raw": "{\n  \"target_price\": 699.99,\n  \"name\": \"Mon produit renommé\"\n}"
 				},
 				"url": {
 					"raw": "{{baseUrl}}/api/v1/products/{{productId}}",
@@ -319,7 +681,7 @@
 						"check"
 					]
 				},
-				"description": "Forcer la vérification du prix d'un produit (envoie une alerte si prix < seuil)"
+				"description": "Forcer la vérification du prix d'un produit (envoie une alerte si prix < seuil, marque comme indisponible si nécessaire)"
 			},
 			"response": []
 		},
@@ -379,6 +741,11 @@
 		},
 		{
 			"key": "token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "refreshToken",
 			"value": "",
 			"type": "string"
 		},

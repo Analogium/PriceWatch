@@ -57,9 +57,10 @@ Ce document trace l'état d'avancement du backend de PriceWatch, ce qui a été 
 
 ### 🕷️ Web Scraping
 - [x] Service de scraping implémenté (`app/services/scraper.py`)
-- [x] Support multi-sites (Amazon, Fnac, Darty, etc.)
+- [x] Support multi-sites : Amazon, Fnac, Darty, Cdiscount, Boulanger, E.Leclerc ✨ NEW
+- [x] Détection automatique du site par pattern matching ✨ NEW
 - [x] Extraction du titre, prix et image
-- [x] Gestion des erreurs de scraping
+- [x] Gestion des erreurs de scraping avec retry logic et logging ✨ NEW
 
 ### 📧 Notifications Email
 - [x] Service email implémenté (`app/services/email.py`)
@@ -103,16 +104,18 @@ Ce document trace l'état d'avancement du backend de PriceWatch, ce qui a été 
   - [x] Tests de sécurité (`tests/test_security.py`)
   - [x] Tests d'historique des prix (`tests/test_price_history.py`)
   - [x] Tests de pagination, filtres et tri (`tests/test_pagination.py`) ✨ NEW
-- [x] Suite de tests unitaires (76 tests) ✨ NEW
+- [x] Suite de tests unitaires (113 tests) ✨ NEW
   - [x] Tests scraper service (17 tests, 85% coverage) ✅
   - [x] Tests email service (13 tests, 96% coverage) ✅
   - [x] Tests price_history service (13 tests, 100% coverage) ✅
   - [x] Tests Celery tasks (10 tests) ✅
-  - [x] Tests error handling (13 tests, retry logic, unavailability detection) ✅ NEW
+  - [x] Tests error handling (13 tests, retry logic, unavailability detection) ✅
   - [x] Tests security (9 tests) ✅
+  - [x] Tests site detection (24 tests, 100% réussite) ✅ NEW
+  - [x] Tests nouveaux scrapers (13 tests, Cdiscount/Boulanger/Leclerc) ✅ NEW
 - [x] Infrastructure de tests ✨ NEW
   - [x] pytest avec markers (unit, integration, scraper, email, celery) ✨ NEW
-  - [x] pytest-cov pour coverage reporting (71% total) ✨ NEW
+  - [x] pytest-cov pour coverage reporting (73% total) ✨ NEW
   - [x] pytest-mock pour mocking ✨ NEW
 - [x] Scripts d'exécution des tests ✨ NEW
   - [x] `run_tests.sh` - Tests d'intégration
@@ -185,14 +188,20 @@ Ce document trace l'état d'avancement du backend de PriceWatch, ce qui a été 
   - Exception ProductUnavailableError pour gérer l'indisponibilité
   - Marquage automatique dans les tâches Celery
 
-#### 🕷️ Amélioration du Scraping - PRIORITÉ MOYENNE
+#### 🕷️ Amélioration du Scraping - ✅ PARTIELLEMENT COMPLÉTÉ
 - [ ] **Support Playwright/Selenium** pour sites JavaScript dynamiques
   - Nécessaire pour certains sites modernes
   - Élargit la compatibilité
-- [ ] **Détection automatique du site** (pattern matching sur URL)
-  - Simplifie l'ajout de produits
-- [ ] **Support de nouveaux sites** (Cdiscount, Boulanger, Leclerc, etc.)
-  - Élargit la couverture
+- [x] **Détection automatique du site** (pattern matching sur URL) ✨ NEW
+  - Classe SiteDetector pour reconnaissance automatique des domaines
+  - Support multi-pays pour Amazon (.fr, .com, .de, .co.uk, .es, .it)
+  - Pattern matching robuste avec gestion www. et sous-domaines
+  - 24 tests unitaires (100% de réussite)
+- [x] **Support de nouveaux sites** (Cdiscount, Boulanger, Leclerc) ✨ NEW
+  - Scrapers spécifiques pour Cdiscount, Boulanger, E.Leclerc
+  - Détection d'indisponibilité pour chaque site
+  - Tests unitaires complets (13 tests)
+  - Total : 6 sites supportés (Amazon, Fnac, Darty, Cdiscount, Boulanger, Leclerc)
 
 ---
 
@@ -345,6 +354,8 @@ Ce document trace l'état d'avancement du backend de PriceWatch, ce qui a été 
 - **[tests/test_unit_celery_tasks.py](../tests/test_unit_celery_tasks.py)** - Tests des tâches Celery (10 tests)
 - **[tests/test_unit_error_handling.py](../tests/test_unit_error_handling.py)** - Tests de gestion d'erreurs (13 tests) ✨ NEW
 - **[tests/test_unit_security.py](../tests/test_unit_security.py)** - Tests de sécurité (9 tests)
+- **[tests/test_unit_site_detection.py](../tests/test_unit_site_detection.py)** - Tests de détection de sites (24 tests) ✨ NEW
+- **[tests/test_unit_new_scrapers.py](../tests/test_unit_new_scrapers.py)** - Tests nouveaux scrapers (13 tests) ✨ NEW
 
 ### Lancer les tests
 
@@ -433,4 +444,4 @@ docker-compose exec backend alembic current
 
 ---
 
-**Dernière mise à jour** : 14/11/2025
+**Dernière mise à jour** : 15/11/2025

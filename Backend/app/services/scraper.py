@@ -1,9 +1,11 @@
 import requests
 from bs4 import BeautifulSoup
-from typing import Optional
+from typing import Optional, Callable
 from app.schemas.product import ProductScrapedData
 import re
 import time
+import random
+from urllib.parse import urlparse
 from app.core.logging_config import get_logger
 
 logger = get_logger(__name__)
@@ -13,6 +15,52 @@ class ProductUnavailableError(Exception):
     """Raised when a product is no longer available."""
 
     pass
+
+
+class SiteDetector:
+    """Utility class for detecting e-commerce sites from URLs."""
+
+    # Site patterns: domain keywords -> site name
+    SITE_PATTERNS = {
+        'amazon': ['amazon.fr', 'amazon.com', 'amazon.de', 'amazon.co.uk', 'amazon.es', 'amazon.it'],
+        'fnac': ['fnac.com', 'fnac.fr'],
+        'darty': ['darty.com'],
+        'cdiscount': ['cdiscount.com'],
+        'boulanger': ['boulanger.com', 'boulanger.fr'],
+        'leclerc': ['e.leclerc', 'e-leclerc'],
+    }
+
+    @classmethod
+    def detect_site(cls, url: str) -> Optional[str]:
+        """
+        Detect the e-commerce site from URL.
+
+        Args:
+            url: Product URL
+
+        Returns:
+            Site name (lowercase) or None if unknown
+        """
+        try:
+            parsed = urlparse(url.lower())
+            domain = parsed.netloc
+
+            # Remove 'www.' prefix if present
+            domain = domain.replace('www.', '')
+
+            # Check each site pattern
+            for site_name, patterns in cls.SITE_PATTERNS.items():
+                for pattern in patterns:
+                    if pattern in domain:
+                        logger.debug(f"Detected site '{site_name}' from domain '{domain}'")
+                        return site_name
+
+            logger.debug(f"Unknown site from domain '{domain}'")
+            return None
+
+        except Exception as e:
+            logger.warning(f"Error detecting site from URL {url}: {str(e)}")
+            return None
 
 
 class PriceScraper:
@@ -27,10 +75,23 @@ class PriceScraper:
             retry_delay: Delay in seconds between retries
         """
         self.headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
+            'Accept-Language': 'fr-FR,fr;q=0.9,en-US;q=0.8,en;q=0.7',
+            'Accept-Encoding': 'gzip, deflate, br',
+            'DNT': '1',
+            'Connection': 'keep-alive',
+            'Upgrade-Insecure-Requests': '1',
+            'Sec-Fetch-Dest': 'document',
+            'Sec-Fetch-Mode': 'navigate',
+            'Sec-Fetch-Site': 'none',
+            'Sec-Fetch-User': '?1',
+            'Cache-Control': 'max-age=0',
         }
         self.max_retries = max_retries
         self.retry_delay = retry_delay
+        self.session = requests.Session()
+        self.session.headers.update(self.headers)
 
     def scrape_product(self, url: str) -> Optional[ProductScrapedData]:
         """
@@ -52,7 +113,12 @@ class PriceScraper:
             try:
                 logger.info(f"Scraping attempt {attempt}/{self.max_retries} for URL: {url}")
 
-                response = requests.get(url, headers=self.headers, timeout=10)
+                # Add random delay to appear more human-like
+                if attempt > 1:
+                    delay = random.uniform(1.0, 3.0)
+                    time.sleep(delay)
+
+                response = self.session.get(url, timeout=15)
                 response.raise_for_status()
                 soup = BeautifulSoup(response.content, 'html.parser')
 
@@ -61,15 +127,24 @@ class PriceScraper:
                     logger.warning(f"Product unavailable at URL: {url}")
                     raise ProductUnavailableError(f"Product is no longer available: {url}")
 
-                # Detect site and use appropriate scraping strategy
-                if 'amazon' in url.lower():
+                # Detect site automatically and use appropriate scraping strategy
+                site = SiteDetector.detect_site(url)
+
+                if site == 'amazon':
                     result = self._scrape_amazon(soup)
-                elif 'fnac' in url.lower():
+                elif site == 'fnac':
                     result = self._scrape_fnac(soup)
-                elif 'darty' in url.lower():
+                elif site == 'darty':
                     result = self._scrape_darty(soup)
+                elif site == 'cdiscount':
+                    result = self._scrape_cdiscount(soup)
+                elif site == 'boulanger':
+                    result = self._scrape_boulanger(soup)
+                elif site == 'leclerc':
+                    result = self._scrape_leclerc(soup)
                 else:
-                    # Generic scraping strategy
+                    # Generic scraping strategy for unknown sites
+                    logger.info(f"Using generic scraper for unknown site: {url}")
                     result = self._scrape_generic(soup)
 
                 if result:
@@ -77,7 +152,9 @@ class PriceScraper:
                     return result
                 else:
                     logger.warning(f"Failed to extract product data from {url}")
-                    return None
+                    # For sites that might need JavaScript rendering, mark as extraction failure
+                    last_exception = Exception(f"Failed to extract data from {url}")
+                    continue
 
             except ProductUnavailableError:
                 # Don't retry if product is unavailable
@@ -97,6 +174,14 @@ class PriceScraper:
                     logger.error(f"Product not found (HTTP {status_code}): {url}")
                     raise ProductUnavailableError(f"Product not found: {url}")
 
+                # For 403, add longer delay before retry (anti-bot protection)
+                if status_code == 403:
+                    logger.warning(f"Access forbidden (403) - possible anti-bot protection on {url}")
+                    if attempt < self.max_retries:
+                        wait_time = self.retry_delay * attempt * 2  # Double the wait time for 403
+                        logger.info(f"Waiting {wait_time}s before retry (anti-bot delay)...")
+                        time.sleep(wait_time)
+
             except Exception as e:
                 last_exception = e
                 logger.warning(f"Error on attempt {attempt} for {url}: {str(e)}")
@@ -107,8 +192,48 @@ class PriceScraper:
                 logger.info(f"Waiting {wait_time}s before retry...")
                 time.sleep(wait_time)
 
-        # All retries failed
-        logger.error(f"All {self.max_retries} scraping attempts failed for {url}: {last_exception}")
+        # All retries failed - try Playwright as fallback
+        if last_exception:
+            # Check if it's a 403 error or failed extraction (likely anti-bot)
+            should_try_playwright = False
+
+            if isinstance(last_exception, requests.exceptions.HTTPError):
+                status_code = last_exception.response.status_code if last_exception.response is not None else None
+                if status_code == 403:
+                    logger.warning(f"HTTP 403 detected for {url} - trying Playwright fallback")
+                    should_try_playwright = True
+            elif "Failed to extract data" in str(last_exception):
+                # Extraction failed - might need JavaScript rendering
+                logger.warning(f"Data extraction failed for {url} - trying Playwright fallback")
+                should_try_playwright = True
+
+            # Try Playwright fallback for anti-bot protection
+            if should_try_playwright:
+                try:
+                    logger.info(f"Attempting Playwright fallback for {url}")
+                    from app.services.playwright_scraper import scrape_with_playwright
+                    result = scrape_with_playwright(url)
+                    if result:
+                        logger.info(f"Playwright fallback successful for {url}")
+                        return result
+                    else:
+                        logger.error(f"Playwright fallback also failed for {url}")
+                except Exception as e:
+                    logger.error(f"Playwright fallback error for {url}: {str(e)}")
+
+            # Log final failure
+            if isinstance(last_exception, requests.exceptions.HTTPError):
+                status_code = last_exception.response.status_code if last_exception.response is not None else None
+                if status_code == 403:
+                    logger.error(
+                        f"Unable to scrape {url} even with Playwright. "
+                        f"Site has very strong anti-bot protection."
+                    )
+                else:
+                    logger.error(f"All {self.max_retries} scraping attempts failed for {url}: {last_exception}")
+            else:
+                logger.error(f"All {self.max_retries} scraping attempts failed for {url}: {last_exception}")
+
         return None
 
     def _is_product_unavailable(self, soup: BeautifulSoup, url: str) -> bool:
@@ -169,6 +294,31 @@ class PriceScraper:
         # Darty-specific checks
         if 'darty' in url.lower():
             availability_elem = soup.find('div', {'class': 'product_availability'})
+            if availability_elem:
+                availability_text = availability_elem.get_text().lower()
+                if 'indisponible' in availability_text or 'rupture' in availability_text:
+                    return True
+
+        # Use site detector for better site detection
+        site = SiteDetector.detect_site(url)
+
+        # Site-specific checks using detector
+        if site == 'cdiscount':
+            availability_elem = soup.find('div', {'class': 'fpStockAvailability'})
+            if availability_elem:
+                availability_text = availability_elem.get_text().lower()
+                if 'indisponible' in availability_text or 'stock épuisé' in availability_text:
+                    return True
+
+        elif site == 'boulanger':
+            availability_elem = soup.find('div', {'class': 'availability'})
+            if availability_elem:
+                availability_text = availability_elem.get_text().lower()
+                if 'indisponible' in availability_text or 'épuisé' in availability_text:
+                    return True
+
+        elif site == 'leclerc':
+            availability_elem = soup.find('span', {'class': 'stock-status'})
             if availability_elem:
                 availability_text = availability_elem.get_text().lower()
                 if 'indisponible' in availability_text or 'rupture' in availability_text:
@@ -291,6 +441,137 @@ class PriceScraper:
 
         except Exception as e:
             logger.error(f"Error in generic scraping: {str(e)}", exc_info=True)
+            return None
+
+    def _scrape_cdiscount(self, soup: BeautifulSoup) -> Optional[ProductScrapedData]:
+        """Scrape Cdiscount product page."""
+        try:
+            # Title
+            title_elem = soup.find('h1', {'itemprop': 'name'})
+            if not title_elem:
+                title_elem = soup.find('h1', {'class': 'fpDesCol1'})
+            name = title_elem.text.strip() if title_elem else "Unknown Product"
+
+            # Price - Cdiscount has various price formats
+            price = None
+            price_elem = soup.find('span', {'class': 'fpPrice'})
+            if not price_elem:
+                price_elem = soup.find('span', {'itemprop': 'price'})
+            if not price_elem:
+                price_elem = soup.find('meta', {'itemprop': 'price'})
+                if price_elem:
+                    price_str = price_elem.get('content', '')
+                else:
+                    price_str = ''
+            else:
+                price_str = price_elem.text.strip()
+
+            if price_str:
+                price_str = price_str.replace('€', '').replace(',', '.').replace(' ', '')
+                price = float(re.sub(r'[^\d.]', '', price_str))
+
+            if price is None:
+                logger.warning("Failed to extract price from Cdiscount page")
+                return None
+
+            # Image
+            image_elem = soup.find('img', {'class': 'img', 'itemprop': 'image'})
+            if not image_elem:
+                image_elem = soup.find('meta', {'property': 'og:image'})
+                image = image_elem.get('content') if image_elem else None
+            else:
+                image = image_elem.get('src') if image_elem else None
+
+            return ProductScrapedData(name=name, price=price, image=image)
+
+        except Exception as e:
+            logger.error(f"Error parsing Cdiscount page: {str(e)}", exc_info=True)
+            return None
+
+    def _scrape_boulanger(self, soup: BeautifulSoup) -> Optional[ProductScrapedData]:
+        """Scrape Boulanger product page."""
+        try:
+            # Title
+            title_elem = soup.find('h1', {'class': 'product-title'})
+            if not title_elem:
+                title_elem = soup.find('h1', {'itemprop': 'name'})
+            name = title_elem.text.strip() if title_elem else "Unknown Product"
+
+            # Price
+            price = None
+            price_elem = soup.find('span', {'class': 'price'})
+            if not price_elem:
+                price_elem = soup.find('meta', {'itemprop': 'price'})
+                if price_elem:
+                    price_str = price_elem.get('content', '')
+                else:
+                    price_str = ''
+            else:
+                price_str = price_elem.text.strip()
+
+            if price_str:
+                price_str = price_str.replace('€', '').replace(',', '.').replace(' ', '')
+                price = float(re.sub(r'[^\d.]', '', price_str))
+
+            if price is None:
+                logger.warning("Failed to extract price from Boulanger page")
+                return None
+
+            # Image
+            image_elem = soup.find('img', {'class': 'product-visual__image'})
+            if not image_elem:
+                image_elem = soup.find('meta', {'property': 'og:image'})
+                image = image_elem.get('content') if image_elem else None
+            else:
+                image = image_elem.get('src') if image_elem else None
+
+            return ProductScrapedData(name=name, price=price, image=image)
+
+        except Exception as e:
+            logger.error(f"Error parsing Boulanger page: {str(e)}", exc_info=True)
+            return None
+
+    def _scrape_leclerc(self, soup: BeautifulSoup) -> Optional[ProductScrapedData]:
+        """Scrape E.Leclerc product page."""
+        try:
+            # Title
+            title_elem = soup.find('h1', {'class': 'product-name'})
+            if not title_elem:
+                title_elem = soup.find('h1', {'itemprop': 'name'})
+            name = title_elem.text.strip() if title_elem else "Unknown Product"
+
+            # Price
+            price = None
+            price_elem = soup.find('span', {'class': 'product-price'})
+            if not price_elem:
+                price_elem = soup.find('meta', {'itemprop': 'price'})
+                if price_elem:
+                    price_str = price_elem.get('content', '')
+                else:
+                    price_str = ''
+            else:
+                price_str = price_elem.text.strip()
+
+            if price_str:
+                price_str = price_str.replace('€', '').replace(',', '.').replace(' ', '')
+                price = float(re.sub(r'[^\d.]', '', price_str))
+
+            if price is None:
+                logger.warning("Failed to extract price from E.Leclerc page")
+                return None
+
+            # Image
+            image_elem = soup.find('img', {'class': 'product-image'})
+            if not image_elem:
+                image_elem = soup.find('meta', {'property': 'og:image'})
+                image = image_elem.get('content') if image_elem else None
+            else:
+                image = image_elem.get('src') if image_elem else None
+
+            return ProductScrapedData(name=name, price=price, image=image)
+
+        except Exception as e:
+            logger.error(f"Error parsing E.Leclerc page: {str(e)}", exc_info=True)
             return None
 
 

@@ -2,7 +2,7 @@
 	"info": {
 		"_postman_id": "pricewatch-user-management",
 		"name": "PriceWatch - User Management",
-		"description": "Collection pour la gestion complète des utilisateurs (CRUD)",
+		"description": "Collection pour la gestion complète des utilisateurs (CRUD) - Exemples avec 6 sites e-commerce supportés (Amazon, Fnac, Darty, Cdiscount, Boulanger, E.Leclerc)",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
@@ -80,7 +80,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n  \"email\": \"bob@pricewatch.com\",\n  \"password\": \"BobPassword456\"\n}"
+					"raw": "{\n  \"email\": \"bob@pricewatch.com\",\n  \"password\": \"BobPassword456!\"\n}"
 				},
 				"url": {
 					"raw": "{{baseUrl}}/api/v1/auth/register",
@@ -126,7 +126,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n  \"email\": \"charlie@pricewatch.com\",\n  \"password\": \"Charlie789Pass\"\n}"
+					"raw": "{\n  \"email\": \"charlie@pricewatch.com\",\n  \"password\": \"Charlie789Pass!\"\n}"
 				},
 				"url": {
 					"raw": "{{baseUrl}}/api/v1/auth/register",
@@ -217,7 +217,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n  \"email\": \"bob@pricewatch.com\",\n  \"password\": \"BobPassword456\"\n}"
+					"raw": "{\n  \"email\": \"bob@pricewatch.com\",\n  \"password\": \"BobPassword456!\"\n}"
 				},
 				"url": {
 					"raw": "{{baseUrl}}/api/v1/auth/login",
@@ -262,7 +262,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n  \"email\": \"charlie@pricewatch.com\",\n  \"password\": \"Charlie789Pass\"\n}"
+					"raw": "{\n  \"email\": \"charlie@pricewatch.com\",\n  \"password\": \"Charlie789Pass!\"\n}"
 				},
 				"url": {
 					"raw": "{{baseUrl}}/api/v1/auth/login",
@@ -362,7 +362,7 @@
 			"response": []
 		},
 		{
-			"name": "10. Alice - Add Product (iPhone)",
+			"name": "10. Alice - Add Product (iPhone - Amazon)",
 			"event": [
 				{
 					"listen": "test",
@@ -406,12 +406,12 @@
 						"products"
 					]
 				},
-				"description": "Alice ajoute un iPhone à surveiller"
+				"description": "Alice ajoute un iPhone depuis Amazon (détection automatique du site)"
 			},
 			"response": []
 		},
 		{
-			"name": "11. Bob - Add Product (MacBook)",
+			"name": "11. Bob - Add Product (Tablette - Cdiscount)",
 			"event": [
 				{
 					"listen": "test",
@@ -442,7 +442,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n  \"url\": \"https://www.amazon.fr/dp/B0CM5JV268\",\n  \"target_price\": 1299.00\n}"
+					"raw": "{\n  \"url\": \"https://www.cdiscount.com/informatique/tablettes-tactiles-ebooks/apple-ipad-mini-6-wi-fi-64go-gris-sideral/f-10798-app0194252584576.html\",\n  \"target_price\": 499.00\n}"
 				},
 				"url": {
 					"raw": "{{baseUrl}}/api/v1/products",
@@ -455,12 +455,61 @@
 						"products"
 					]
 				},
-				"description": "Bob ajoute un MacBook à surveiller"
+				"description": "Bob ajoute une tablette depuis Cdiscount (nouveau site supporté)"
 			},
 			"response": []
 		},
 		{
-			"name": "12. Alice - Get All Products",
+			"name": "12. Charlie - Add Product (MacBook - Boulanger)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"if (pm.response.code === 201) {",
+							"    const response = pm.response.json();",
+							"    pm.environment.set(\"charlieProduct1Id\", response.id);",
+							"    console.log(\"✅ Product added for Charlie:\", response.id);",
+							"}"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{charlieToken}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"url\": \"https://www.boulanger.com/ref/1174942\",\n  \"target_price\": 1899.00\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/api/v1/products",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"products"
+					]
+				},
+				"description": "Charlie ajoute un MacBook depuis Boulanger (nouveau site supporté)"
+			},
+			"response": []
+		},
+		{
+			"name": "13. Alice - Get All Products",
 			"request": {
 				"method": "GET",
 				"header": [
@@ -481,12 +530,12 @@
 						"products"
 					]
 				},
-				"description": "Voir tous les produits d'Alice"
+				"description": "Voir tous les produits d'Alice (inclut is_available et unavailable_since)"
 			},
 			"response": []
 		},
 		{
-			"name": "13. Bob - Get All Products",
+			"name": "14. Bob - Get All Products",
 			"request": {
 				"method": "GET",
 				"header": [
@@ -512,7 +561,35 @@
 			"response": []
 		},
 		{
-			"name": "14. Alice - Update Product Target Price",
+			"name": "15. Alice - Get Product History",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{aliceToken}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{baseUrl}}/api/v1/products/{{aliceProduct1Id}}/history",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"products",
+						"{{aliceProduct1Id}}",
+						"history"
+					]
+				},
+				"description": "Alice consulte l'historique des prix de son produit"
+			},
+			"response": []
+		},
+		{
+			"name": "16. Alice - Update Product Target Price",
 			"request": {
 				"method": "PUT",
 				"header": [
@@ -547,7 +624,7 @@
 			"response": []
 		},
 		{
-			"name": "15. Bob - Update Product Target Price",
+			"name": "17. Bob - Update Product Target Price",
 			"request": {
 				"method": "PUT",
 				"header": [
@@ -563,7 +640,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n  \"target_price\": 1199.00\n}"
+					"raw": "{\n  \"target_price\": 449.00\n}"
 				},
 				"url": {
 					"raw": "{{baseUrl}}/api/v1/products/{{bobProduct1Id}}",
@@ -577,12 +654,12 @@
 						"{{bobProduct1Id}}"
 					]
 				},
-				"description": "Bob modifie son prix cible pour le MacBook"
+				"description": "Bob modifie son prix cible pour la tablette"
 			},
 			"response": []
 		},
 		{
-			"name": "16. Alice - Check Product Price",
+			"name": "18. Alice - Check Product Price",
 			"request": {
 				"method": "POST",
 				"header": [
@@ -605,12 +682,12 @@
 						"check"
 					]
 				},
-				"description": "Alice vérifie manuellement le prix de son produit"
+				"description": "Alice vérifie manuellement le prix de son produit (avec retry logic et détection d'indisponibilité)"
 			},
 			"response": []
 		},
 		{
-			"name": "17. Bob - Check Product Price",
+			"name": "19. Bob - Check Product Price",
 			"request": {
 				"method": "POST",
 				"header": [
@@ -638,7 +715,7 @@
 			"response": []
 		},
 		{
-			"name": "18. Alice - Delete Product",
+			"name": "20. Alice - Delete Product",
 			"request": {
 				"method": "DELETE",
 				"header": [
@@ -665,7 +742,7 @@
 			"response": []
 		},
 		{
-			"name": "19. Bob - Delete Product",
+			"name": "21. Bob - Delete Product",
 			"request": {
 				"method": "DELETE",
 				"header": [
@@ -692,7 +769,7 @@
 			"response": []
 		},
 		{
-			"name": "20. [ERREUR] Bob tente d'accéder au produit d'Alice",
+			"name": "22. [ERREUR] Bob tente d'accéder au produit d'Alice",
 			"request": {
 				"method": "GET",
 				"header": [
@@ -719,7 +796,7 @@
 			"response": []
 		},
 		{
-			"name": "21. [ERREUR] Accès sans token",
+			"name": "23. [ERREUR] Accès sans token",
 			"request": {
 				"method": "GET",
 				"header": [],
@@ -739,7 +816,7 @@
 			"response": []
 		},
 		{
-			"name": "22. [ERREUR] Login avec mauvais mot de passe",
+			"name": "24. [ERREUR] Login avec mauvais mot de passe",
 			"request": {
 				"method": "POST",
 				"header": [
@@ -769,7 +846,7 @@
 			"response": []
 		},
 		{
-			"name": "23. [ERREUR] Register email déjà existant",
+			"name": "25. [ERREUR] Register email déjà existant",
 			"request": {
 				"method": "POST",
 				"header": [
@@ -780,7 +857,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n  \"email\": \"alice@pricewatch.com\",\n  \"password\": \"AnotherPassword456\"\n}"
+					"raw": "{\n  \"email\": \"alice@pricewatch.com\",\n  \"password\": \"AnotherPassword456!\"\n}"
 				},
 				"url": {
 					"raw": "{{baseUrl}}/api/v1/auth/register",
@@ -877,6 +954,11 @@
 		},
 		{
 			"key": "bobProduct1Id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "charlieProduct1Id",
 			"value": "",
 			"type": "string"
 		},
