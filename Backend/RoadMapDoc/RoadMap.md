@@ -189,7 +189,7 @@ Ce document trace l'état d'avancement du backend de PriceWatch, ce qui a été 
   - Marquage automatique dans les tâches Celery
 
 #### 🕷️ Amélioration du Scraping - ✅ PARTIELLEMENT COMPLÉTÉ
-- [ ] **Support Playwright/Selenium** pour sites JavaScript dynamiques
+- [X] **Support Playwright/Selenium** pour sites JavaScript dynamiques
   - Nécessaire pour certains sites modernes
   - Élargit la compatibilité
 - [x] **Détection automatique du site** (pattern matching sur URL) ✨ NEW
