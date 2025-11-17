@@ -15,6 +15,7 @@ from datetime import datetime
 from tasks import check_all_prices, check_single_product
 from app.models.product import Product
 from app.models.user import User
+from app.models.user_preferences import UserPreferences
 from app.schemas.product import ProductScrapedData
 
 
@@ -110,6 +111,11 @@ class TestCeleryTasks:
         user_query.filter.return_value = user_query
         user_query.first.return_value = mock_user
 
+        # Mock user preferences query (return None = use defaults)
+        prefs_query = MagicMock()
+        prefs_query.filter.return_value = prefs_query
+        prefs_query.first.return_value = None  # No preferences set
+
         def query_side_effect(*args, **kwargs):
             if args and args[0] is Product:
                 query = MagicMock()
@@ -117,6 +123,8 @@ class TestCeleryTasks:
                 return query
             elif args and args[0] is User:
                 return user_query
+            elif args and args[0] is UserPreferences:
+                return prefs_query
             return MagicMock()
 
         mock_db.query.side_effect = query_side_effect
@@ -130,13 +138,14 @@ class TestCeleryTasks:
         # Execute task
         check_all_prices()
 
-        # Verify alert was sent
+        # Verify alert was sent (with user_preferences parameter)
         mock_send_alert.assert_called_once_with(
             "user@example.com",
             "Test Product",
             75.00,
             100.00,
-            "https://example.com/product"
+            "https://example.com/product",
+            user_preferences=None  # No preferences set
         )
 
     @pytest.mark.unit
@@ -317,11 +326,18 @@ class TestCeleryTasks:
         user_query.filter.return_value = user_query
         user_query.first.return_value = mock_user
 
+        # Mock user preferences query
+        prefs_query = MagicMock()
+        prefs_query.filter.return_value = prefs_query
+        prefs_query.first.return_value = None  # No preferences
+
         def query_side_effect(*args, **kwargs):
             if args and args[0] is Product:
                 return product_query
             elif args and args[0] is User:
                 return user_query
+            elif args and args[0] is UserPreferences:
+                return prefs_query
             return MagicMock()
 
         mock_db.query.side_effect = query_side_effect
@@ -335,13 +351,14 @@ class TestCeleryTasks:
         # Execute task
         check_single_product(1)
 
-        # Verify alert was sent
+        # Verify alert was sent (with user_preferences parameter)
         mock_send_alert.assert_called_once_with(
             "user@example.com",
             "Alert Product",
             75.00,
             100.00,
-            "https://example.com/alert"
+            "https://example.com/alert",
+            user_preferences=None  # No preferences set
         )
 
     @pytest.mark.unit

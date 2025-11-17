@@ -317,6 +317,22 @@ class TestEmailService:
         assert email_service is not None
         assert isinstance(email_service, EmailService)
 
+    @pytest.mark.unit
+    @pytest.mark.email
+    @patch('app.services.email.smtplib.SMTP')
+    def test_send_email_generic_exception(self, mock_smtp):
+        """Test handling of generic exceptions during email send."""
+        mock_smtp.side_effect = Exception("Unexpected error")
+
+        with pytest.raises(Exception):
+            self.email_service.send_price_alert(
+                to_email="user@example.com",
+                product_name="Test Product",
+                current_price=99.99,
+                target_price=89.99,
+                product_url="https://example.com/product",
+            )
+
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

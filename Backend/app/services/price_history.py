@@ -1,4 +1,5 @@
 """Service for managing price history records."""
+
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 from app.models.price_history import PriceHistory
@@ -23,22 +24,14 @@ class PriceHistoryService:
         Returns:
             Created PriceHistory instance
         """
-        price_entry = PriceHistory(
-            product_id=product_id,
-            price=price,
-            recorded_at=datetime.utcnow()
-        )
+        price_entry = PriceHistory(product_id=product_id, price=price, recorded_at=datetime.utcnow())
         db.add(price_entry)
         db.commit()
         db.refresh(price_entry)
         return price_entry
 
     @staticmethod
-    def get_product_history(
-        db: Session,
-        product_id: int,
-        limit: Optional[int] = None
-    ) -> List[PriceHistory]:
+    def get_product_history(db: Session, product_id: int, limit: Optional[int] = None) -> List[PriceHistory]:
         """
         Get price history for a product.
 
@@ -50,9 +43,11 @@ class PriceHistoryService:
         Returns:
             List of PriceHistory records, ordered by date (newest first)
         """
-        query = db.query(PriceHistory).filter(
-            PriceHistory.product_id == product_id
-        ).order_by(PriceHistory.recorded_at.desc())
+        query = (
+            db.query(PriceHistory)
+            .filter(PriceHistory.product_id == product_id)
+            .order_by(PriceHistory.recorded_at.desc())
+        )
 
         if limit:
             query = query.limit(limit)
@@ -77,28 +72,35 @@ class PriceHistoryService:
             return None
 
         # Calculate statistics from history
-        stats = db.query(
-            func.min(PriceHistory.price).label('lowest'),
-            func.max(PriceHistory.price).label('highest'),
-            func.avg(PriceHistory.price).label('average'),
-            func.count(PriceHistory.id).label('total')
-        ).filter(PriceHistory.product_id == product_id).first()
+        stats = (
+            db.query(
+                func.min(PriceHistory.price).label("lowest"),
+                func.max(PriceHistory.price).label("highest"),
+                func.avg(PriceHistory.price).label("average"),
+                func.count(PriceHistory.id).label("total"),
+            )
+            .filter(PriceHistory.product_id == product_id)
+            .first()
+        )
 
         if not stats or stats.total == 0:
             # No history yet, use current price
             return {
-                'current_price': product.current_price,
-                'lowest_price': product.current_price,
-                'highest_price': product.current_price,
-                'average_price': product.current_price,
-                'price_change_percentage': 0.0,
-                'total_records': 0
+                "current_price": product.current_price,
+                "lowest_price": product.current_price,
+                "highest_price": product.current_price,
+                "average_price": product.current_price,
+                "price_change_percentage": 0.0,
+                "total_records": 0,
             }
 
         # Get first recorded price for change percentage
-        first_price = db.query(PriceHistory.price).filter(
-            PriceHistory.product_id == product_id
-        ).order_by(PriceHistory.recorded_at.asc()).first()
+        first_price = (
+            db.query(PriceHistory.price)
+            .filter(PriceHistory.product_id == product_id)
+            .order_by(PriceHistory.recorded_at.asc())
+            .first()
+        )
 
         price_change_percentage = None
         if first_price and first_price[0] > 0:
@@ -106,12 +108,12 @@ class PriceHistoryService:
             price_change_percentage = round(price_change, 2)
 
         return {
-            'current_price': product.current_price,
-            'lowest_price': float(stats.lowest),
-            'highest_price': float(stats.highest),
-            'average_price': round(float(stats.average), 2),
-            'price_change_percentage': price_change_percentage,
-            'total_records': stats.total
+            "current_price": product.current_price,
+            "lowest_price": float(stats.lowest),
+            "highest_price": float(stats.highest),
+            "average_price": round(float(stats.average), 2),
+            "price_change_percentage": price_change_percentage,
+            "total_records": stats.total,
         }
 
     @staticmethod
@@ -128,9 +130,12 @@ class PriceHistoryService:
             True if the price should be recorded, False otherwise
         """
         # Get the most recent price record
-        last_record = db.query(PriceHistory).filter(
-            PriceHistory.product_id == product_id
-        ).order_by(PriceHistory.recorded_at.desc()).first()
+        last_record = (
+            db.query(PriceHistory)
+            .filter(PriceHistory.product_id == product_id)
+            .order_by(PriceHistory.recorded_at.desc())
+            .first()
+        )
 
         # Record if no history exists or if price has changed
         if not last_record or last_record.price != new_price:

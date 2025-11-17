@@ -97,8 +97,90 @@ class TestTokenFunctions:
     def test_decode_invalid_token(self):
         """Test decoding an invalid token returns None."""
         decoded = decode_access_token("invalid_token_string")
-
         assert decoded is None
+
+    @pytest.mark.unit
+    def test_create_refresh_token(self):
+        """Test creating a refresh token."""
+        email = "test@example.com"
+        refresh_token = create_refresh_token({"sub": email})
+
+        assert refresh_token is not None
+        assert isinstance(refresh_token, str)
+
+        # Decode and verify
+        decoded = decode_access_token(refresh_token)
+        assert decoded is not None
+        assert decoded["sub"] == email
+        assert decoded["type"] == "refresh"
+
+    @pytest.mark.unit
+    def test_access_token_has_correct_type(self):
+        """Test that access token has correct type field."""
+        email = "test@example.com"
+        access_token = create_access_token({"sub": email})
+
+        decoded = decode_access_token(access_token)
+        assert decoded is not None
+        # Access tokens don't have type or it's not "refresh"
+        assert decoded.get("type") != "refresh"
+
+    @pytest.mark.unit
+    def test_password_hash_and_verify(self):
+        """Test password hashing and verification."""
+        password = "SecurePassword123!"
+        hashed = get_password_hash(password)
+
+        assert hashed != password
+        assert verify_password(password, hashed) is True
+        assert verify_password("WrongPassword", hashed) is False
+
+    @pytest.mark.unit
+    def test_token_expiration(self):
+        """Test that tokens have expiration claim."""
+        email = "test@example.com"
+        token = create_access_token({"sub": email})
+
+        decoded = decode_access_token(token)
+        assert decoded is not None
+        assert "exp" in decoded
+
+    @pytest.mark.unit
+    def test_custom_token_expiration(self):
+        """Test creating token with custom expiration."""
+        email = "test@example.com"
+        custom_delta = timedelta(minutes=5)
+        token = create_access_token({"sub": email}, expires_delta=custom_delta)
+
+        decoded = decode_access_token(token)
+        assert decoded is not None
+        assert "exp" in decoded
+
+    @pytest.mark.unit
+    def test_generate_verification_token(self):
+        """Test generating verification token."""
+        from app.core.security import generate_verification_token
+
+        token1 = generate_verification_token()
+        token2 = generate_verification_token()
+
+        assert token1 is not None
+        assert token2 is not None
+        assert token1 != token2  # Should be unique
+        assert len(token1) > 10  # Should be reasonably long
+
+    @pytest.mark.unit
+    def test_generate_reset_token(self):
+        """Test generating reset token."""
+        from app.core.security import generate_reset_token
+
+        token1 = generate_reset_token()
+        token2 = generate_reset_token()
+
+        assert token1 is not None
+        assert token2 is not None
+        assert token1 != token2  # Should be unique
+        assert len(token1) > 10  # Should be reasonably long
 
     @pytest.mark.unit
     def test_password_hashing(self):

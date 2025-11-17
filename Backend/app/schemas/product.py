@@ -43,12 +43,14 @@ class ProductScrapedData(BaseModel):
 
 class SortOrder(str, Enum):
     """Sort order enum."""
+
     asc = "asc"
     desc = "desc"
 
 
 class ProductSortBy(str, Enum):
     """Product sort field enum."""
+
     name = "name"
     price = "current_price"
     target_price = "target_price"
@@ -58,6 +60,7 @@ class ProductSortBy(str, Enum):
 
 class PaginationMetadata(BaseModel):
     """Metadata for paginated responses."""
+
     page: int
     page_size: int
     total_items: int
@@ -68,5 +71,6 @@ class PaginationMetadata(BaseModel):
 
 class PaginatedProductsResponse(BaseModel):
     """Paginated response for products."""
+
     items: List[ProductResponse]
     metadata: PaginationMetadata

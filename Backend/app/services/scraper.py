@@ -22,12 +22,12 @@ class SiteDetector:
 
     # Site patterns: domain keywords -> site name
     SITE_PATTERNS = {
-        'amazon': ['amazon.fr', 'amazon.com', 'amazon.de', 'amazon.co.uk', 'amazon.es', 'amazon.it'],
-        'fnac': ['fnac.com', 'fnac.fr'],
-        'darty': ['darty.com'],
-        'cdiscount': ['cdiscount.com'],
-        'boulanger': ['boulanger.com', 'boulanger.fr'],
-        'leclerc': ['e.leclerc', 'e-leclerc'],
+        "amazon": ["amazon.fr", "amazon.com", "amazon.de", "amazon.co.uk", "amazon.es", "amazon.it"],
+        "fnac": ["fnac.com", "fnac.fr"],
+        "darty": ["darty.com"],
+        "cdiscount": ["cdiscount.com"],
+        "boulanger": ["boulanger.com", "boulanger.fr"],
+        "leclerc": ["e.leclerc", "e-leclerc"],
     }
 
     @classmethod
@@ -46,7 +46,7 @@ class SiteDetector:
             domain = parsed.netloc
 
             # Remove 'www.' prefix if present
-            domain = domain.replace('www.', '')
+            domain = domain.replace("www.", "")
 
             # Check each site pattern
             for site_name, patterns in cls.SITE_PATTERNS.items():
@@ -75,18 +75,18 @@ class PriceScraper:
             retry_delay: Delay in seconds between retries
         """
         self.headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
-            'Accept-Language': 'fr-FR,fr;q=0.9,en-US;q=0.8,en;q=0.7',
-            'Accept-Encoding': 'gzip, deflate, br',
-            'DNT': '1',
-            'Connection': 'keep-alive',
-            'Upgrade-Insecure-Requests': '1',
-            'Sec-Fetch-Dest': 'document',
-            'Sec-Fetch-Mode': 'navigate',
-            'Sec-Fetch-Site': 'none',
-            'Sec-Fetch-User': '?1',
-            'Cache-Control': 'max-age=0',
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8",
+            "Accept-Language": "fr-FR,fr;q=0.9,en-US;q=0.8,en;q=0.7",
+            "Accept-Encoding": "gzip, deflate, br",
+            "DNT": "1",
+            "Connection": "keep-alive",
+            "Upgrade-Insecure-Requests": "1",
+            "Sec-Fetch-Dest": "document",
+            "Sec-Fetch-Mode": "navigate",
+            "Sec-Fetch-Site": "none",
+            "Sec-Fetch-User": "?1",
+            "Cache-Control": "max-age=0",
         }
         self.max_retries = max_retries
         self.retry_delay = retry_delay
@@ -120,7 +120,7 @@ class PriceScraper:
 
                 response = self.session.get(url, timeout=15)
                 response.raise_for_status()
-                soup = BeautifulSoup(response.content, 'html.parser')
+                soup = BeautifulSoup(response.content, "html.parser")
 
                 # Check for product availability
                 if self._is_product_unavailable(soup, url):
@@ -130,17 +130,17 @@ class PriceScraper:
                 # Detect site automatically and use appropriate scraping strategy
                 site = SiteDetector.detect_site(url)
 
-                if site == 'amazon':
+                if site == "amazon":
                     result = self._scrape_amazon(soup)
-                elif site == 'fnac':
+                elif site == "fnac":
                     result = self._scrape_fnac(soup)
-                elif site == 'darty':
+                elif site == "darty":
                     result = self._scrape_darty(soup)
-                elif site == 'cdiscount':
+                elif site == "cdiscount":
                     result = self._scrape_cdiscount(soup)
-                elif site == 'boulanger':
+                elif site == "boulanger":
                     result = self._scrape_boulanger(soup)
-                elif site == 'leclerc':
+                elif site == "leclerc":
                     result = self._scrape_leclerc(soup)
                 else:
                     # Generic scraping strategy for unknown sites
@@ -212,6 +212,7 @@ class PriceScraper:
                 try:
                     logger.info(f"Attempting Playwright fallback for {url}")
                     from app.services.playwright_scraper import scrape_with_playwright
+
                     result = scrape_with_playwright(url)
                     if result:
                         logger.info(f"Playwright fallback successful for {url}")
@@ -226,8 +227,7 @@ class PriceScraper:
                 status_code = last_exception.response.status_code if last_exception.response is not None else None
                 if status_code == 403:
                     logger.error(
-                        f"Unable to scrape {url} even with Playwright. "
-                        f"Site has very strong anti-bot protection."
+                        f"Unable to scrape {url} even with Playwright. " f"Site has very strong anti-bot protection."
                     )
                 else:
                     logger.error(f"All {self.max_retries} scraping attempts failed for {url}: {last_exception}")
@@ -271,57 +271,57 @@ class PriceScraper:
                 return True
 
         # Amazon-specific checks
-        if 'amazon' in url.lower():
-            availability_elem = soup.find('div', {'id': 'availability'})
+        if "amazon" in url.lower():
+            availability_elem = soup.find("div", {"id": "availability"})
             if availability_elem:
                 availability_text = availability_elem.get_text().lower()
-                if 'unavailable' in availability_text or 'indisponible' in availability_text:
+                if "unavailable" in availability_text or "indisponible" in availability_text:
                     return True
 
             # Check for "Currently unavailable" message
-            unavailable_msg = soup.find('span', {'class': 'a-size-medium a-color-price'})
-            if unavailable_msg and 'indisponible' in unavailable_msg.get_text().lower():
+            unavailable_msg = soup.find("span", {"class": "a-size-medium a-color-price"})
+            if unavailable_msg and "indisponible" in unavailable_msg.get_text().lower():
                 return True
 
         # Fnac-specific checks
-        if 'fnac' in url.lower():
-            availability_elem = soup.find('div', {'class': 'f-productHeader-buyingArea'})
+        if "fnac" in url.lower():
+            availability_elem = soup.find("div", {"class": "f-productHeader-buyingArea"})
             if availability_elem:
                 availability_text = availability_elem.get_text().lower()
-                if 'indisponible' in availability_text or 'épuisé' in availability_text:
+                if "indisponible" in availability_text or "épuisé" in availability_text:
                     return True
 
         # Darty-specific checks
-        if 'darty' in url.lower():
-            availability_elem = soup.find('div', {'class': 'product_availability'})
+        if "darty" in url.lower():
+            availability_elem = soup.find("div", {"class": "product_availability"})
             if availability_elem:
                 availability_text = availability_elem.get_text().lower()
-                if 'indisponible' in availability_text or 'rupture' in availability_text:
+                if "indisponible" in availability_text or "rupture" in availability_text:
                     return True
 
         # Use site detector for better site detection
         site = SiteDetector.detect_site(url)
 
         # Site-specific checks using detector
-        if site == 'cdiscount':
-            availability_elem = soup.find('div', {'class': 'fpStockAvailability'})
+        if site == "cdiscount":
+            availability_elem = soup.find("div", {"class": "fpStockAvailability"})
             if availability_elem:
                 availability_text = availability_elem.get_text().lower()
-                if 'indisponible' in availability_text or 'stock épuisé' in availability_text:
+                if "indisponible" in availability_text or "stock épuisé" in availability_text:
                     return True
 
-        elif site == 'boulanger':
-            availability_elem = soup.find('div', {'class': 'availability'})
+        elif site == "boulanger":
+            availability_elem = soup.find("div", {"class": "availability"})
             if availability_elem:
                 availability_text = availability_elem.get_text().lower()
-                if 'indisponible' in availability_text or 'épuisé' in availability_text:
+                if "indisponible" in availability_text or "épuisé" in availability_text:
                     return True
 
-        elif site == 'leclerc':
-            availability_elem = soup.find('span', {'class': 'stock-status'})
+        elif site == "leclerc":
+            availability_elem = soup.find("span", {"class": "stock-status"})
             if availability_elem:
                 availability_text = availability_elem.get_text().lower()
-                if 'indisponible' in availability_text or 'rupture' in availability_text:
+                if "indisponible" in availability_text or "rupture" in availability_text:
                     return True
 
         return False
@@ -330,23 +330,23 @@ class PriceScraper:
         """Scrape Amazon product page."""
         try:
             # Title
-            title_elem = soup.find('span', {'id': 'productTitle'})
+            title_elem = soup.find("span", {"id": "productTitle"})
             name = title_elem.text.strip() if title_elem else "Unknown Product"
 
             # Price (Amazon has multiple price formats)
             price = None
-            price_whole = soup.find('span', {'class': 'a-price-whole'})
-            price_fraction = soup.find('span', {'class': 'a-price-fraction'})
+            price_whole = soup.find("span", {"class": "a-price-whole"})
+            price_fraction = soup.find("span", {"class": "a-price-fraction"})
 
             if price_whole:
-                price_str = price_whole.text.strip().replace(',', '.').replace(' ', '')
+                price_str = price_whole.text.strip().replace(",", ".").replace(" ", "")
                 if price_fraction:
                     price_str += price_fraction.text.strip()
-                price = float(re.sub(r'[^\d.]', '', price_str))
+                price = float(re.sub(r"[^\d.]", "", price_str))
 
             # Image
-            image_elem = soup.find('img', {'id': 'landingImage'})
-            image = image_elem.get('src') if image_elem else None
+            image_elem = soup.find("img", {"id": "landingImage"})
+            image = image_elem.get("src") if image_elem else None
 
             if price is None:
                 logger.warning("Failed to extract price from Amazon page")
@@ -362,21 +362,21 @@ class PriceScraper:
         """Scrape Fnac product page."""
         try:
             # Title
-            title_elem = soup.find('h1', {'class': 'f-productHeader-Title'})
+            title_elem = soup.find("h1", {"class": "f-productHeader-Title"})
             name = title_elem.text.strip() if title_elem else "Unknown Product"
 
             # Price
-            price_elem = soup.find('span', {'class': 'f-priceBox-price'})
+            price_elem = soup.find("span", {"class": "f-priceBox-price"})
             if price_elem:
-                price_str = price_elem.text.strip().replace('€', '').replace(',', '.').replace(' ', '')
-                price = float(re.sub(r'[^\d.]', '', price_str))
+                price_str = price_elem.text.strip().replace("€", "").replace(",", ".").replace(" ", "")
+                price = float(re.sub(r"[^\d.]", "", price_str))
             else:
                 logger.warning("Failed to extract price from Fnac page")
                 return None
 
             # Image
-            image_elem = soup.find('img', {'class': 'f-productVisuals-mainImage'})
-            image = image_elem.get('src') if image_elem else None
+            image_elem = soup.find("img", {"class": "f-productVisuals-mainImage"})
+            image = image_elem.get("src") if image_elem else None
 
             return ProductScrapedData(name=name, price=price, image=image)
 
@@ -388,21 +388,21 @@ class PriceScraper:
         """Scrape Darty product page."""
         try:
             # Title
-            title_elem = soup.find('h1', {'class': 'product_title'})
+            title_elem = soup.find("h1", {"class": "product_title"})
             name = title_elem.text.strip() if title_elem else "Unknown Product"
 
             # Price
-            price_elem = soup.find('span', {'class': 'product_price'})
+            price_elem = soup.find("span", {"class": "product_price"})
             if price_elem:
-                price_str = price_elem.text.strip().replace('€', '').replace(',', '.').replace(' ', '')
-                price = float(re.sub(r'[^\d.]', '', price_str))
+                price_str = price_elem.text.strip().replace("€", "").replace(",", ".").replace(" ", "")
+                price = float(re.sub(r"[^\d.]", "", price_str))
             else:
                 logger.warning("Failed to extract price from Darty page")
                 return None
 
             # Image
-            image_elem = soup.find('img', {'class': 'product_image'})
-            image = image_elem.get('src') if image_elem else None
+            image_elem = soup.find("img", {"class": "product_image"})
+            image = image_elem.get("src") if image_elem else None
 
             return ProductScrapedData(name=name, price=price, image=image)
 
@@ -415,7 +415,7 @@ class PriceScraper:
         try:
             # Try to find title from common patterns
             name = "Unknown Product"
-            for tag in ['h1', 'title']:
+            for tag in ["h1", "title"]:
                 elem = soup.find(tag)
                 if elem:
                     name = elem.text.strip()
@@ -423,15 +423,15 @@ class PriceScraper:
 
             # Try to find price from meta tags or common patterns
             price = None
-            price_meta = soup.find('meta', {'property': 'product:price:amount'})
+            price_meta = soup.find("meta", {"property": "product:price:amount"})
             if price_meta:
-                price = float(price_meta.get('content'))
+                price = float(price_meta.get("content"))
 
             # Try to find image
             image = None
-            image_meta = soup.find('meta', {'property': 'og:image'})
+            image_meta = soup.find("meta", {"property": "og:image"})
             if image_meta:
-                image = image_meta.get('content')
+                image = image_meta.get("content")
 
             if price is None:
                 logger.warning("Failed to extract price using generic scraper")
@@ -447,40 +447,40 @@ class PriceScraper:
         """Scrape Cdiscount product page."""
         try:
             # Title
-            title_elem = soup.find('h1', {'itemprop': 'name'})
+            title_elem = soup.find("h1", {"itemprop": "name"})
             if not title_elem:
-                title_elem = soup.find('h1', {'class': 'fpDesCol1'})
+                title_elem = soup.find("h1", {"class": "fpDesCol1"})
             name = title_elem.text.strip() if title_elem else "Unknown Product"
 
             # Price - Cdiscount has various price formats
             price = None
-            price_elem = soup.find('span', {'class': 'fpPrice'})
+            price_elem = soup.find("span", {"class": "fpPrice"})
             if not price_elem:
-                price_elem = soup.find('span', {'itemprop': 'price'})
+                price_elem = soup.find("span", {"itemprop": "price"})
             if not price_elem:
-                price_elem = soup.find('meta', {'itemprop': 'price'})
+                price_elem = soup.find("meta", {"itemprop": "price"})
                 if price_elem:
-                    price_str = price_elem.get('content', '')
+                    price_str = price_elem.get("content", "")
                 else:
-                    price_str = ''
+                    price_str = ""
             else:
                 price_str = price_elem.text.strip()
 
             if price_str:
-                price_str = price_str.replace('€', '').replace(',', '.').replace(' ', '')
-                price = float(re.sub(r'[^\d.]', '', price_str))
+                price_str = price_str.replace("€", "").replace(",", ".").replace(" ", "")
+                price = float(re.sub(r"[^\d.]", "", price_str))
 
             if price is None:
                 logger.warning("Failed to extract price from Cdiscount page")
                 return None
 
             # Image
-            image_elem = soup.find('img', {'class': 'img', 'itemprop': 'image'})
+            image_elem = soup.find("img", {"class": "img", "itemprop": "image"})
             if not image_elem:
-                image_elem = soup.find('meta', {'property': 'og:image'})
-                image = image_elem.get('content') if image_elem else None
+                image_elem = soup.find("meta", {"property": "og:image"})
+                image = image_elem.get("content") if image_elem else None
             else:
-                image = image_elem.get('src') if image_elem else None
+                image = image_elem.get("src") if image_elem else None
 
             return ProductScrapedData(name=name, price=price, image=image)
 
@@ -492,38 +492,38 @@ class PriceScraper:
         """Scrape Boulanger product page."""
         try:
             # Title
-            title_elem = soup.find('h1', {'class': 'product-title'})
+            title_elem = soup.find("h1", {"class": "product-title"})
             if not title_elem:
-                title_elem = soup.find('h1', {'itemprop': 'name'})
+                title_elem = soup.find("h1", {"itemprop": "name"})
             name = title_elem.text.strip() if title_elem else "Unknown Product"
 
             # Price
             price = None
-            price_elem = soup.find('span', {'class': 'price'})
+            price_elem = soup.find("span", {"class": "price"})
             if not price_elem:
-                price_elem = soup.find('meta', {'itemprop': 'price'})
+                price_elem = soup.find("meta", {"itemprop": "price"})
                 if price_elem:
-                    price_str = price_elem.get('content', '')
+                    price_str = price_elem.get("content", "")
                 else:
-                    price_str = ''
+                    price_str = ""
             else:
                 price_str = price_elem.text.strip()
 
             if price_str:
-                price_str = price_str.replace('€', '').replace(',', '.').replace(' ', '')
-                price = float(re.sub(r'[^\d.]', '', price_str))
+                price_str = price_str.replace("€", "").replace(",", ".").replace(" ", "")
+                price = float(re.sub(r"[^\d.]", "", price_str))
 
             if price is None:
                 logger.warning("Failed to extract price from Boulanger page")
                 return None
 
             # Image
-            image_elem = soup.find('img', {'class': 'product-visual__image'})
+            image_elem = soup.find("img", {"class": "product-visual__image"})
             if not image_elem:
-                image_elem = soup.find('meta', {'property': 'og:image'})
-                image = image_elem.get('content') if image_elem else None
+                image_elem = soup.find("meta", {"property": "og:image"})
+                image = image_elem.get("content") if image_elem else None
             else:
-                image = image_elem.get('src') if image_elem else None
+                image = image_elem.get("src") if image_elem else None
 
             return ProductScrapedData(name=name, price=price, image=image)
 
@@ -535,38 +535,38 @@ class PriceScraper:
         """Scrape E.Leclerc product page."""
         try:
             # Title
-            title_elem = soup.find('h1', {'class': 'product-name'})
+            title_elem = soup.find("h1", {"class": "product-name"})
             if not title_elem:
-                title_elem = soup.find('h1', {'itemprop': 'name'})
+                title_elem = soup.find("h1", {"itemprop": "name"})
             name = title_elem.text.strip() if title_elem else "Unknown Product"
 
             # Price
             price = None
-            price_elem = soup.find('span', {'class': 'product-price'})
+            price_elem = soup.find("span", {"class": "product-price"})
             if not price_elem:
-                price_elem = soup.find('meta', {'itemprop': 'price'})
+                price_elem = soup.find("meta", {"itemprop": "price"})
                 if price_elem:
-                    price_str = price_elem.get('content', '')
+                    price_str = price_elem.get("content", "")
                 else:
-                    price_str = ''
+                    price_str = ""
             else:
                 price_str = price_elem.text.strip()
 
             if price_str:
-                price_str = price_str.replace('€', '').replace(',', '.').replace(' ', '')
-                price = float(re.sub(r'[^\d.]', '', price_str))
+                price_str = price_str.replace("€", "").replace(",", ".").replace(" ", "")
+                price = float(re.sub(r"[^\d.]", "", price_str))
 
             if price is None:
                 logger.warning("Failed to extract price from E.Leclerc page")
                 return None
 
             # Image
-            image_elem = soup.find('img', {'class': 'product-image'})
+            image_elem = soup.find("img", {"class": "product-image"})
             if not image_elem:
-                image_elem = soup.find('meta', {'property': 'og:image'})
-                image = image_elem.get('content') if image_elem else None
+                image_elem = soup.find("meta", {"property": "og:image"})
+                image = image_elem.get("content") if image_elem else None
             else:
-                image = image_elem.get('src') if image_elem else None
+                image = image_elem.get("src") if image_elem else None
 
             return ProductScrapedData(name=name, price=price, image=image)
 

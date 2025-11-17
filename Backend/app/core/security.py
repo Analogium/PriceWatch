@@ -27,13 +27,13 @@ def validate_password_strength(password: str) -> tuple[bool, str]:
     if len(password) < settings.MIN_PASSWORD_LENGTH:
         return False, f"Password must be at least {settings.MIN_PASSWORD_LENGTH} characters long"
 
-    if settings.REQUIRE_UPPERCASE and not re.search(r'[A-Z]', password):
+    if settings.REQUIRE_UPPERCASE and not re.search(r"[A-Z]", password):
         return False, "Password must contain at least one uppercase letter"
 
-    if settings.REQUIRE_LOWERCASE and not re.search(r'[a-z]', password):
+    if settings.REQUIRE_LOWERCASE and not re.search(r"[a-z]", password):
         return False, "Password must contain at least one lowercase letter"
 
-    if settings.REQUIRE_DIGIT and not re.search(r'\d', password):
+    if settings.REQUIRE_DIGIT and not re.search(r"\d", password):
         return False, "Password must contain at least one digit"
 
     if settings.REQUIRE_SPECIAL_CHAR and not re.search(r'[!@#$%^&*(),.?":{}|<>]', password):

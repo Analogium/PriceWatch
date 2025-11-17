@@ -1,6 +1,7 @@
 """
 Logging configuration with structured logging and log rotation.
 """
+
 import logging
 import logging.handlers
 import sys
@@ -91,9 +92,7 @@ def setup_logging(
                 encoding="utf-8",
             )
         else:
-            file_handler = logging.FileHandler(
-                filename=log_path / "pricewatch.log", encoding="utf-8"
-            )
+            file_handler = logging.FileHandler(filename=log_path / "pricewatch.log", encoding="utf-8")
 
         file_handler.setLevel(logging.DEBUG)  # Always log DEBUG to file
 

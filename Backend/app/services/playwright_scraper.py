@@ -3,6 +3,7 @@ Playwright-based scraper for e-commerce sites with anti-bot protection.
 
 This scraper uses browser automation to bypass CAPTCHA and Cloudflare protections.
 """
+
 import asyncio
 import random
 from typing import Optional
@@ -66,41 +67,41 @@ class PlaywrightScraper:
                     browser = await p.chromium.launch(
                         headless=self.headless,
                         args=[
-                            '--disable-blink-features=AutomationControlled',
-                            '--disable-dev-shm-usage',
-                            '--no-sandbox',
-                        ]
+                            "--disable-blink-features=AutomationControlled",
+                            "--disable-dev-shm-usage",
+                            "--no-sandbox",
+                        ],
                     )
 
                     # Create context with realistic settings
                     context = await browser.new_context(
-                        viewport={'width': 1920, 'height': 1080},
-                        user_agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-                        locale='fr-FR',
-                        timezone_id='Europe/Paris',
+                        viewport={"width": 1920, "height": 1080},
+                        user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+                        locale="fr-FR",
+                        timezone_id="Europe/Paris",
                     )
 
                     # Create page
                     page = await context.new_page()
 
                     # Navigate to URL
-                    await page.goto(url, wait_until='networkidle', timeout=self.timeout)
+                    await page.goto(url, wait_until="networkidle", timeout=self.timeout)
 
                     # Wait a bit for dynamic content
                     await page.wait_for_timeout(2000)
 
                     # Detect site and scrape accordingly
-                    if 'amazon' in url.lower():
+                    if "amazon" in url.lower():
                         result = await self._scrape_amazon(page)
-                    elif 'fnac' in url.lower():
+                    elif "fnac" in url.lower():
                         result = await self._scrape_fnac(page)
-                    elif 'darty' in url.lower():
+                    elif "darty" in url.lower():
                         result = await self._scrape_darty(page)
-                    elif 'cdiscount' in url.lower():
+                    elif "cdiscount" in url.lower():
                         result = await self._scrape_cdiscount(page)
-                    elif 'boulanger' in url.lower():
+                    elif "boulanger" in url.lower():
                         result = await self._scrape_boulanger(page)
-                    elif 'leclerc' in url.lower():
+                    elif "leclerc" in url.lower():
                         result = await self._scrape_leclerc(page)
                     else:
                         result = await self._scrape_generic(page)
@@ -141,7 +142,7 @@ class PlaywrightScraper:
                 # If title not found, might be a CAPTCHA or bot detection page
                 # Try to detect if it's a bot check page
                 captcha_form = await page.query_selector('form[action*="validateCaptcha"]')
-                robot_check = await page.query_selector('text=/Robot Check/i')
+                robot_check = await page.query_selector("text=/Robot Check/i")
 
                 if captcha_form or robot_check:
                     logger.error(
@@ -154,7 +155,7 @@ class PlaywrightScraper:
                 # Otherwise continue trying to scrape
 
             # Extract title
-            title_elem = await page.query_selector('#productTitle')
+            title_elem = await page.query_selector("#productTitle")
             if not title_elem:
                 title_elem = await page.query_selector('h1[id*="title"]')
             name = await title_elem.inner_text() if title_elem else "Unknown Product"
@@ -163,9 +164,9 @@ class PlaywrightScraper:
             # Extract price - multiple selectors
             price = None
             price_selectors = [
-                '.a-price-whole',
+                ".a-price-whole",
                 'span[class*="price-whole"]',
-                '.a-price .a-offscreen',
+                ".a-price .a-offscreen",
                 'span[class*="price"]',
             ]
 
@@ -175,11 +176,11 @@ class PlaywrightScraper:
                     if price_elem:
                         price_text = await price_elem.inner_text()
                         # Clean price text
-                        price_text = price_text.replace('€', '').replace(',', '.').replace(' ', '').strip()
+                        price_text = price_text.replace("€", "").replace(",", ".").replace(" ", "").strip()
                         # Extract number
-                        match = re.search(r'(\d+[.,]?\d*)', price_text)
+                        match = re.search(r"(\d+[.,]?\d*)", price_text)
                         if match:
-                            price = float(match.group(1).replace(',', '.'))
+                            price = float(match.group(1).replace(",", "."))
                             break
                 except:
                     continue
@@ -190,12 +191,12 @@ class PlaywrightScraper:
 
             # Extract image
             image = None
-            image_selectors = ['#landingImage', 'img[id*="image"]', '.a-dynamic-image']
+            image_selectors = ["#landingImage", 'img[id*="image"]', ".a-dynamic-image"]
             for selector in image_selectors:
                 try:
                     image_elem = await page.query_selector(selector)
                     if image_elem:
-                        image = await image_elem.get_attribute('src')
+                        image = await image_elem.get_attribute("src")
                         break
                 except:
                     continue
@@ -210,10 +211,10 @@ class PlaywrightScraper:
         """Scrape Fnac product page using Playwright."""
         try:
             # Wait for content to load
-            await page.wait_for_selector('h1, .f-productHeader-Title', timeout=10000)
+            await page.wait_for_selector("h1, .f-productHeader-Title", timeout=10000)
 
             # Extract title
-            title_selectors = ['.f-productHeader-Title', 'h1[class*="product"]', 'h1']
+            title_selectors = [".f-productHeader-Title", 'h1[class*="product"]', "h1"]
             name = "Unknown Product"
             for selector in title_selectors:
                 try:
@@ -228,7 +229,7 @@ class PlaywrightScraper:
             # Extract price
             price = None
             price_selectors = [
-                '.f-priceBox-price',
+                ".f-priceBox-price",
                 'span[class*="price"]',
                 '[itemprop="price"]',
             ]
@@ -239,10 +240,10 @@ class PlaywrightScraper:
                     if price_elem:
                         price_text = await price_elem.inner_text()
                         # Clean and extract price
-                        price_text = price_text.replace('€', '').replace(',', '.').replace(' ', '').strip()
-                        match = re.search(r'(\d+[.,]?\d*)', price_text)
+                        price_text = price_text.replace("€", "").replace(",", ".").replace(" ", "").strip()
+                        match = re.search(r"(\d+[.,]?\d*)", price_text)
                         if match:
-                            price = float(match.group(1).replace(',', '.'))
+                            price = float(match.group(1).replace(",", "."))
                             break
                 except:
                     continue
@@ -252,7 +253,7 @@ class PlaywrightScraper:
                 try:
                     price_meta = await page.query_selector('meta[itemprop="price"]')
                     if price_meta:
-                        price_content = await price_meta.get_attribute('content')
+                        price_content = await price_meta.get_attribute("content")
                         if price_content:
                             price = float(price_content)
                 except:
@@ -264,12 +265,12 @@ class PlaywrightScraper:
 
             # Extract image
             image = None
-            image_selectors = ['.f-productVisuals-mainImage', 'img[class*="product"]', 'img[itemprop="image"]']
+            image_selectors = [".f-productVisuals-mainImage", 'img[class*="product"]', 'img[itemprop="image"]']
             for selector in image_selectors:
                 try:
                     image_elem = await page.query_selector(selector)
                     if image_elem:
-                        image = await image_elem.get_attribute('src')
+                        image = await image_elem.get_attribute("src")
                         break
                 except:
                     continue
@@ -301,7 +302,7 @@ class PlaywrightScraper:
         try:
             # Extract title
             name = "Unknown Product"
-            title_selectors = ['h1', '[itemprop="name"]', '.product-title', '.product-name']
+            title_selectors = ["h1", '[itemprop="name"]', ".product-title", ".product-name"]
             for selector in title_selectors:
                 try:
                     title_elem = await page.query_selector(selector)
@@ -317,7 +318,7 @@ class PlaywrightScraper:
             # Try various price selectors
             price_selectors = [
                 '[itemprop="price"]',
-                '.price',
+                ".price",
                 '[class*="price"]',
                 'meta[itemprop="price"]',
                 'meta[property="product:price:amount"]',
@@ -328,18 +329,18 @@ class PlaywrightScraper:
                     price_elem = await page.query_selector(selector)
                     if price_elem:
                         # Check if it's a meta tag
-                        tag_name = await price_elem.evaluate('el => el.tagName.toLowerCase()')
-                        if tag_name == 'meta':
-                            price_content = await price_elem.get_attribute('content')
+                        tag_name = await price_elem.evaluate("el => el.tagName.toLowerCase()")
+                        if tag_name == "meta":
+                            price_content = await price_elem.get_attribute("content")
                             if price_content:
                                 price = float(price_content)
                                 break
                         else:
                             price_text = await price_elem.inner_text()
-                            price_text = price_text.replace('€', '').replace(',', '.').replace(' ', '').strip()
-                            match = re.search(r'(\d+[.,]?\d*)', price_text)
+                            price_text = price_text.replace("€", "").replace(",", ".").replace(" ", "").strip()
+                            match = re.search(r"(\d+[.,]?\d*)", price_text)
                             if match:
-                                price = float(match.group(1).replace(',', '.'))
+                                price = float(match.group(1).replace(",", "."))
                                 break
                 except:
                     continue
@@ -355,11 +356,11 @@ class PlaywrightScraper:
                 try:
                     image_elem = await page.query_selector(selector)
                     if image_elem:
-                        tag_name = await image_elem.evaluate('el => el.tagName.toLowerCase()')
-                        if tag_name == 'meta':
-                            image = await image_elem.get_attribute('content')
+                        tag_name = await image_elem.evaluate("el => el.tagName.toLowerCase()")
+                        if tag_name == "meta":
+                            image = await image_elem.get_attribute("content")
                         else:
-                            image = await image_elem.get_attribute('src')
+                            image = await image_elem.get_attribute("src")
                         if image:
                             break
                 except:

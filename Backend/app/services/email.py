@@ -1,4 +1,5 @@
 import smtplib
+import requests
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from app.core.config import settings
@@ -17,8 +18,34 @@ class EmailService:
         self.smtp_password = settings.SMTP_PASSWORD
         self.from_email = settings.EMAIL_FROM
 
-    def send_price_alert(self, to_email: str, product_name: str, new_price: float, old_price: float, product_url: str):
-        """Send a price alert email to the user."""
+    def send_price_alert(
+        self,
+        to_email: str,
+        product_name: str,
+        new_price: float,
+        old_price: float,
+        product_url: str,
+        user_preferences=None,
+    ):
+        """Send a price alert email to the user.
+
+        Args:
+            to_email: User's email address
+            product_name: Name of the product
+            new_price: New price of the product
+            old_price: Previous price of the product
+            product_url: URL of the product
+            user_preferences: UserPreferences object (optional)
+        """
+        # Check if user has email notifications enabled
+        if user_preferences:
+            if not user_preferences.email_notifications:
+                logger.info(f"Email notifications disabled for {to_email}, skipping price alert")
+                return
+            if not user_preferences.price_drop_alerts:
+                logger.info(f"Price drop alerts disabled for {to_email}, skipping")
+                return
+
         subject = f"🔔 Baisse de prix détectée sur {product_name}"
 
         html_content = f"""
@@ -47,6 +74,17 @@ class EmailService:
         """
 
         self._send_email(to_email, subject, html_content)
+
+        # Send webhook notification if enabled
+        if user_preferences and user_preferences.webhook_notifications and user_preferences.webhook_url:
+            self._send_webhook_notification(
+                webhook_url=user_preferences.webhook_url,
+                webhook_type=user_preferences.webhook_type,
+                product_name=product_name,
+                new_price=new_price,
+                old_price=old_price,
+                product_url=product_url,
+            )
 
     def send_verification_email(self, to_email: str, token: str):
         """Send email verification link."""
@@ -140,6 +178,107 @@ class EmailService:
         except Exception as e:
             logger.error(f"Error sending email to {to_email}: {str(e)}", exc_info=True)
             raise
+
+    def _send_webhook_notification(
+        self,
+        webhook_url: str,
+        webhook_type: str,
+        product_name: str,
+        new_price: float,
+        old_price: float,
+        product_url: str,
+    ):
+        """Send webhook notification for price drop.
+
+        Args:
+            webhook_url: The webhook URL to send to
+            webhook_type: Type of webhook (slack, discord, custom)
+            product_name: Name of the product
+            new_price: New price of the product
+            old_price: Previous price of the product
+            product_url: URL of the product
+        """
+        try:
+            logger.info(f"Sending webhook notification to {webhook_url} (type: {webhook_type})")
+
+            # Prepare payload based on webhook type
+            if webhook_type == "slack":
+                payload = {
+                    "text": f"🔔 Price Drop Alert!",
+                    "blocks": [
+                        {
+                            "type": "section",
+                            "text": {"type": "mrkdwn", "text": f"*{product_name}* vient de baisser de prix !"},
+                        },
+                        {
+                            "type": "section",
+                            "fields": [
+                                {"type": "mrkdwn", "text": f"*Nouveau prix:*\n€{new_price:.2f}"},
+                                {"type": "mrkdwn", "text": f"*Ancien prix:*\n~€{old_price:.2f}~"},
+                                {
+                                    "type": "mrkdwn",
+                                    "text": f"*Économie:*\n€{(old_price - new_price):.2f} ({((old_price - new_price) / old_price * 100):.1f}%)",
+                                },
+                            ],
+                        },
+                        {
+                            "type": "actions",
+                            "elements": [
+                                {
+                                    "type": "button",
+                                    "text": {"type": "plain_text", "text": "Voir le produit"},
+                                    "url": product_url,
+                                }
+                            ],
+                        },
+                    ],
+                }
+            elif webhook_type == "discord":
+                payload = {
+                    "content": "🔔 **Price Drop Alert!**",
+                    "embeds": [
+                        {
+                            "title": product_name,
+                            "url": product_url,
+                            "color": 5025616,  # Green color
+                            "fields": [
+                                {"name": "Nouveau prix", "value": f"€{new_price:.2f}", "inline": True},
+                                {"name": "Ancien prix", "value": f"~~€{old_price:.2f}~~", "inline": True},
+                                {
+                                    "name": "Économie",
+                                    "value": f"€{(old_price - new_price):.2f} ({((old_price - new_price) / old_price * 100):.1f}%)",
+                                    "inline": True,
+                                },
+                            ],
+                        }
+                    ],
+                }
+            else:
+                # Custom webhook - generic JSON payload
+                payload = {
+                    "event": "price_drop",
+                    "product_name": product_name,
+                    "new_price": new_price,
+                    "old_price": old_price,
+                    "savings": old_price - new_price,
+                    "savings_percent": ((old_price - new_price) / old_price * 100),
+                    "product_url": product_url,
+                }
+
+            response = requests.post(
+                webhook_url, json=payload, headers={"Content-Type": "application/json"}, timeout=10
+            )
+
+            if response.status_code in [200, 201, 204]:
+                logger.info(f"Webhook notification sent successfully to {webhook_url}")
+            else:
+                logger.warning(f"Webhook notification returned status {response.status_code}: {response.text}")
+
+        except requests.exceptions.RequestException as e:
+            logger.error(f"Error sending webhook notification to {webhook_url}: {str(e)}", exc_info=True)
+            # Don't raise - webhook failures shouldn't prevent email sending
+        except Exception as e:
+            logger.error(f"Unexpected error sending webhook notification: {str(e)}", exc_info=True)
 
 
 email_service = EmailService()
