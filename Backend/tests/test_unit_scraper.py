@@ -192,8 +192,7 @@ class TestPriceScraper:
 
     @pytest.mark.unit
     @pytest.mark.scraper
-    @patch('app.services.scraper.requests.get')
-    def test_scrape_product_amazon_url(self, mock_get):
+    def test_scrape_product_amazon_url(self):
         """Test scrape_product with Amazon URL."""
         mock_response = Mock()
         mock_response.status_code = 200
@@ -206,19 +205,20 @@ class TestPriceScraper:
             </body>
         </html>
         """
-        mock_get.return_value = mock_response
+
+        # Mock the session.get method
+        self.scraper.session.get = Mock(return_value=mock_response)
 
         result = self.scraper.scrape_product("https://www.amazon.fr/product/test")
 
         assert result is not None
         assert result.name == "Amazon Product"
         assert result.price == 99.99
-        mock_get.assert_called_once()
+        self.scraper.session.get.assert_called_once()
 
     @pytest.mark.unit
     @pytest.mark.scraper
-    @patch('app.services.scraper.requests.get')
-    def test_scrape_product_fnac_url(self, mock_get):
+    def test_scrape_product_fnac_url(self):
         """Test scrape_product with Fnac URL."""
         mock_response = Mock()
         mock_response.status_code = 200
@@ -230,7 +230,9 @@ class TestPriceScraper:
             </body>
         </html>
         """.encode('utf-8')
-        mock_get.return_value = mock_response
+
+        # Mock the session.get method
+        self.scraper.session.get = Mock(return_value=mock_response)
 
         result = self.scraper.scrape_product("https://www.fnac.com/product/test")
 
@@ -240,8 +242,7 @@ class TestPriceScraper:
 
     @pytest.mark.unit
     @pytest.mark.scraper
-    @patch('app.services.scraper.requests.get')
-    def test_scrape_product_darty_url(self, mock_get):
+    def test_scrape_product_darty_url(self):
         """Test scrape_product with Darty URL."""
         mock_response = Mock()
         mock_response.status_code = 200
@@ -253,7 +254,9 @@ class TestPriceScraper:
             </body>
         </html>
         """.encode('utf-8')
-        mock_get.return_value = mock_response
+
+        # Mock the session.get method
+        self.scraper.session.get = Mock(return_value=mock_response)
 
         result = self.scraper.scrape_product("https://www.darty.com/product/test")
 
@@ -263,8 +266,7 @@ class TestPriceScraper:
 
     @pytest.mark.unit
     @pytest.mark.scraper
-    @patch('app.services.scraper.requests.get')
-    def test_scrape_product_generic_url(self, mock_get):
+    def test_scrape_product_generic_url(self):
         """Test scrape_product with generic URL."""
         mock_response = Mock()
         mock_response.status_code = 200
@@ -276,7 +278,9 @@ class TestPriceScraper:
             </head>
         </html>
         """
-        mock_get.return_value = mock_response
+
+        # Mock the session.get method
+        self.scraper.session.get = Mock(return_value=mock_response)
 
         result = self.scraper.scrape_product("https://www.example.com/product/test")
 

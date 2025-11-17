@@ -200,8 +200,7 @@ class TestLeclercScraper:
 class TestScraperSiteRouting:
     """Test that scraper correctly routes to site-specific scrapers."""
 
-    @patch('app.services.scraper.requests.get')
-    def test_cdiscount_url_uses_cdiscount_scraper(self, mock_get):
+    def test_cdiscount_url_uses_cdiscount_scraper(self):
         """Test that Cdiscount URL uses Cdiscount scraper."""
         html = """
         <html>
@@ -215,16 +214,17 @@ class TestScraperSiteRouting:
         mock_response.status_code = 200
         mock_response.content = html.encode('utf-8')
         mock_response.raise_for_status = Mock()
-        mock_get.return_value = mock_response
 
         scraper = PriceScraper(max_retries=1)
+        # Mock the session.get method
+        scraper.session.get = Mock(return_value=mock_response)
+
         result = scraper.scrape_product("https://www.cdiscount.com/product/123")
 
         assert result is not None
         assert result.price == 99.99
 
-    @patch('app.services.scraper.requests.get')
-    def test_boulanger_url_uses_boulanger_scraper(self, mock_get):
+    def test_boulanger_url_uses_boulanger_scraper(self):
         """Test that Boulanger URL uses Boulanger scraper."""
         html = """
         <html>
@@ -238,16 +238,17 @@ class TestScraperSiteRouting:
         mock_response.status_code = 200
         mock_response.content = html.encode('utf-8')
         mock_response.raise_for_status = Mock()
-        mock_get.return_value = mock_response
 
         scraper = PriceScraper(max_retries=1)
+        # Mock the session.get method
+        scraper.session.get = Mock(return_value=mock_response)
+
         result = scraper.scrape_product("https://www.boulanger.com/ref/123")
 
         assert result is not None
         assert result.price == 199.99
 
-    @patch('app.services.scraper.requests.get')
-    def test_leclerc_url_uses_leclerc_scraper(self, mock_get):
+    def test_leclerc_url_uses_leclerc_scraper(self):
         """Test that E.Leclerc URL uses Leclerc scraper."""
         html = """
         <html>
@@ -261,16 +262,17 @@ class TestScraperSiteRouting:
         mock_response.status_code = 200
         mock_response.content = html.encode('utf-8')
         mock_response.raise_for_status = Mock()
-        mock_get.return_value = mock_response
 
         scraper = PriceScraper(max_retries=1)
+        # Mock the session.get method
+        scraper.session.get = Mock(return_value=mock_response)
+
         result = scraper.scrape_product("https://www.e.leclerc/product/123")
 
         assert result is not None
         assert result.price == 5.99
 
-    @patch('app.services.scraper.requests.get')
-    def test_unknown_url_uses_generic_scraper(self, mock_get):
+    def test_unknown_url_uses_generic_scraper(self):
         """Test that unknown URL uses generic scraper."""
         html = """
         <html>
@@ -285,9 +287,11 @@ class TestScraperSiteRouting:
         mock_response.status_code = 200
         mock_response.content = html.encode('utf-8')
         mock_response.raise_for_status = Mock()
-        mock_get.return_value = mock_response
 
         scraper = PriceScraper(max_retries=1)
+        # Mock the session.get method
+        scraper.session.get = Mock(return_value=mock_response)
+
         result = scraper.scrape_product("https://www.unknownsite.com/product/123")
 
         assert result is not None

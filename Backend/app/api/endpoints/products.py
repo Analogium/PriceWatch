@@ -6,9 +6,13 @@ from datetime import datetime
 from math import ceil
 from app.db.base import get_db
 from app.schemas.product import (
-    ProductCreate, ProductUpdate, ProductResponse,
-    PaginatedProductsResponse, PaginationMetadata,
-    ProductSortBy, SortOrder
+    ProductCreate,
+    ProductUpdate,
+    ProductResponse,
+    PaginatedProductsResponse,
+    PaginationMetadata,
+    ProductSortBy,
+    SortOrder,
 )
 from app.schemas.price_history import PriceHistoryResponse, PriceHistoryStats
 from app.models.product import Product
@@ -29,7 +33,7 @@ def get_products(
     sort_by: ProductSortBy = Query(ProductSortBy.created_at, description="Field to sort by"),
     order: SortOrder = Query(SortOrder.desc, description="Sort order (asc/desc)"),
     current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """
     Get paginated products tracked by the current user.
@@ -46,8 +50,7 @@ def get_products(
     # Apply search filter
     if search:
         search_filter = or_(
-            func.lower(Product.name).contains(func.lower(search)),
-            func.lower(Product.url).contains(func.lower(search))
+            func.lower(Product.name).contains(func.lower(search)), func.lower(Product.url).contains(func.lower(search))
         )
         query = query.filter(search_filter)
 
@@ -74,7 +77,7 @@ def get_products(
         total_items=total_items,
         total_pages=total_pages,
         has_next=page < total_pages,
-        has_previous=page > 1
+        has_previous=page > 1,
     )
 
     return PaginatedProductsResponse(items=products, metadata=metadata)
@@ -82,9 +85,7 @@ def get_products(
 
 @router.post("", response_model=ProductResponse, status_code=status.HTTP_201_CREATED)
 def create_product(
-    product_data: ProductCreate,
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    product_data: ProductCreate, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)
 ):
     """Add a new product to track."""
     # Scrape product information
@@ -93,7 +94,7 @@ def create_product(
     if not scraped_data:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Unable to extract product information from URL. Please check the URL and try again."
+            detail="Unable to extract product information from URL. Please check the URL and try again.",
         )
 
     # Create new product
@@ -104,7 +105,7 @@ def create_product(
         image=scraped_data.image,
         current_price=scraped_data.price,
         target_price=product_data.target_price,
-        last_checked=datetime.utcnow()
+        last_checked=datetime.utcnow(),
     )
 
     db.add(new_product)
@@ -118,22 +119,12 @@ def create_product(
 
 
 @router.get("/{product_id}", response_model=ProductResponse)
-def get_product(
-    product_id: int,
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
-):
+def get_product(product_id: int, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     """Get a specific product by ID."""
-    product = db.query(Product).filter(
-        Product.id == product_id,
-        Product.user_id == current_user.id
-    ).first()
+    product = db.query(Product).filter(Product.id == product_id, Product.user_id == current_user.id).first()
 
     if not product:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Product not found"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found")
 
     return product
 
@@ -143,19 +134,13 @@ def update_product(
     product_id: int,
     product_data: ProductUpdate,
     current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """Update a product (name or target price)."""
-    product = db.query(Product).filter(
-        Product.id == product_id,
-        Product.user_id == current_user.id
-    ).first()
+    product = db.query(Product).filter(Product.id == product_id, Product.user_id == current_user.id).first()
 
     if not product:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Product not found"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found")
 
     # Update fields
     if product_data.name is not None:
@@ -170,22 +155,12 @@ def update_product(
 
 
 @router.delete("/{product_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_product(
-    product_id: int,
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
-):
+def delete_product(product_id: int, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     """Delete a product from tracking."""
-    product = db.query(Product).filter(
-        Product.id == product_id,
-        Product.user_id == current_user.id
-    ).first()
+    product = db.query(Product).filter(Product.id == product_id, Product.user_id == current_user.id).first()
 
     if not product:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Product not found"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found")
 
     db.delete(product)
     db.commit()
@@ -198,28 +173,19 @@ def check_product_price(
     product_id: int,
     background_tasks: BackgroundTasks,
     current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """Manually check and update the price of a product."""
-    product = db.query(Product).filter(
-        Product.id == product_id,
-        Product.user_id == current_user.id
-    ).first()
+    product = db.query(Product).filter(Product.id == product_id, Product.user_id == current_user.id).first()
 
     if not product:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Product not found"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found")
 
     # Scrape current price
     scraped_data = scraper.scrape_product(product.url)
 
     if not scraped_data:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Unable to fetch current price"
-        )
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Unable to fetch current price")
 
     old_price = product.current_price
     product.current_price = scraped_data.price
@@ -233,12 +199,7 @@ def check_product_price(
     if scraped_data.price <= product.target_price and old_price > product.target_price:
         # Send email notification in background
         background_tasks.add_task(
-            email_service.send_price_alert,
-            current_user.email,
-            product.name,
-            scraped_data.price,
-            old_price,
-            product.url
+            email_service.send_price_alert, current_user.email, product.name, scraped_data.price, old_price, product.url
         )
 
     db.commit()
@@ -249,10 +210,7 @@ def check_product_price(
 
 @router.get("/{product_id}/history", response_model=List[PriceHistoryResponse])
 def get_product_price_history(
-    product_id: int,
-    limit: int = 100,
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    product_id: int, limit: int = 100, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)
 ):
     """
     Get the price history for a specific product.
@@ -265,16 +223,10 @@ def get_product_price_history(
         List of price history records, ordered by date (newest first)
     """
     # Verify product belongs to current user
-    product = db.query(Product).filter(
-        Product.id == product_id,
-        Product.user_id == current_user.id
-    ).first()
+    product = db.query(Product).filter(Product.id == product_id, Product.user_id == current_user.id).first()
 
     if not product:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Product not found"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found")
 
     # Get price history
     history = price_history_service.get_product_history(db, product_id, limit)
@@ -284,9 +236,7 @@ def get_product_price_history(
 
 @router.get("/{product_id}/history/stats", response_model=PriceHistoryStats)
 def get_product_price_statistics(
-    product_id: int,
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    product_id: int, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)
 ):
     """
     Get price statistics for a specific product.
@@ -298,24 +248,15 @@ def get_product_price_statistics(
         Price statistics including lowest, highest, average, and change percentage
     """
     # Verify product belongs to current user
-    product = db.query(Product).filter(
-        Product.id == product_id,
-        Product.user_id == current_user.id
-    ).first()
+    product = db.query(Product).filter(Product.id == product_id, Product.user_id == current_user.id).first()
 
     if not product:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Product not found"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found")
 
     # Get statistics
     stats = price_history_service.get_price_statistics(db, product_id)
 
     if not stats:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Product not found"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found")
 
     return stats

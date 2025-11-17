@@ -5,16 +5,19 @@ from typing import Optional
 
 class PriceHistoryBase(BaseModel):
     """Base schema for PriceHistory"""
+
     price: float = Field(..., description="Prix enregistré")
 
 
 class PriceHistoryCreate(PriceHistoryBase):
     """Schema for creating a price history entry"""
+
     product_id: int = Field(..., description="ID du produit")
 
 
 class PriceHistoryResponse(PriceHistoryBase):
     """Schema for price history response"""
+
     id: int
     product_id: int
     recorded_at: datetime
@@ -25,6 +28,7 @@ class PriceHistoryResponse(PriceHistoryBase):
 
 class PriceHistoryStats(BaseModel):
     """Schema for price history statistics"""
+
     current_price: float
     lowest_price: float
     highest_price: float

@@ -1,6 +1,7 @@
 """
 Rate limiting middleware using Redis.
 """
+
 from fastapi import Request, HTTPException, status
 from typing import Optional
 import time
@@ -59,13 +60,14 @@ class RateLimiter:
         if self.is_rate_limited(client_ip):
             raise HTTPException(
                 status_code=status.HTTP_429_TOO_MANY_REQUESTS,
-                detail=f"Rate limit exceeded. Maximum {self.requests} requests per {self.period} seconds."
+                detail=f"Rate limit exceeded. Maximum {self.requests} requests per {self.period} seconds.",
             )
 
 
 # Create rate limiter instance
 try:
     from redis import Redis
+
     redis_client = Redis.from_url(settings.REDIS_URL, decode_responses=True)
     rate_limiter = RateLimiter(redis_client)
 except Exception as e:
