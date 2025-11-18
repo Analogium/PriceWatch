@@ -79,7 +79,8 @@ Ce document trace l'état d'avancement du backend de PriceWatch, ce qui a été 
 - [x] Configuration Celery + Redis
 - [x] Tâche `check_all_prices` - Vérification quotidienne de tous les produits
 - [x] Tâche `check_single_product` - Vérification d'un produit spécifique
-- [x] Celery Beat configuré (exécution toutes les 24h)
+- [x] Tâche `check_prices_by_frequency` - Vérification selon la fréquence configurée (6h, 12h, 24h) ✨ **NEW**
+- [x] Celery Beat configuré avec 3 schedules (6h, 12h, 24h) ✨ **NEW**
 - [x] Envoi automatique d'alertes si prix ≤ seuil
 - [x] Enregistrement automatique de l'historique des prix ✨ NEW
 
@@ -90,6 +91,7 @@ Ce document trace l'état d'avancement du backend de PriceWatch, ce qui a été 
   - reset_token, reset_token_expires ✨ NEW
 - [x] Modèle `Product` :
   - id, user_id, name, url, image, current_price, target_price, last_checked, created_at
+  - check_frequency (6, 12, or 24 hours) ✨ **NEW**
 - [x] Modèle `PriceHistory` : ✨ NEW
   - id, product_id, price, recorded_at
 - [x] Modèle `UserPreferences` : ✨ **NEW**
@@ -115,11 +117,11 @@ Ce document trace l'état d'avancement du backend de PriceWatch, ce qui a été 
   - [x] Tests de sécurité (`tests/test_security.py`)
   - [x] Tests d'historique des prix (`tests/test_price_history.py`)
   - [x] Tests de pagination, filtres et tri (`tests/test_pagination.py`) ✨ NEW
-- [x] Suite de tests unitaires (214 tests) ✨ **AMÉLIORÉ**
+- [x] Suite de tests unitaires (237 tests) ✨ **AMÉLIORÉ**
   - [x] Tests scraper service (17 tests, 79% coverage) ✅
   - [x] Tests email service (14 tests, 95% coverage) ✅
   - [x] Tests price_history service (13 tests, 100% coverage) ✅
-  - [x] Tests Celery tasks (10 tests, 100% coverage) ✅
+  - [x] Tests Celery tasks (11 tests, 100% coverage) ✅
   - [x] Tests error handling (13 tests, retry logic, unavailability detection) ✅
   - [x] Tests security (16 tests, 96% coverage) ✅
   - [x] Tests site detection (24 tests, 100% réussite) ✅
@@ -132,6 +134,10 @@ Ce document trace l'état d'avancement du backend de PriceWatch, ce qui a été 
   - [x] Tests main app (11 tests, 100% coverage) ✅
   - [x] Tests imports (6 tests) ✅
   - [x] Tests user preferences (14 tests, 100% coverage) ✅ **NEW**
+  - [x] Tests check frequency (13 tests, 100% coverage) ✅ **NEW**
+  - [x] Tests priority calculation (10 tests, 100% coverage) ✅ **NEW**
+  - [x] Tests parallel scraping (11 tests, 100% coverage) ✅ **NEW**
+  - **Total: 248 tests unitaires** avec **60% de couverture globale**
 - [x] Infrastructure de tests ✨ NEW
   - [x] pytest avec markers (unit, integration, scraper, email, celery) ✨ NEW
   - [x] pytest-cov pour coverage reporting (**60% total**) ✨ **AMÉLIORÉ**
@@ -177,7 +183,7 @@ Ce document trace l'état d'avancement du backend de PriceWatch, ce qui a été 
   - [x] Scraper service (17 tests, 79% coverage) ✨ NEW
   - [x] Email service (14 tests, 95% coverage) ✨ NEW
   - [x] Price history service (13 tests, 100% coverage) ✨ NEW
-  - [x] Tâches Celery (10 tests, 100% coverage) ✨ NEW
+  - [x] Tâches Celery (11 tests, 100% coverage) ✨ NEW
   - [x] API dependencies (6 tests, 100% coverage) ✨ NEW
   - [x] Rate limiting (18 tests, 92% coverage) ✨ NEW
   - [x] Auth endpoints (21 tests, 96% coverage) ✨ NEW
@@ -186,7 +192,9 @@ Ce document trace l'état d'avancement du backend de PriceWatch, ce qui a été 
   - [x] Main app (11 tests, 100% coverage) ✨ NEW
   - [x] Security (16 tests, 96% coverage) ✨ NEW
   - [x] User preferences (14 tests, 100% coverage) ✨ **NEW**
-  - **Total: 214 tests unitaires** avec **60% de couverture globale**
+  - [x] Check frequency (13 tests, 100% coverage) ✨ **NEW**
+  - [x] Priority calculation (10 tests, 100% coverage) ✨ **NEW**
+  - **Total: 237 tests unitaires** avec **60% de couverture globale**
 - [x] **Infrastructure de tests** ✨ NEW
   - pytest avec markers (unit, integration, scraper, email, celery)
   - pytest-cov pour coverage tracking avec seuil minimal de 70%
@@ -254,13 +262,27 @@ Ce document trace l'état d'avancement du backend de PriceWatch, ce qui a été 
   - Tâche Celery hebdomadaire
 
 #### 🔄 Optimisation des Tâches Planifiées
-- [ ] **Configuration de fréquence par produit** (toutes les 6h, 12h, 24h)
-  - Ajoute un champ `check_frequency` au modèle Product
+- [x] **Configuration de fréquence par produit** (toutes les 6h, 12h, 24h) ✨ **NEW**
+  - Champ `check_frequency` ajouté au modèle Product
+  - Validation Pydantic pour valeurs autorisées (6, 12, 24)
+  - Tâches Celery distinctes pour chaque fréquence
+  - Filtre automatique basé sur `last_checked` pour éviter les vérifications trop fréquentes
+  - 13 tests unitaires (100% coverage)
   - Plus de flexibilité pour l'utilisateur
-- [ ] **Priorité des vérifications** (produits proches du seuil en premier)
-  - Optimise les vérifications les plus importantes
-- [ ] **Parallelisation** du scraping (plusieurs produits en même temps)
-  - Améliore les performances
+- [x] **Priorité des vérifications** (produits proches du seuil en premier) ✨ **NEW**
+  - Fonction `calculate_priority()` basée sur le pourcentage de distance au prix cible
+  - Produits à/sous le seuil vérifiés en premier (priorité maximale)
+  - Tri automatique des produits par priorité avant vérification
+  - 10 tests unitaires (100% coverage)
+  - Optimise les vérifications pour détecter rapidement les baisses importantes
+- [x] **Parallélisation** du scraping (plusieurs produits en même temps) ✨ **NEW**
+  - ThreadPoolExecutor pour scraping concurrent
+  - Configuration via `MAX_PARALLEL_SCRAPERS` (5 par défaut) et `SCRAPING_BATCH_SIZE` (10 par défaut)
+  - Fonction `scrape_single_product_safe()` thread-safe avec gestion d'erreurs
+  - Fonction `scrape_products_parallel()` pour traitement par batch
+  - Intégration complète dans `check_prices_by_frequency()`
+  - 11 tests unitaires (100% coverage)
+  - Améliore significativement les performances pour les vérifications massives
 
 #### 📊 Administration & Analytics
 - [ ] **Endpoint admin** pour statistiques globales
@@ -401,8 +423,10 @@ Ce document trace l'état d'avancement du backend de PriceWatch, ce qui a été 
 - **[tests/test_unit_main.py](../tests/test_unit_main.py)** - Tests main app (11 tests, 100% coverage)
 - **[tests/test_unit_imports.py](../tests/test_unit_imports.py)** - Tests imports (6 tests)
 - **[tests/test_unit_preferences.py](../tests/test_unit_preferences.py)** - Tests user preferences (14 tests, 100% coverage) ✨ **NEW**
+- **[tests/test_unit_check_frequency.py](../tests/test_unit_check_frequency.py)** - Tests check frequency (13 tests, 100% coverage) ✨ **NEW**
+- **[tests/test_unit_priority.py](../tests/test_unit_priority.py)** - Tests priority calculation (10 tests, 100% coverage) ✨ **NEW**
 
-**Total : 214 tests unitaires avec 60% de couverture globale**
+**Total : 237 tests unitaires avec 60% de couverture globale**
 
 ### Lancer les tests
 
@@ -491,4 +515,4 @@ docker-compose exec backend alembic current
 
 ---
 
-**Dernière mise à jour** : 2025-01-17
+**Dernière mise à jour** : 2025-11-18

@@ -161,9 +161,19 @@ Backend/
    - Saved to database with `target_price`
    - Initial price recorded in `price_history`
 
-2. Celery Beat triggers `check_all_prices` every 24h
-   - Defined in `tasks.py`
-   - Iterates through all products
+2. Celery Beat triggers price checking based on product frequency
+   - Three separate tasks: `check_prices_by_frequency(6)`, `check_prices_by_frequency(12)`, `check_prices_by_frequency(24)`
+   - Run every 6h, 12h, and 24h respectively
+   - Each task filters products by their `check_frequency` field
+   - Only checks products where `last_checked` is older than the frequency interval
+   - **Products are sorted by priority** (closest to target price first)
+     - Priority = 0 for products at/below target (highest priority)
+     - Priority increases with distance from target (e.g., 0.1 for 10% above)
+     - Optimizes early detection of price drops
+   - **Products are scraped in parallel batches** for better performance
+     - ThreadPoolExecutor with configurable workers (default: 5 concurrent scrapers)
+     - Products processed in batches (default: 10 products per batch)
+     - Thread-safe scraping with error isolation per product
    - Scrapes current price
    - Records price change in `price_history` (if changed)
    - Sends email alert if `current_price <= target_price`
@@ -183,10 +193,14 @@ Backend/
 
 **Test files:**
 - `test_unit_scraper.py` (17 tests) - Web scraping with mocked HTTP responses
-- `test_unit_email.py` (13 tests) - Email sending with mocked SMTP
-- `test_unit_price_history.py` (13 tests) - Price tracking logic with mocked DB
+- `test_unit_email.py` (14 tests) - Email sending with mocked SMTP
+- `test_unit_price_history.py` (14 tests) - Price tracking logic with mocked DB
 - `test_unit_celery_tasks.py` (11 tests) - Celery tasks with mocked everything
-- `test_unit_security.py` (9 tests) - Password validation, token generation
+- `test_unit_security.py` (16 tests) - Password validation, token generation
+- `test_unit_check_frequency.py` (13 tests) - Frequency-based checking
+- `test_unit_priority.py` (10 tests) - Priority calculation and sorting
+- `test_unit_parallel_scraping.py` (11 tests) - Parallel scraping with ThreadPoolExecutor
+- Total: 248 unit tests
 
 ### Common Patterns
 
@@ -200,8 +214,11 @@ Backend/
 **Adding a model field:**
 1. Modify model in `models/`
 2. Create migration: `./migrate.sh "add field description"`
+   - If adding NOT NULL field to existing table, use `server_default` in migration
 3. Update corresponding Pydantic schema in `schemas/`
+   - Add field validators if needed (e.g., `@field_validator`)
 4. Update tests
+5. Update documentation (CLAUDE.md, RoadMap.md)
 
 **Testing with mocks:**
 ```python
@@ -224,6 +241,8 @@ def test_scrape_amazon(mock_get):
 - `REDIS_URL` - Redis for Celery and rate limiting
 - `ACCESS_TOKEN_EXPIRE_MINUTES=30` - JWT expiry
 - `REFRESH_TOKEN_EXPIRE_DAYS=7` - Refresh token expiry
+- `MAX_PARALLEL_SCRAPERS=5` - Maximum concurrent scrapers in parallel mode
+- `SCRAPING_BATCH_SIZE=10` - Number of products to scrape per batch
 
 **API Pagination:**
 All product list endpoints support:

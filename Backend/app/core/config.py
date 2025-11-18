@@ -42,6 +42,10 @@ class Settings(BaseSettings):
     ENABLE_JSON_LOGS: bool = False
     ENABLE_LOG_ROTATION: bool = True
 
+    # Scraping Parallelization
+    MAX_PARALLEL_SCRAPERS: int = 5  # Maximum number of concurrent scrapers
+    SCRAPING_BATCH_SIZE: int = 10  # Number of products to scrape in parallel batches
+
     class Config:
         env_file = ".env"
         case_sensitive = True
