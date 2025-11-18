@@ -18,6 +18,7 @@ class Product(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     is_available = Column(Boolean, default=True, nullable=False)
     unavailable_since = Column(DateTime, nullable=True)
+    check_frequency = Column(Integer, default=24, nullable=False)  # Frequency in hours (6, 12, or 24)
 
     # Relationships
     owner = relationship("User", back_populates="products")
