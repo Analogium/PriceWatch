@@ -100,7 +100,9 @@ Backend/
 │   │   ├── dependencies.py           # Auth & DB dependencies
 │   │   └── endpoints/
 │   │       ├── auth.py               # JWT auth, registration, login, password reset
-│   │       └── products.py           # Product CRUD, price history, pagination
+│   │       ├── products.py           # Product CRUD, price history, pagination
+│   │       ├── preferences.py        # User preferences management
+│   │       └── admin.py              # Admin endpoints (stats, user management, exports)
 │   ├── core/
 │   │   ├── config.py                 # Settings (loaded from .env)
 │   │   ├── security.py               # JWT, password hashing, validation
@@ -108,17 +110,22 @@ Backend/
 │   ├── db/
 │   │   └── base.py                   # SQLAlchemy base and session
 │   ├── models/                       # SQLAlchemy ORM models
-│   │   ├── user.py                   # User model (auth, verification, reset tokens)
+│   │   ├── user.py                   # User model (auth, verification, reset tokens, is_admin)
 │   │   ├── product.py                # Product model
-│   │   └── price_history.py         # Price history tracking
+│   │   ├── price_history.py         # Price history tracking
+│   │   ├── user_preferences.py      # User preferences model
+│   │   └── scraping_stats.py        # Scraping performance tracking
 │   ├── schemas/                      # Pydantic validation schemas
 │   │   ├── user.py
 │   │   ├── product.py
-│   │   └── price_history.py
+│   │   ├── price_history.py
+│   │   ├── user_preferences.py
+│   │   └── admin.py                  # Admin schemas (stats, exports)
 │   ├── services/                     # Business logic
 │   │   ├── scraper.py                # Web scraping (BeautifulSoup)
 │   │   ├── email.py                  # SMTP email sending
-│   │   └── price_history.py         # Price tracking logic
+│   │   ├── price_history.py         # Price tracking logic
+│   │   └── admin.py                  # Admin analytics and data export
 │   └── main.py                       # FastAPI app entry point
 ├── tasks.py                          # Celery tasks (price checking)
 ├── tests/
@@ -152,6 +159,32 @@ Backend/
 
 4. Token refresh → `POST /api/v1/auth/refresh`
    - Accepts refresh token, returns new access token
+
+### Admin Access Control
+
+1. **Admin role**: Users have `is_admin` field (default: False)
+   - Must be manually set in database or via admin promotion endpoint
+   - All admin endpoints use `Depends(get_current_admin_user)` dependency
+
+2. **Admin capabilities**:
+   - View global system statistics and analytics
+   - View per-site scraping performance metrics
+   - View detailed user statistics
+   - Export user data (CSV/JSON) for GDPR compliance
+   - Promote/revoke admin privileges
+   - Delete user accounts
+
+3. **Security protections**:
+   - Admins cannot revoke their own admin status
+   - Admins cannot delete their own account
+   - All admin endpoints return 403 Forbidden for non-admin users
+
+4. **Admin endpoints**: All prefixed with `/api/v1/admin`
+   - Statistics: `/stats/global`, `/stats/site/{name}`, `/stats/users`
+   - Exports: `/export/user/{id}/csv`, `/export/user/{id}/json`
+   - User management: `POST /users/{id}/admin`, `DELETE /users/{id}/admin`, `DELETE /users/{id}`
+
+See [ADMIN_FEATURES.md](RoadMapDoc/ADMIN_FEATURES.md) for complete documentation.
 
 ### Price Tracking Flow
 
@@ -200,7 +233,8 @@ Backend/
 - `test_unit_check_frequency.py` (13 tests) - Frequency-based checking
 - `test_unit_priority.py` (10 tests) - Priority calculation and sorting
 - `test_unit_parallel_scraping.py` (11 tests) - Parallel scraping with ThreadPoolExecutor
-- Total: 248 unit tests
+- `test_unit_admin.py` (16 tests) - Admin service and endpoints with mocked DB
+- Total: 264 unit tests
 
 ### Common Patterns
 
@@ -288,6 +322,7 @@ All product list endpoints support:
 - `RoadMapDoc/RoadMap.md` - Feature roadmap and implementation status
 - `RoadMapDoc/TESTING.md` - Testing infrastructure documentation
 - `RoadMapDoc/SECURITY_FEATURES.md` - Security features documentation
+- `RoadMapDoc/ADMIN_FEATURES.md` - Administration and analytics documentation
 
 ### When Making Changes
 

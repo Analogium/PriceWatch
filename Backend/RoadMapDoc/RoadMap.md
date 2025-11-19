@@ -284,13 +284,39 @@ Ce document trace l'état d'avancement du backend de PriceWatch, ce qui a été 
   - 11 tests unitaires (100% coverage)
   - Améliore significativement les performances pour les vérifications massives
 
-#### 📊 Administration & Analytics
-- [ ] **Endpoint admin** pour statistiques globales
-  - Nombre d'utilisateurs, produits, taux de succès scraping
-- [ ] **Dashboard admin** basique
-  - Interface de monitoring
-- [ ] **Export CSV** des données utilisateur (RGPD)
-  - Conformité légale
+#### 📊 Administration & Analytics - ✅ COMPLÉTÉ
+- [x] **Modèle ScrapingStats** pour tracking des performances de scraping ✨ **NEW**
+  - Enregistre site_name, status, response_time, error_message
+  - Indexes sur site_name et created_at pour requêtes rapides
+- [x] **Champ is_admin** dans le modèle User pour gestion des rôles ✨ **NEW**
+  - Permission par défaut: False
+  - Validation via dependency get_current_admin_user
+- [x] **AdminService** complet avec analytics avancées ✨ **NEW**
+  - get_global_stats(): Statistiques système (users, products, scraping)
+  - get_site_stats(): Statistiques par site (success rate, response time)
+  - get_user_stats(): Statistiques utilisateur détaillées
+  - log_scraping_stat(): Enregistrement automatique des scrapes
+- [x] **Endpoints admin** avec contrôle d'accès basé sur rôles ✨ **NEW**
+  - GET /api/v1/admin/stats/global - Statistiques globales
+  - GET /api/v1/admin/stats/site/{site_name} - Stats par site
+  - GET /api/v1/admin/stats/users - Liste stats tous utilisateurs (pagination)
+  - GET /api/v1/admin/stats/users/{user_id} - Stats utilisateur spécifique
+  - GET /api/v1/admin/stats/scraping - Stats de scraping récentes
+  - POST /api/v1/admin/users/{user_id}/admin - Promouvoir en admin
+  - DELETE /api/v1/admin/users/{user_id}/admin - Révoquer rôle admin
+  - DELETE /api/v1/admin/users/{user_id} - Supprimer utilisateur
+- [x] **Export RGPD** (CSV et JSON) ✨ **NEW**
+  - GET /api/v1/admin/export/user/{user_id}/csv - Export CSV
+  - GET /api/v1/admin/export/user/{user_id}/json - Export JSON
+  - Options: include_products, include_price_history, include_preferences
+  - Conformité RGPD complète
+- [x] **Protection des endpoints** ✨ **NEW**
+  - Tous les endpoints admin requièrent is_admin=True
+  - Impossibilité de se révoquer soi-même ou se supprimer
+- [x] **Tests unitaires complets** (16 tests, 100% coverage) ✨ **NEW**
+  - Tests AdminService (get_stats, export data, log scraping)
+  - Tests dependencies (get_current_admin_user)
+  - Tests cas d'erreur et edge cases
 
 #### 🔧 DevOps & Déploiement
 - [ ] **CI/CD pipeline** (GitHub Actions / GitLab CI)
