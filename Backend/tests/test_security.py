@@ -50,33 +50,20 @@ def test_1_password_strength():
     ]
 
     for password, description in weak_passwords:
-        try:
-            response = requests.post(
-                f"{BASE_URL}/auth/register",
-                json={"email": f"test_{int(time.time())}@example.com", "password": password},
-            )
-            if response.status_code == 400:
-                print_success(f"{description}: Rejected ✓")
-            else:
-                print_error(f"{description}: Should have been rejected!")
-        except Exception as e:
-            print_error(f"Error testing {description}: {str(e)}")
-
-    # Test strong password
-    try:
         response = requests.post(
             f"{BASE_URL}/auth/register",
-            json={"email": f"strong_user_{int(time.time())}@example.com", "password": "StrongPass123!"},
+            json={"email": f"test_{int(time.time())}@example.com", "password": password},
         )
-        if response.status_code == 201:
-            print_success("Strong password accepted ✓")
-            return response.json()
-        else:
-            print_error(f"Strong password rejected: {response.json()}")
-    except Exception as e:
-        print_error(f"Error: {str(e)}")
+        assert response.status_code == 400, f"{description}: Should have been rejected!"
+        print_success(f"{description}: Rejected ✓")
 
-    return None
+    # Test strong password
+    response = requests.post(
+        f"{BASE_URL}/auth/register",
+        json={"email": f"strong_user_{int(time.time())}@example.com", "password": "StrongPass123!"},
+    )
+    assert response.status_code == 201, f"Strong password rejected: {response.json()}"
+    print_success("Strong password accepted ✓")
 
 
 def test_2_registration_and_verification():
@@ -86,23 +73,15 @@ def test_2_registration_and_verification():
     email = f"verify_test_{int(time.time())}@example.com"
     password = "SecurePass123!"
 
-    try:
-        # Register
-        response = requests.post(f"{BASE_URL}/auth/register", json={"email": email, "password": password})
+    # Register
+    response = requests.post(f"{BASE_URL}/auth/register", json={"email": email, "password": password})
 
-        if response.status_code == 201:
-            print_success(f"User registered: {email}")
-            user_data = response.json()
-            print_info(f"User ID: {user_data['id']}")
-            print_info(f"Is verified: {user_data.get('is_verified', 'N/A')}")
-            print_info("Check your database for verification_token to test email verification")
-            return {"email": email, "password": password}
-        else:
-            print_error(f"Registration failed: {response.json()}")
-    except Exception as e:
-        print_error(f"Error: {str(e)}")
-
-    return None
+    assert response.status_code == 201, f"Registration failed: {response.json()}"
+    print_success(f"User registered: {email}")
+    user_data = response.json()
+    print_info(f"User ID: {user_data['id']}")
+    print_info(f"Is verified: {user_data.get('is_verified', 'N/A')}")
+    print_info("Check your database for verification_token to test email verification")
 
 
 def test_3_login_and_tokens():
@@ -113,58 +92,37 @@ def test_3_login_and_tokens():
     email = f"token_test_{int(time.time())}@example.com"
     password = "TokenTest123!"
 
-    try:
-        # Register
-        reg_response = requests.post(f"{BASE_URL}/auth/register", json={"email": email, "password": password})
+    # Register
+    reg_response = requests.post(f"{BASE_URL}/auth/register", json={"email": email, "password": password})
+    assert reg_response.status_code == 201, f"Registration failed: {reg_response.json()}"
+    print_success(f"User created: {email}")
 
-        if reg_response.status_code != 201:
-            print_error(f"Registration failed: {reg_response.json()}")
-            return None
+    # Login
+    login_response = requests.post(f"{BASE_URL}/auth/login", json={"email": email, "password": password})
+    assert login_response.status_code == 200, f"Login failed: {login_response.json()}"
 
-        print_success(f"User created: {email}")
+    tokens = login_response.json()
+    print_success("Login successful")
+    print_info(f"Access token received (length: {len(tokens['access_token'])})")
+    print_info(f"Refresh token received (length: {len(tokens.get('refresh_token', ''))})")
 
-        # Login
-        login_response = requests.post(f"{BASE_URL}/auth/login", json={"email": email, "password": password})
+    # Test access token
+    me_response = requests.get(
+        f"{BASE_URL}/auth/me", headers={"Authorization": f"Bearer {tokens['access_token']}"}
+    )
+    assert me_response.status_code == 200, "Access token invalid"
+    print_success(f"Access token valid ✓ User: {me_response.json()['email']}")
 
-        if login_response.status_code == 200:
-            tokens = login_response.json()
-            print_success("Login successful")
-            print_info(f"Access token received (length: {len(tokens['access_token'])})")
-            print_info(f"Refresh token received (length: {len(tokens.get('refresh_token', ''))})")
+    # Test refresh token
+    assert "refresh_token" in tokens, "No refresh token received"
+    refresh_response = requests.post(
+        f"{BASE_URL}/auth/refresh", json={"refresh_token": tokens["refresh_token"]}
+    )
+    assert refresh_response.status_code == 200, f"Refresh token failed: {refresh_response.json()}"
 
-            # Test access token
-            me_response = requests.get(
-                f"{BASE_URL}/auth/me", headers={"Authorization": f"Bearer {tokens['access_token']}"}
-            )
-
-            if me_response.status_code == 200:
-                print_success(f"Access token valid ✓ User: {me_response.json()['email']}")
-            else:
-                print_error("Access token invalid")
-
-            # Test refresh token
-            if "refresh_token" in tokens:
-                refresh_response = requests.post(
-                    f"{BASE_URL}/auth/refresh", json={"refresh_token": tokens["refresh_token"]}
-                )
-
-                if refresh_response.status_code == 200:
-                    new_tokens = refresh_response.json()
-                    print_success("Refresh token works ✓")
-                    print_info(f"New access token received (length: {len(new_tokens['access_token'])})")
-                    return {"tokens": tokens, "email": email}
-                else:
-                    print_error(f"Refresh token failed: {refresh_response.json()}")
-            else:
-                print_error("No refresh token received")
-
-        else:
-            print_error(f"Login failed: {login_response.json()}")
-
-    except Exception as e:
-        print_error(f"Error: {str(e)}")
-
-    return None
+    new_tokens = refresh_response.json()
+    print_success("Refresh token works ✓")
+    print_info(f"New access token received (length: {len(new_tokens['access_token'])})")
 
 
 def test_4_rate_limiting():
