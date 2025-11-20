@@ -96,8 +96,8 @@ def create_test_products(token, count=25):
             price = 100 + (i * 10)
             cursor.execute(
                 """
-                INSERT INTO products (user_id, name, url, image, current_price, target_price, last_checked, created_at)
-                VALUES (%s, %s, %s, %s, %s, %s, NOW() - INTERVAL '%s days', NOW() - INTERVAL '%s days')
+                INSERT INTO products (user_id, name, url, image, current_price, target_price, last_checked, created_at, is_available)
+                VALUES (%s, %s, %s, %s, %s, %s, NOW() - INTERVAL '%s days', NOW() - INTERVAL '%s days', TRUE)
                 RETURNING id
             """,
                 (

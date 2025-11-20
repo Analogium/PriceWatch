@@ -57,7 +57,7 @@ class PriceHistoryService:
         return query.all()
 
     @staticmethod
-    def get_price_statistics(db: Session, product_id: int) -> dict:
+    def get_price_statistics(db: Session, product_id: int) -> dict | None:
         """
         Calculate price statistics for a product.
 

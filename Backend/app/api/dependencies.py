@@ -1,3 +1,5 @@
+from typing import Optional
+
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.orm import Session
@@ -26,7 +28,7 @@ def get_current_user(
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    email: str = payload.get("sub")
+    email: Optional[str] = payload.get("sub")
     if email is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

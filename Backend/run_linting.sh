@@ -1,5 +1,7 @@
 #!/bin/bash
 # Script pour exécuter les outils de linting et formatting
+# docker-compose exec -T backend /app/run_linting.sh 2>&1
+
 
 set -e
 

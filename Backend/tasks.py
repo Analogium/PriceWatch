@@ -148,7 +148,7 @@ def scrape_single_product_safe(product: Product) -> Tuple[Product, Optional[floa
 
 
 def scrape_products_parallel(
-    products: List[Product], max_workers: int = None
+    products: List[Product], max_workers: Optional[int] = None
 ) -> List[Tuple[Product, Optional[float], Optional[Exception]]]:
     """
     Scrape multiple products in parallel using ThreadPoolExecutor.

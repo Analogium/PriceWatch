@@ -275,7 +275,7 @@ class AdminService:
         if not user:
             raise ValueError(f"User {user_id} not found")
 
-        data = {
+        data: Dict[str, Any] = {
             "user": {
                 "id": user.id,
                 "email": user.email,

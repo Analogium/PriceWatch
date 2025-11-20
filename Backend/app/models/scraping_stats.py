@@ -1,6 +1,8 @@
 from datetime import datetime
+from typing import Optional
 
-from sqlalchemy import Column, DateTime, Float, Integer, String
+from sqlalchemy import String
+from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db.base import Base
 
@@ -8,10 +10,10 @@ from app.db.base import Base
 class ScrapingStats(Base):
     __tablename__ = "scraping_stats"
 
-    id = Column(Integer, primary_key=True, index=True)
-    site_name = Column(String, nullable=False, index=True)  # amazon, fnac, darty, etc.
-    product_id = Column(Integer, nullable=True)  # Optional reference to product
-    status = Column(String, nullable=False)  # success, failure, unavailable
-    response_time = Column(Float, nullable=True)  # Time taken to scrape in seconds
-    error_message = Column(String, nullable=True)
-    created_at = Column(DateTime, default=datetime.utcnow, index=True)
+    id: Mapped[int] = mapped_column(primary_key=True, index=True)
+    site_name: Mapped[str] = mapped_column(String, index=True)  # amazon, fnac, darty, etc.
+    product_id: Mapped[Optional[int]] = mapped_column(nullable=True)  # Optional reference to product
+    status: Mapped[str] = mapped_column(String)  # success, failure, unavailable
+    response_time: Mapped[Optional[float]] = mapped_column(nullable=True)  # Time taken to scrape in seconds
+    error_message: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(default=datetime.utcnow, index=True)

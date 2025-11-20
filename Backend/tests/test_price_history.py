@@ -95,8 +95,8 @@ def create_test_product_with_history(token):
         # Insert test product
         cursor.execute(
             """
-            INSERT INTO products (user_id, name, url, image, current_price, target_price, last_checked, created_at)
-            VALUES (%s, %s, %s, %s, %s, %s, NOW(), NOW())
+            INSERT INTO products (user_id, name, url, image, current_price, target_price, last_checked, created_at, is_available)
+            VALUES (%s, %s, %s, %s, %s, %s, NOW(), NOW(), TRUE)
             RETURNING id
         """,
             (
