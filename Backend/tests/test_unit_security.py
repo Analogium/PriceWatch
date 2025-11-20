@@ -10,19 +10,17 @@ Tests include:
 - Invalid credentials handling
 - Token validation
 """
+
 import pytest
-from unittest.mock import Mock, MagicMock, patch
-from datetime import datetime, timedelta
-from fastapi.testclient import TestClient
-from app.main import app
-from app.models.user import User
+
+from datetime import timedelta
 from app.core.security import (
     validate_password_strength,
     get_password_hash,
     verify_password,
     create_access_token,
     create_refresh_token,
-    decode_access_token
+    decode_access_token,
 )
 
 
@@ -76,8 +74,6 @@ class TestPasswordStrength:
 
         is_valid, error = validate_password_strength("VerySecure99#")
         assert is_valid is True
-
-
 
 
 class TestTokenFunctions:

@@ -9,11 +9,11 @@ Tests include:
 - Error handling
 - Price parsing edge cases
 """
+
 import pytest
 from unittest.mock import Mock, patch
 from bs4 import BeautifulSoup
 from app.services.scraper import PriceScraper, scraper
-from app.schemas.product import ProductScrapedData
 
 
 class TestPriceScraper:
@@ -27,8 +27,8 @@ class TestPriceScraper:
     def test_scraper_initialization(self):
         """Test that scraper initializes with correct headers."""
         assert self.scraper is not None
-        assert 'User-Agent' in self.scraper.headers
-        assert 'Mozilla' in self.scraper.headers['User-Agent']
+        assert "User-Agent" in self.scraper.headers
+        assert "Mozilla" in self.scraper.headers["User-Agent"]
 
     @pytest.mark.unit
     @pytest.mark.scraper
@@ -44,7 +44,7 @@ class TestPriceScraper:
             </body>
         </html>
         """
-        soup = BeautifulSoup(html, 'html.parser')
+        soup = BeautifulSoup(html, "html.parser")
         result = self.scraper._scrape_amazon(soup)
 
         assert result is not None
@@ -64,7 +64,7 @@ class TestPriceScraper:
             </body>
         </html>
         """
-        soup = BeautifulSoup(html, 'html.parser')
+        soup = BeautifulSoup(html, "html.parser")
         result = self.scraper._scrape_amazon(soup)
 
         assert result is None
@@ -83,7 +83,7 @@ class TestPriceScraper:
             </body>
         </html>
         """
-        soup = BeautifulSoup(html, 'html.parser')
+        soup = BeautifulSoup(html, "html.parser")
         result = self.scraper._scrape_amazon(soup)
 
         assert result is not None
@@ -102,7 +102,7 @@ class TestPriceScraper:
             </body>
         </html>
         """
-        soup = BeautifulSoup(html, 'html.parser')
+        soup = BeautifulSoup(html, "html.parser")
         result = self.scraper._scrape_fnac(soup)
 
         assert result is not None
@@ -121,7 +121,7 @@ class TestPriceScraper:
             </body>
         </html>
         """
-        soup = BeautifulSoup(html, 'html.parser')
+        soup = BeautifulSoup(html, "html.parser")
         result = self.scraper._scrape_fnac(soup)
 
         assert result is None
@@ -139,7 +139,7 @@ class TestPriceScraper:
             </body>
         </html>
         """
-        soup = BeautifulSoup(html, 'html.parser')
+        soup = BeautifulSoup(html, "html.parser")
         result = self.scraper._scrape_darty(soup)
 
         assert result is not None
@@ -163,7 +163,7 @@ class TestPriceScraper:
             </body>
         </html>
         """
-        soup = BeautifulSoup(html, 'html.parser')
+        soup = BeautifulSoup(html, "html.parser")
         result = self.scraper._scrape_generic(soup)
 
         assert result is not None
@@ -185,7 +185,7 @@ class TestPriceScraper:
             </body>
         </html>
         """
-        soup = BeautifulSoup(html, 'html.parser')
+        soup = BeautifulSoup(html, "html.parser")
         result = self.scraper._scrape_generic(soup)
 
         assert result is None
@@ -229,7 +229,9 @@ class TestPriceScraper:
                 <span class="f-priceBox-price">79,99</span>
             </body>
         </html>
-        """.encode('utf-8')
+        """.encode(
+            "utf-8"
+        )
 
         # Mock the session.get method
         self.scraper.session.get = Mock(return_value=mock_response)
@@ -253,7 +255,9 @@ class TestPriceScraper:
                 <span class="product_price">149,99</span>
             </body>
         </html>
-        """.encode('utf-8')
+        """.encode(
+            "utf-8"
+        )
 
         # Mock the session.get method
         self.scraper.session.get = Mock(return_value=mock_response)
@@ -289,7 +293,7 @@ class TestPriceScraper:
 
     @pytest.mark.unit
     @pytest.mark.scraper
-    @patch('app.services.scraper.requests.get')
+    @patch("app.services.scraper.requests.get")
     def test_scrape_product_http_error(self, mock_get):
         """Test scrape_product with HTTP error."""
         mock_get.side_effect = Exception("Connection error")
@@ -300,7 +304,7 @@ class TestPriceScraper:
 
     @pytest.mark.unit
     @pytest.mark.scraper
-    @patch('app.services.scraper.requests.get')
+    @patch("app.services.scraper.requests.get")
     def test_scrape_product_timeout(self, mock_get):
         """Test scrape_product with timeout."""
         mock_get.side_effect = Exception("Timeout")
@@ -311,7 +315,7 @@ class TestPriceScraper:
 
     @pytest.mark.unit
     @pytest.mark.scraper
-    @patch('app.services.scraper.requests.get')
+    @patch("app.services.scraper.requests.get")
     def test_scrape_product_invalid_html(self, mock_get):
         """Test scrape_product with invalid HTML."""
         mock_response = Mock()

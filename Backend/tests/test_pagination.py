@@ -7,6 +7,7 @@ Tests include:
 - Filtering/Search (by name and URL)
 - Combined features
 """
+
 import requests
 import time
 import psycopg2
@@ -18,20 +19,20 @@ DB_CONFIG = {
     "port": 5432,
     "database": "pricewatch",
     "user": "pricewatch",
-    "password": "pricewatch"
+    "password": "pricewatch",
 }
 
 # ANSI color codes
-BLUE = '\033[94m'
-GREEN = '\033[92m'
-YELLOW = '\033[93m'
-RED = '\033[91m'
-RESET = '\033[0m'
+BLUE = "\033[94m"
+GREEN = "\033[92m"
+YELLOW = "\033[93m"
+RED = "\033[91m"
+RESET = "\033[0m"
 
 
 def print_header(message):
     """Print a formatted header."""
-    separator = '=' * 60
+    separator = "=" * 60
     newline = "\n"
     print(f"{newline}{BLUE}{separator}{RESET}")
     print(f"{BLUE}{message}{RESET}")
@@ -92,20 +93,23 @@ def create_test_products(token, count=25):
         # Insert multiple test products with varying prices
         for i in range(count):
             price = 100 + (i * 10)
-            cursor.execute("""
+            cursor.execute(
+                """
                 INSERT INTO products (user_id, name, url, image, current_price, target_price, last_checked, created_at)
                 VALUES (%s, %s, %s, %s, %s, %s, NOW() - INTERVAL '%s days', NOW() - INTERVAL '%s days')
                 RETURNING id
-            """, (
-                user_id,
-                f"Product {i+1:02d}",
-                f"https://example.com/product{i+1}",
-                f"https://example.com/image{i+1}.jpg",
-                price,
-                price - 20,
-                count - i,  # Older products have higher numbers
-                count - i
-            ))
+            """,
+                (
+                    user_id,
+                    f"Product {i + 1:02d}",
+                    f"https://example.com/product{i + 1}",
+                    f"https://example.com/image{i + 1}.jpg",
+                    price,
+                    price - 20,
+                    count - i,  # Older products have higher numbers
+                    count - i,
+                ),
+            )
 
             product_id = cursor.fetchone()[0]
             product_ids.append(product_id)
@@ -137,18 +141,18 @@ def test_basic_pagination(token):
 
         metadata = data.get("metadata", {})
         correct_metadata = (
-            metadata.get("page") == 1 and
-            metadata.get("page_size") == 10 and
-            "total_items" in metadata and
-            "total_pages" in metadata and
-            "has_next" in metadata and
-            "has_previous" in metadata
+            metadata.get("page") == 1
+            and metadata.get("page_size") == 10
+            and "total_items" in metadata
+            and "total_pages" in metadata
+            and "has_next" in metadata
+            and "has_previous" in metadata
         )
 
         print_test(
             "Basic pagination structure",
             has_items and correct_page_size and correct_metadata,
-            f"Items: {len(data.get('items', []))}, Metadata valid: {correct_metadata}"
+            f"Items: {len(data.get('items', []))}, Metadata valid: {correct_metadata}",
         )
         return has_items and correct_page_size and correct_metadata
     else:
@@ -170,19 +174,19 @@ def test_pagination_metadata(token):
         metadata = data["metadata"]
 
         # Check has_previous and has_next
-        first_page_correct = metadata["has_previous"] == False and metadata["has_next"] == True
+        first_page_correct = metadata["has_previous"] is False and metadata["has_next"] is True
 
         # Get middle page
         response2 = requests.get(f"{BASE_URL}/products?page=2&page_size=5", headers=headers)
         if response2.status_code == 200:
             data2 = response2.json()
             metadata2 = data2["metadata"]
-            middle_page_correct = metadata2["has_previous"] == True
+            middle_page_correct = metadata2["has_previous"] is True
 
             print_test(
                 "Pagination metadata accuracy",
                 first_page_correct and middle_page_correct,
-                f"First page has_next: {metadata['has_next']}, Middle page has_previous: {metadata2['has_previous']}"
+                f"First page has_next: {metadata['has_next']}, Middle page has_previous: {metadata2['has_previous']}",
             )
             return first_page_correct and middle_page_correct
         else:
@@ -200,10 +204,7 @@ def test_sorting_by_price(token):
     headers = {"Authorization": f"Bearer {token}"}
 
     # Sort by price ascending
-    response = requests.get(
-        f"{BASE_URL}/products?page=1&page_size=5&sort_by=current_price&order=asc",
-        headers=headers
-    )
+    response = requests.get(f"{BASE_URL}/products?page=1&page_size=5&sort_by=current_price&order=asc", headers=headers)
 
     if response.status_code == 200:
         data = response.json()
@@ -211,13 +212,9 @@ def test_sorting_by_price(token):
 
         if len(items) >= 2:
             prices = [item["current_price"] for item in items]
-            is_ascending = all(prices[i] <= prices[i+1] for i in range(len(prices)-1))
+            is_ascending = all(prices[i] <= prices[i + 1] for i in range(len(prices) - 1))
 
-            print_test(
-                "Sorting by price (ascending)",
-                is_ascending,
-                f"Prices: {prices[:3]}..."
-            )
+            print_test("Sorting by price (ascending)", is_ascending, f"Prices: {prices[:3]}...")
             return is_ascending
         else:
             print_test("Sorting by price", True, "Not enough items to test sorting")
@@ -234,10 +231,7 @@ def test_sorting_by_name(token):
     headers = {"Authorization": f"Bearer {token}"}
 
     # Sort by name ascending
-    response = requests.get(
-        f"{BASE_URL}/products?page=1&page_size=5&sort_by=name&order=asc",
-        headers=headers
-    )
+    response = requests.get(f"{BASE_URL}/products?page=1&page_size=5&sort_by=name&order=asc", headers=headers)
 
     if response.status_code == 200:
         data = response.json()
@@ -245,13 +239,9 @@ def test_sorting_by_name(token):
 
         if len(items) >= 2:
             names = [item["name"] for item in items]
-            is_ascending = all(names[i] <= names[i+1] for i in range(len(names)-1))
+            is_ascending = all(names[i] <= names[i + 1] for i in range(len(names) - 1))
 
-            print_test(
-                "Sorting by name (ascending)",
-                is_ascending,
-                f"Names: {names[:3]}"
-            )
+            print_test("Sorting by name (ascending)", is_ascending, f"Names: {names[:3]}")
             return is_ascending
         else:
             print_test("Sorting by name", True, "Not enough items to test sorting")
@@ -268,10 +258,7 @@ def test_search_by_name(token):
     headers = {"Authorization": f"Bearer {token}"}
 
     # Search for "Product 01"
-    response = requests.get(
-        f"{BASE_URL}/products?search=Product 01",
-        headers=headers
-    )
+    response = requests.get(f"{BASE_URL}/products?search=Product 01", headers=headers)
 
     if response.status_code == 200:
         data = response.json()
@@ -280,11 +267,7 @@ def test_search_by_name(token):
         # Check that all results contain the search term
         all_match = all("Product 01" in item["name"] or "Product 01" in item["url"] for item in items)
 
-        print_test(
-            "Search by name",
-            all_match,
-            f"Found {len(items)} items matching 'Product 01'"
-        )
+        print_test("Search by name", all_match, f"Found {len(items)} items matching 'Product 01'")
         return all_match
     else:
         print_test("Search by name", False, f"Status: {response.status_code}")
@@ -298,10 +281,7 @@ def test_search_by_url(token):
     headers = {"Authorization": f"Bearer {token}"}
 
     # Search by URL pattern
-    response = requests.get(
-        f"{BASE_URL}/products?search=product1",
-        headers=headers
-    )
+    response = requests.get(f"{BASE_URL}/products?search=product1", headers=headers)
 
     if response.status_code == 200:
         data = response.json()
@@ -310,15 +290,10 @@ def test_search_by_url(token):
         # Check that results contain the search term in name or URL
         search_term_lower = "product1"
         all_match = all(
-            search_term_lower in item["name"].lower() or search_term_lower in item["url"].lower()
-            for item in items
+            search_term_lower in item["name"].lower() or search_term_lower in item["url"].lower() for item in items
         )
 
-        print_test(
-            "Search by URL pattern",
-            all_match,
-            f"Found {len(items)} items matching 'product1'"
-        )
+        print_test("Search by URL pattern", all_match, f"Found {len(items)} items matching 'product1'")
         return all_match
     else:
         print_test("Search by URL", False, f"Status: {response.status_code}")
@@ -332,10 +307,7 @@ def test_combined_search_and_sort(token):
     headers = {"Authorization": f"Bearer {token}"}
 
     # Search and sort by price
-    response = requests.get(
-        f"{BASE_URL}/products?search=Product&sort_by=current_price&order=desc",
-        headers=headers
-    )
+    response = requests.get(f"{BASE_URL}/products?search=Product&sort_by=current_price&order=desc", headers=headers)
 
     if response.status_code == 200:
         data = response.json()
@@ -347,12 +319,12 @@ def test_combined_search_and_sort(token):
 
             # Check sorting applied
             prices = [item["current_price"] for item in items]
-            is_descending = all(prices[i] >= prices[i+1] for i in range(len(prices)-1))
+            is_descending = all(prices[i] >= prices[i + 1] for i in range(len(prices) - 1))
 
             print_test(
                 "Combined search and sort",
                 all_match_search and is_descending,
-                f"Found {len(items)} items, sorted descending: {is_descending}"
+                f"Found {len(items)} items, sorted descending: {is_descending}",
             )
             return all_match_search and is_descending
         else:
@@ -370,10 +342,7 @@ def test_empty_search_results(token):
     headers = {"Authorization": f"Bearer {token}"}
 
     # Search for something that doesn't exist
-    response = requests.get(
-        f"{BASE_URL}/products?search=NonExistentProduct12345",
-        headers=headers
-    )
+    response = requests.get(f"{BASE_URL}/products?search=NonExistentProduct12345", headers=headers)
 
     if response.status_code == 200:
         data = response.json()
@@ -385,7 +354,7 @@ def test_empty_search_results(token):
         print_test(
             "Empty search results handled correctly",
             empty_results,
-            f"Items: {len(items)}, Total: {metadata['total_items']}"
+            f"Items: {len(items)}, Total: {metadata['total_items']}",
         )
         return empty_results
     else:
@@ -436,6 +405,7 @@ def main():
     except Exception as e:
         print(f"{RED}Test execution error: {str(e)}{RESET}")
         import traceback
+
         traceback.print_exc()
 
     # Summary

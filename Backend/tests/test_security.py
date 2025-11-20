@@ -2,22 +2,22 @@
 Test script for all security features.
 Run this with: python test_security.py
 """
+
 import requests
-import json
 import time
 
 BASE_URL = "http://localhost:8000/api/v1"
 
 # Colors for terminal output
-GREEN = '\033[92m'
-RED = '\033[91m'
-YELLOW = '\033[93m'
-BLUE = '\033[94m'
-RESET = '\033[0m'
+GREEN = "\033[92m"
+RED = "\033[91m"
+YELLOW = "\033[93m"
+BLUE = "\033[94m"
+RESET = "\033[0m"
 
 
 def print_test(test_name):
-    separator = '=' * 60
+    separator = "=" * 60
     print(f"\n{BLUE}{separator}{RESET}")
     print(f"{BLUE}TEST: {test_name}{RESET}")
     print(f"{BLUE}{separator}{RESET}")
@@ -52,7 +52,7 @@ def test_1_password_strength():
         try:
             response = requests.post(
                 f"{BASE_URL}/auth/register",
-                json={"email": f"test_{int(time.time())}@example.com", "password": password}
+                json={"email": f"test_{int(time.time())}@example.com", "password": password},
             )
             if response.status_code == 400:
                 print_success(f"{description}: Rejected ✓")
@@ -65,7 +65,7 @@ def test_1_password_strength():
     try:
         response = requests.post(
             f"{BASE_URL}/auth/register",
-            json={"email": f"strong_user_{int(time.time())}@example.com", "password": "StrongPass123!"}
+            json={"email": f"strong_user_{int(time.time())}@example.com", "password": "StrongPass123!"},
         )
         if response.status_code == 201:
             print_success("Strong password accepted ✓")
@@ -87,10 +87,7 @@ def test_2_registration_and_verification():
 
     try:
         # Register
-        response = requests.post(
-            f"{BASE_URL}/auth/register",
-            json={"email": email, "password": password}
-        )
+        response = requests.post(f"{BASE_URL}/auth/register", json={"email": email, "password": password})
 
         if response.status_code == 201:
             print_success(f"User registered: {email}")
@@ -117,10 +114,7 @@ def test_3_login_and_tokens():
 
     try:
         # Register
-        reg_response = requests.post(
-            f"{BASE_URL}/auth/register",
-            json={"email": email, "password": password}
-        )
+        reg_response = requests.post(f"{BASE_URL}/auth/register", json={"email": email, "password": password})
 
         if reg_response.status_code != 201:
             print_error(f"Registration failed: {reg_response.json()}")
@@ -129,10 +123,7 @@ def test_3_login_and_tokens():
         print_success(f"User created: {email}")
 
         # Login
-        login_response = requests.post(
-            f"{BASE_URL}/auth/login",
-            json={"email": email, "password": password}
-        )
+        login_response = requests.post(f"{BASE_URL}/auth/login", json={"email": email, "password": password})
 
         if login_response.status_code == 200:
             tokens = login_response.json()
@@ -142,8 +133,7 @@ def test_3_login_and_tokens():
 
             # Test access token
             me_response = requests.get(
-                f"{BASE_URL}/auth/me",
-                headers={"Authorization": f"Bearer {tokens['access_token']}"}
+                f"{BASE_URL}/auth/me", headers={"Authorization": f"Bearer {tokens['access_token']}"}
             )
 
             if me_response.status_code == 200:
@@ -152,10 +142,9 @@ def test_3_login_and_tokens():
                 print_error("Access token invalid")
 
             # Test refresh token
-            if 'refresh_token' in tokens:
+            if "refresh_token" in tokens:
                 refresh_response = requests.post(
-                    f"{BASE_URL}/auth/refresh",
-                    json={"refresh_token": tokens['refresh_token']}
+                    f"{BASE_URL}/auth/refresh", json={"refresh_token": tokens["refresh_token"]}
                 )
 
                 if refresh_response.status_code == 200:
@@ -187,10 +176,10 @@ def test_4_rate_limiting():
     for i in range(10):
         try:
             response = requests.get(f"{BASE_URL}/../../health")
-            print_info(f"Request {i+1}: Status {response.status_code}")
+            print_info(f"Request {i + 1}: Status {response.status_code}")
 
             if response.status_code == 429:
-                print_success(f"Rate limiting triggered after {i+1} requests ✓")
+                print_success(f"Rate limiting triggered after {i + 1} requests ✓")
                 rate_limited = True
                 break
 
@@ -213,10 +202,7 @@ def test_5_password_reset():
 
     try:
         # Register
-        reg_response = requests.post(
-            f"{BASE_URL}/auth/register",
-            json={"email": email, "password": password}
-        )
+        reg_response = requests.post(f"{BASE_URL}/auth/register", json={"email": email, "password": password})
 
         if reg_response.status_code != 201:
             print_error(f"Registration failed: {reg_response.json()}")
@@ -225,10 +211,7 @@ def test_5_password_reset():
         print_success(f"User created: {email}")
 
         # Request password reset
-        reset_request = requests.post(
-            f"{BASE_URL}/auth/forgot-password",
-            json={"email": email}
-        )
+        reset_request = requests.post(f"{BASE_URL}/auth/forgot-password", json={"email": email})
 
         if reset_request.status_code == 200:
             print_success("Password reset requested ✓")
@@ -238,10 +221,7 @@ def test_5_password_reset():
             print_error(f"Password reset request failed: {reset_request.json()}")
 
         # Test with non-existent email (should return same message for security)
-        fake_reset = requests.post(
-            f"{BASE_URL}/auth/forgot-password",
-            json={"email": "nonexistent@example.com"}
-        )
+        fake_reset = requests.post(f"{BASE_URL}/auth/forgot-password", json={"email": "nonexistent@example.com"})
 
         if fake_reset.status_code == 200:
             print_success("Non-existent email handled securely ✓")
@@ -261,10 +241,7 @@ def test_6_duplicate_registration():
 
     try:
         # First registration
-        response1 = requests.post(
-            f"{BASE_URL}/auth/register",
-            json={"email": email, "password": password}
-        )
+        response1 = requests.post(f"{BASE_URL}/auth/register", json={"email": email, "password": password})
 
         if response1.status_code == 201:
             print_success(f"First registration successful: {email}")
@@ -273,10 +250,7 @@ def test_6_duplicate_registration():
             return
 
         # Second registration (should fail)
-        response2 = requests.post(
-            f"{BASE_URL}/auth/register",
-            json={"email": email, "password": password}
-        )
+        response2 = requests.post(f"{BASE_URL}/auth/register", json={"email": email, "password": password})
 
         if response2.status_code == 400:
             print_success("Duplicate email rejected ✓")
@@ -297,16 +271,10 @@ def test_7_invalid_credentials():
 
     try:
         # Register
-        requests.post(
-            f"{BASE_URL}/auth/register",
-            json={"email": email, "password": password}
-        )
+        requests.post(f"{BASE_URL}/auth/register", json={"email": email, "password": password})
 
         # Test wrong password
-        wrong_pass = requests.post(
-            f"{BASE_URL}/auth/login",
-            json={"email": email, "password": "WrongPass123!"}
-        )
+        wrong_pass = requests.post(f"{BASE_URL}/auth/login", json={"email": email, "password": "WrongPass123!"})
 
         if wrong_pass.status_code == 401:
             print_success("Wrong password rejected ✓")
@@ -315,8 +283,7 @@ def test_7_invalid_credentials():
 
         # Test non-existent user
         no_user = requests.post(
-            f"{BASE_URL}/auth/login",
-            json={"email": "nonexistent@example.com", "password": password}
+            f"{BASE_URL}/auth/login", json={"email": "nonexistent@example.com", "password": password}
         )
 
         if no_user.status_code == 401:
@@ -325,10 +292,7 @@ def test_7_invalid_credentials():
             print_error(f"Non-existent user accepted! Status: {no_user.status_code}")
 
         # Test correct credentials
-        correct = requests.post(
-            f"{BASE_URL}/auth/login",
-            json={"email": email, "password": password}
-        )
+        correct = requests.post(f"{BASE_URL}/auth/login", json={"email": email, "password": password})
 
         if correct.status_code == 200:
             print_success("Correct credentials accepted ✓")
@@ -340,7 +304,7 @@ def test_7_invalid_credentials():
 
 
 def main():
-    separator = '=' * 60
+    separator = "=" * 60
     print(f"\n{GREEN}{separator}")
     print("PriceWatch Security Features Test Suite")
     print(f"{separator}{RESET}\n")
@@ -359,7 +323,7 @@ def main():
         test_6_duplicate_registration()
         test_7_invalid_credentials()
 
-        separator = '=' * 60
+        separator = "=" * 60
         print(f"\n{GREEN}{separator}")
         print("All tests completed!")
         print(f"{separator}{RESET}\n")

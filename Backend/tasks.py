@@ -295,11 +295,7 @@ def check_prices_by_frequency(frequency_hours: int):
                         user = db.query(User).filter(User.id == product.user_id).first()
                         if user:
                             # Get user preferences
-                            preferences = (
-                                db.query(UserPreferences)
-                                .filter(UserPreferences.user_id == user.id)
-                                .first()
-                            )
+                            preferences = db.query(UserPreferences).filter(UserPreferences.user_id == user.id).first()
 
                             # Send alert email (respecting user preferences)
                             email_service.send_price_alert(

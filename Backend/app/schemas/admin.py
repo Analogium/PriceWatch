@@ -5,6 +5,7 @@ from typing import Optional, Dict, Any
 
 class GlobalStats(BaseModel):
     """Global system statistics"""
+
     total_users: int
     verified_users: int
     admin_users: int
@@ -21,6 +22,7 @@ class GlobalStats(BaseModel):
 
 class UserStats(BaseModel):
     """Statistics for a specific user"""
+
     user_id: int
     email: str
     is_verified: bool
@@ -37,6 +39,7 @@ class UserStats(BaseModel):
 
 class ScrapingStatsResponse(BaseModel):
     """Scraping statistics response"""
+
     id: int
     site_name: str
     product_id: Optional[int]
@@ -50,6 +53,7 @@ class ScrapingStatsResponse(BaseModel):
 
 class SiteStats(BaseModel):
     """Statistics per site"""
+
     site_name: str
     total_scrapes: int
     successful_scrapes: int
@@ -61,6 +65,7 @@ class SiteStats(BaseModel):
 
 class ExportRequest(BaseModel):
     """Request to export user data"""
+
     user_id: int
     include_products: bool = True
     include_price_history: bool = True
@@ -69,6 +74,7 @@ class ExportRequest(BaseModel):
 
 class ExportResponse(BaseModel):
     """Response with exported data URL or content"""
+
     export_id: str
     created_at: datetime
     file_path: str
@@ -77,6 +83,7 @@ class ExportResponse(BaseModel):
 
 class AdminAction(BaseModel):
     """Log of admin actions"""
+
     admin_id: int
     action_type: str  # delete_user, disable_user, change_role, etc.
     target_user_id: Optional[int] = None

@@ -3,7 +3,7 @@ Unit tests for database configuration and session management.
 """
 
 import pytest
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import Mock, patch
 from sqlalchemy.orm import Session
 
 from app.db.base import get_db, Base

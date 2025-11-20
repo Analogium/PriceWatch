@@ -2,10 +2,11 @@
 Script de test simple pour vérifier que l'API fonctionne correctement.
 Usage: python test_api.py
 """
+
 import requests
-import json
 
 BASE_URL = "http://localhost:8000"
+
 
 def test_health():
     """Test health check endpoint."""
@@ -15,25 +16,21 @@ def test_health():
     print(f"Response: {response.json()}")
     return response.status_code == 200
 
+
 def test_register():
     """Test user registration."""
     print("\n🔍 Test 2: User Registration")
-    data = {
-        "email": "test@example.com",
-        "password": "TestPassword123!"
-    }
+    data = {"email": "test@example.com", "password": "TestPassword123!"}
     response = requests.post(f"{BASE_URL}/api/v1/auth/register", json=data)
     print(f"Status: {response.status_code}")
     print(f"Response: {response.json()}")
     return response.status_code in [200, 201, 400]  # 400 si l'utilisateur existe déjà
 
+
 def test_login():
     """Test user login and get token."""
     print("\n🔍 Test 3: User Login")
-    data = {
-        "email": "test@example.com",
-        "password": "TestPassword123!"
-    }
+    data = {"email": "test@example.com", "password": "TestPassword123!"}
     response = requests.post(f"{BASE_URL}/api/v1/auth/login", json=data)
     print(f"Status: {response.status_code}")
     result = response.json()
@@ -42,6 +39,7 @@ def test_login():
     if response.status_code == 200:
         return result.get("access_token")
     return None
+
 
 def test_get_me(token):
     """Test getting current user info."""
@@ -52,14 +50,12 @@ def test_get_me(token):
     print(f"Response: {response.json()}")
     return response.status_code == 200
 
+
 def test_add_product(token):
     """Test adding a product to track."""
     print("\n🔍 Test 5: Add Product (Amazon example)")
     headers = {"Authorization": f"Bearer {token}"}
-    data = {
-        "url": "https://www.amazon.fr/dp/B0EXAMPLE",
-        "target_price": 199.99
-    }
+    data = {"url": "https://www.amazon.fr/dp/B0EXAMPLE", "target_price": 199.99}
     response = requests.post(f"{BASE_URL}/api/v1/products", json=data, headers=headers)
     print(f"Status: {response.status_code}")
     if response.status_code in [200, 201]:
@@ -69,6 +65,7 @@ def test_add_product(token):
         print(f"Response: {response.text}")
         return None
 
+
 def test_get_products(token):
     """Test getting all products."""
     print("\n🔍 Test 6: Get All Products")
@@ -77,6 +74,7 @@ def test_get_products(token):
     print(f"Status: {response.status_code}")
     print(f"Response: {response.json()}")
     return response.status_code == 200
+
 
 def main():
     """Run all tests."""
@@ -110,6 +108,7 @@ def main():
     print("\n" + "=" * 50)
     print("✅ Tests terminés!")
     print("=" * 50)
+
 
 if __name__ == "__main__":
     try:

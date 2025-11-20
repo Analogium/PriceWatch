@@ -48,7 +48,7 @@ class EmailService:
 
         subject = f"🔔 Baisse de prix détectée sur {product_name}"
 
-        html_content = f"""
+        html_content = """
         <html>
             <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
                 <h2 style="color: #4CAF50;">Bonne nouvelle ! 🎉</h2>
@@ -91,9 +91,9 @@ class EmailService:
         subject = "Vérifiez votre email - PriceWatch"
 
         # Note: In production, use the actual frontend URL
-        verification_url = f"http://localhost:5173/verify-email?token={token}"
+        verification_url = f"http://localhost:5173/verify-email?token={token}"  # noqa: F841
 
-        html_content = f"""
+        html_content = """
         <html>
             <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
                 <h2 style="color: #4CAF50;">Bienvenue sur PriceWatch ! 👋</h2>
@@ -123,9 +123,9 @@ class EmailService:
         subject = "Réinitialisation de mot de passe - PriceWatch"
 
         # Note: In production, use the actual frontend URL
-        reset_url = f"http://localhost:5173/reset-password?token={token}"
+        reset_url = f"http://localhost:5173/reset-password?token={token}"  # noqa: F841
 
-        html_content = f"""
+        html_content = """
         <html>
             <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
                 <h2 style="color: #FF5722;">Réinitialisation de mot de passe</h2>
@@ -204,7 +204,7 @@ class EmailService:
             # Prepare payload based on webhook type
             if webhook_type == "slack":
                 payload = {
-                    "text": f"🔔 Price Drop Alert!",
+                    "text": "🔔 Price Drop Alert!",
                     "blocks": [
                         {
                             "type": "section",

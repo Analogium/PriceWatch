@@ -138,7 +138,7 @@ class PlaywrightScraper:
             # Try to wait for product title with longer timeout
             try:
                 await page.wait_for_selector('#productTitle, h1[id*="title"]', timeout=15000)
-            except:
+            except Exception:
                 # If title not found, might be a CAPTCHA or bot detection page
                 # Try to detect if it's a bot check page
                 captcha_form = await page.query_selector('form[action*="validateCaptcha"]')
@@ -182,7 +182,7 @@ class PlaywrightScraper:
                         if match:
                             price = float(match.group(1).replace(",", "."))
                             break
-                except:
+                except Exception:
                     continue
 
             if not price:
@@ -198,7 +198,7 @@ class PlaywrightScraper:
                     if image_elem:
                         image = await image_elem.get_attribute("src")
                         break
-                except:
+                except Exception:
                     continue
 
             return ProductScrapedData(name=name, price=price, image=image)
@@ -223,7 +223,7 @@ class PlaywrightScraper:
                         name = await title_elem.inner_text()
                         name = name.strip()
                         break
-                except:
+                except Exception:
                     continue
 
             # Extract price
@@ -245,7 +245,7 @@ class PlaywrightScraper:
                         if match:
                             price = float(match.group(1).replace(",", "."))
                             break
-                except:
+                except Exception:
                     continue
 
             # Try meta tag if direct selectors failed
@@ -256,7 +256,7 @@ class PlaywrightScraper:
                         price_content = await price_meta.get_attribute("content")
                         if price_content:
                             price = float(price_content)
-                except:
+                except Exception:
                     pass
 
             if not price:
@@ -272,7 +272,7 @@ class PlaywrightScraper:
                     if image_elem:
                         image = await image_elem.get_attribute("src")
                         break
-                except:
+                except Exception:
                     continue
 
             return ProductScrapedData(name=name, price=price, image=image)
@@ -310,7 +310,7 @@ class PlaywrightScraper:
                         name = await title_elem.inner_text()
                         name = name.strip()
                         break
-                except:
+                except Exception:
                     continue
 
             # Extract price
@@ -342,7 +342,7 @@ class PlaywrightScraper:
                             if match:
                                 price = float(match.group(1).replace(",", "."))
                                 break
-                except:
+                except Exception:
                     continue
 
             if not price:
@@ -363,7 +363,7 @@ class PlaywrightScraper:
                             image = await image_elem.get_attribute("src")
                         if image:
                             break
-                except:
+                except Exception:
                     continue
 
             return ProductScrapedData(name=name, price=price, image=image)

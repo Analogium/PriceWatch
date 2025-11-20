@@ -1,6 +1,6 @@
 import requests
 from bs4 import BeautifulSoup
-from typing import Optional, Callable
+from typing import Optional
 from app.schemas.product import ProductScrapedData
 import re
 import time

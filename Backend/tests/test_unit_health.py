@@ -3,8 +3,8 @@ Unit tests for health check endpoints.
 Tests all health check functionality with mocked dependencies.
 """
 
-from datetime import datetime
-from unittest.mock import MagicMock, Mock, patch
+# datetime not needed
+from unittest.mock import Mock, patch
 
 import pytest
 

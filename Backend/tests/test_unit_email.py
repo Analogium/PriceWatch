@@ -9,8 +9,9 @@ Tests include:
 - Error handling
 - SMTP connection handling
 """
+
 import pytest
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import patch, MagicMock
 from app.services.email import EmailService, email_service
 
 
@@ -19,7 +20,7 @@ class TestEmailService:
 
     def setup_method(self):
         """Set up test fixtures."""
-        with patch('app.services.email.settings') as mock_settings:
+        with patch("app.services.email.settings") as mock_settings:
             mock_settings.SMTP_HOST = "smtp.test.com"
             mock_settings.SMTP_PORT = 587
             mock_settings.SMTP_USER = "test@test.com"
@@ -39,7 +40,7 @@ class TestEmailService:
 
     @pytest.mark.unit
     @pytest.mark.email
-    @patch('app.services.email.smtplib.SMTP')
+    @patch("app.services.email.smtplib.SMTP")
     def test_send_price_alert_success(self, mock_smtp):
         """Test successful price alert email sending."""
         mock_server = MagicMock()
@@ -50,7 +51,7 @@ class TestEmailService:
             product_name="Test Product",
             new_price=99.99,
             old_price=149.99,
-            product_url="https://example.com/product"
+            product_url="https://example.com/product",
         )
 
         # Verify SMTP methods were called
@@ -60,7 +61,7 @@ class TestEmailService:
 
     @pytest.mark.unit
     @pytest.mark.email
-    @patch('app.services.email.smtplib.SMTP')
+    @patch("app.services.email.smtplib.SMTP")
     def test_send_price_alert_content(self, mock_smtp):
         """Test price alert email content generation."""
         mock_server = MagicMock()
@@ -71,7 +72,7 @@ class TestEmailService:
             product_name="Amazing Laptop",
             new_price=799.99,
             old_price=999.99,
-            product_url="https://example.com/laptop"
+            product_url="https://example.com/laptop",
         )
 
         # Get the message that was sent
@@ -89,7 +90,7 @@ class TestEmailService:
         if isinstance(payload, list):
             # Get the HTML part and decode it
             html_part = payload[0]
-            html_content = html_part.get_payload(decode=True).decode('utf-8')
+            html_content = html_part.get_payload(decode=True).decode("utf-8")
         else:
             html_content = str(payload)
 
@@ -100,7 +101,7 @@ class TestEmailService:
 
     @pytest.mark.unit
     @pytest.mark.email
-    @patch('app.services.email.smtplib.SMTP')
+    @patch("app.services.email.smtplib.SMTP")
     def test_send_price_alert_calculates_savings(self, mock_smtp):
         """Test that price alert includes savings calculation."""
         mock_server = MagicMock()
@@ -111,7 +112,7 @@ class TestEmailService:
             product_name="Product",
             new_price=80.00,
             old_price=100.00,
-            product_url="https://example.com/product"
+            product_url="https://example.com/product",
         )
 
         call_args = mock_server.send_message.call_args
@@ -121,7 +122,7 @@ class TestEmailService:
         payload = message.get_payload()
         if isinstance(payload, list):
             html_part = payload[0]
-            html_content = html_part.get_payload(decode=True).decode('utf-8')
+            html_content = html_part.get_payload(decode=True).decode("utf-8")
         else:
             html_content = str(payload)
 
@@ -130,16 +131,13 @@ class TestEmailService:
 
     @pytest.mark.unit
     @pytest.mark.email
-    @patch('app.services.email.smtplib.SMTP')
+    @patch("app.services.email.smtplib.SMTP")
     def test_send_verification_email_success(self, mock_smtp):
         """Test successful verification email sending."""
         mock_server = MagicMock()
         mock_smtp.return_value.__enter__.return_value = mock_server
 
-        self.email_service.send_verification_email(
-            to_email="newuser@example.com",
-            token="test-verification-token-123"
-        )
+        self.email_service.send_verification_email(to_email="newuser@example.com", token="test-verification-token-123")
 
         mock_server.starttls.assert_called_once()
         mock_server.login.assert_called_once()
@@ -147,17 +145,14 @@ class TestEmailService:
 
     @pytest.mark.unit
     @pytest.mark.email
-    @patch('app.services.email.smtplib.SMTP')
+    @patch("app.services.email.smtplib.SMTP")
     def test_send_verification_email_content(self, mock_smtp):
         """Test verification email content."""
         mock_server = MagicMock()
         mock_smtp.return_value.__enter__.return_value = mock_server
 
         token = "verification-token-xyz"
-        self.email_service.send_verification_email(
-            to_email="newuser@example.com",
-            token=token
-        )
+        self.email_service.send_verification_email(to_email="newuser@example.com", token=token)
 
         call_args = mock_server.send_message.call_args
         message = call_args[0][0]
@@ -169,7 +164,7 @@ class TestEmailService:
         payload = message.get_payload()
         if isinstance(payload, list):
             html_part = payload[0]
-            html_content = html_part.get_payload(decode=True).decode('utf-8')
+            html_content = html_part.get_payload(decode=True).decode("utf-8")
         else:
             html_content = str(payload)
 
@@ -177,16 +172,13 @@ class TestEmailService:
 
     @pytest.mark.unit
     @pytest.mark.email
-    @patch('app.services.email.smtplib.SMTP')
+    @patch("app.services.email.smtplib.SMTP")
     def test_send_password_reset_email_success(self, mock_smtp):
         """Test successful password reset email sending."""
         mock_server = MagicMock()
         mock_smtp.return_value.__enter__.return_value = mock_server
 
-        self.email_service.send_password_reset_email(
-            to_email="user@example.com",
-            token="reset-token-abc"
-        )
+        self.email_service.send_password_reset_email(to_email="user@example.com", token="reset-token-abc")
 
         mock_server.starttls.assert_called_once()
         mock_server.login.assert_called_once()
@@ -194,17 +186,14 @@ class TestEmailService:
 
     @pytest.mark.unit
     @pytest.mark.email
-    @patch('app.services.email.smtplib.SMTP')
+    @patch("app.services.email.smtplib.SMTP")
     def test_send_password_reset_email_content(self, mock_smtp):
         """Test password reset email content."""
         mock_server = MagicMock()
         mock_smtp.return_value.__enter__.return_value = mock_server
 
         token = "reset-token-123"
-        self.email_service.send_password_reset_email(
-            to_email="user@example.com",
-            token=token
-        )
+        self.email_service.send_password_reset_email(to_email="user@example.com", token=token)
 
         call_args = mock_server.send_message.call_args
         message = call_args[0][0]
@@ -216,7 +205,7 @@ class TestEmailService:
         payload = message.get_payload()
         if isinstance(payload, list):
             html_part = payload[0]
-            html_content = html_part.get_payload(decode=True).decode('utf-8')
+            html_content = html_part.get_payload(decode=True).decode("utf-8")
         else:
             html_content = str(payload)
 
@@ -225,7 +214,7 @@ class TestEmailService:
 
     @pytest.mark.unit
     @pytest.mark.email
-    @patch('app.services.email.smtplib.SMTP')
+    @patch("app.services.email.smtplib.SMTP")
     def test_send_email_smtp_error(self, mock_smtp):
         """Test email sending with SMTP error."""
         mock_smtp.return_value.__enter__.side_effect = Exception("SMTP connection failed")
@@ -236,14 +225,14 @@ class TestEmailService:
                 product_name="Product",
                 new_price=99.99,
                 old_price=149.99,
-                product_url="https://example.com/product"
+                product_url="https://example.com/product",
             )
 
         assert "SMTP connection failed" in str(exc_info.value)
 
     @pytest.mark.unit
     @pytest.mark.email
-    @patch('app.services.email.smtplib.SMTP')
+    @patch("app.services.email.smtplib.SMTP")
     def test_send_email_authentication_error(self, mock_smtp):
         """Test email sending with authentication error."""
         mock_server = MagicMock()
@@ -256,12 +245,12 @@ class TestEmailService:
                 product_name="Product",
                 new_price=99.99,
                 old_price=149.99,
-                product_url="https://example.com/product"
+                product_url="https://example.com/product",
             )
 
     @pytest.mark.unit
     @pytest.mark.email
-    @patch('app.services.email.smtplib.SMTP')
+    @patch("app.services.email.smtplib.SMTP")
     def test_send_email_starttls_called(self, mock_smtp):
         """Test that STARTTLS is called for secure connection."""
         mock_server = MagicMock()
@@ -272,7 +261,7 @@ class TestEmailService:
             product_name="Product",
             new_price=99.99,
             old_price=149.99,
-            product_url="https://example.com/product"
+            product_url="https://example.com/product",
         )
 
         # Verify STARTTLS is called before login
@@ -281,7 +270,7 @@ class TestEmailService:
 
     @pytest.mark.unit
     @pytest.mark.email
-    @patch('app.services.email.smtplib.SMTP')
+    @patch("app.services.email.smtplib.SMTP")
     def test_multiple_emails_sent(self, mock_smtp):
         """Test sending multiple emails in sequence."""
         mock_server = MagicMock()
@@ -293,20 +282,14 @@ class TestEmailService:
             product_name="Product 1",
             new_price=50.00,
             old_price=60.00,
-            product_url="https://example.com/product1"
+            product_url="https://example.com/product1",
         )
 
         # Send verification email
-        self.email_service.send_verification_email(
-            to_email="user2@example.com",
-            token="token123"
-        )
+        self.email_service.send_verification_email(to_email="user2@example.com", token="token123")
 
         # Send password reset
-        self.email_service.send_password_reset_email(
-            to_email="user3@example.com",
-            token="reset123"
-        )
+        self.email_service.send_password_reset_email(to_email="user3@example.com", token="reset123")
 
         # All three should have been sent
         assert mock_server.send_message.call_count == 3
@@ -319,7 +302,7 @@ class TestEmailService:
 
     @pytest.mark.unit
     @pytest.mark.email
-    @patch('app.services.email.smtplib.SMTP')
+    @patch("app.services.email.smtplib.SMTP")
     def test_send_email_generic_exception(self, mock_smtp):
         """Test handling of generic exceptions during email send."""
         mock_smtp.side_effect = Exception("Unexpected error")

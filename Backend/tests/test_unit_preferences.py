@@ -12,10 +12,8 @@ Tests include:
 
 import pytest
 from unittest.mock import Mock, patch, MagicMock
-from fastapi import HTTPException
 from app.models.user_preferences import UserPreferences
-from app.models.user import User
-from app.schemas.user_preferences import UserPreferencesCreate, UserPreferencesUpdate, UserPreferencesResponse
+from app.schemas.user_preferences import UserPreferencesCreate, UserPreferencesUpdate
 
 
 class TestUserPreferencesModel:

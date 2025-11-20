@@ -4,11 +4,12 @@ Tests the product check frequency feature (6h, 12h, 24h).
 """
 
 import pytest
+
+from app.schemas.product import ProductCreate, ProductUpdate
 from unittest.mock import Mock, patch, MagicMock
 from datetime import datetime, timedelta
 from pydantic import ValidationError
 
-from app.schemas.product import ProductCreate, ProductUpdate, ProductResponse
 from app.models.product import Product
 
 
@@ -18,46 +19,29 @@ class TestCheckFrequencyValidation:
 
     def test_product_create_default_frequency(self):
         """Test that ProductCreate has default check_frequency of 24 hours."""
-        product = ProductCreate(
-            url="https://amazon.fr/test",
-            target_price=100.0
-        )
+        product = ProductCreate(url="https://amazon.fr/test", target_price=100.0)
         assert product.check_frequency == 24
 
     def test_product_create_valid_frequency_6h(self):
         """Test that ProductCreate accepts 6 hours as valid frequency."""
-        product = ProductCreate(
-            url="https://amazon.fr/test",
-            target_price=100.0,
-            check_frequency=6
-        )
+        product = ProductCreate(url="https://amazon.fr/test", target_price=100.0, check_frequency=6)
         assert product.check_frequency == 6
 
     def test_product_create_valid_frequency_12h(self):
         """Test that ProductCreate accepts 12 hours as valid frequency."""
-        product = ProductCreate(
-            url="https://amazon.fr/test",
-            target_price=100.0,
-            check_frequency=12
-        )
+        product = ProductCreate(url="https://amazon.fr/test", target_price=100.0, check_frequency=12)
         assert product.check_frequency == 12
 
     def test_product_create_valid_frequency_24h(self):
         """Test that ProductCreate accepts 24 hours as valid frequency."""
-        product = ProductCreate(
-            url="https://amazon.fr/test",
-            target_price=100.0,
-            check_frequency=24
-        )
+        product = ProductCreate(url="https://amazon.fr/test", target_price=100.0, check_frequency=24)
         assert product.check_frequency == 24
 
     def test_product_create_invalid_frequency(self):
         """Test that ProductCreate rejects invalid check_frequency values."""
         with pytest.raises(ValidationError) as exc_info:
             ProductCreate(
-                url="https://amazon.fr/test",
-                target_price=100.0,
-                check_frequency=48  # Invalid: not in [6, 12, 24]
+                url="https://amazon.fr/test", target_price=100.0, check_frequency=48  # Invalid: not in [6, 12, 24]
             )
 
         assert "check_frequency must be 6, 12, or 24 hours" in str(exc_info.value)
@@ -85,10 +69,10 @@ class TestCheckFrequencyValidation:
 class TestCheckPricesByFrequency:
     """Test the check_prices_by_frequency Celery task."""
 
-    @patch('tasks.SessionLocal')
-    @patch('tasks.scraper')
-    @patch('tasks.price_history_service')
-    @patch('tasks.logger')
+    @patch("tasks.SessionLocal")
+    @patch("tasks.scraper")
+    @patch("tasks.price_history_service")
+    @patch("tasks.logger")
     def test_check_prices_by_frequency_filters_by_frequency(
         self, mock_logger, mock_price_service, mock_scraper, mock_session_local
     ):
@@ -112,12 +96,12 @@ class TestCheckPricesByFrequency:
         assert mock_db.query.called
         assert mock_query.filter.called
 
-    @patch('tasks.SessionLocal')
-    @patch('tasks.scrape_products_parallel')
-    @patch('tasks.price_history_service')
-    @patch('tasks.email_service')
-    @patch('tasks.logger')
-    @patch('tasks.settings')
+    @patch("tasks.SessionLocal")
+    @patch("tasks.scrape_products_parallel")
+    @patch("tasks.price_history_service")
+    @patch("tasks.email_service")
+    @patch("tasks.logger")
+    @patch("tasks.settings")
     def test_check_prices_by_frequency_respects_last_checked(
         self, mock_settings, mock_logger, mock_email, mock_price_service, mock_scrape_parallel, mock_session_local
     ):
@@ -168,11 +152,11 @@ class TestCheckPricesByFrequency:
         assert len(batch_products) == 1
         assert batch_products[0] is old_product
 
-    @patch('tasks.SessionLocal')
-    @patch('tasks.scraper')
-    @patch('tasks.price_history_service')
-    @patch('tasks.email_service')
-    @patch('tasks.logger')
+    @patch("tasks.SessionLocal")
+    @patch("tasks.scraper")
+    @patch("tasks.price_history_service")
+    @patch("tasks.email_service")
+    @patch("tasks.logger")
     def test_check_prices_by_frequency_sends_alert(
         self, mock_logger, mock_email, mock_price_service, mock_scraper, mock_session_local
     ):
@@ -243,12 +227,7 @@ class TestCheckPricesByFrequency:
 
         # Verify email was sent
         mock_email.send_price_alert.assert_called_once_with(
-            "test@example.com",
-            "Test Product",
-            90.0,
-            150.0,
-            "https://amazon.fr/test",
-            user_preferences=mock_preferences
+            "test@example.com", "Test Product", 90.0, 150.0, "https://amazon.fr/test", user_preferences=mock_preferences
         )
 
 
@@ -261,10 +240,11 @@ class TestProductModelFrequency:
         from app.models.product import Product
 
         # Check that the column exists
-        assert hasattr(Product, 'check_frequency')
+        assert hasattr(Product, "check_frequency")
 
         # Check that it's a SQLAlchemy Column
         from sqlalchemy.orm import InstrumentedAttribute
+
         assert isinstance(Product.check_frequency, InstrumentedAttribute)
 
     def test_product_default_frequency(self):
@@ -272,5 +252,5 @@ class TestProductModelFrequency:
         from app.models.product import Product
 
         # Get the column default
-        column = Product.__table__.columns['check_frequency']
+        column = Product.__table__.columns["check_frequency"]
         assert column.default.arg == 24

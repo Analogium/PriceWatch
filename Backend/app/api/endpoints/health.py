@@ -7,7 +7,6 @@ from datetime import datetime
 from typing import Any, Dict
 
 import redis
-from celery.app.control import Control
 from fastapi import APIRouter, Depends
 from sqlalchemy import text
 from sqlalchemy.orm import Session
@@ -91,7 +90,7 @@ def check_redis() -> Dict[str, Any]:
 def check_celery() -> Dict[str, Any]:
     """Check Celery worker status and queue info."""
     try:
-        control = Control(celery_app)
+        # Control is accessed via celery_app.control
 
         # Get active workers (with timeout)
         inspect = celery_app.control.inspect(timeout=2.0)

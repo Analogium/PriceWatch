@@ -10,6 +10,7 @@ Tests include:
 - History retrieval and ordering
 - Access control and security
 """
+
 import requests
 import time
 import psycopg2
@@ -21,20 +22,20 @@ DB_CONFIG = {
     "port": 5432,
     "database": "pricewatch",
     "user": "pricewatch",
-    "password": "pricewatch"
+    "password": "pricewatch",
 }
 
 # ANSI color codes
-BLUE = '\033[94m'
-GREEN = '\033[92m'
-YELLOW = '\033[93m'
-RED = '\033[91m'
-RESET = '\033[0m'
+BLUE = "\033[94m"
+GREEN = "\033[92m"
+YELLOW = "\033[93m"
+RED = "\033[91m"
+RESET = "\033[0m"
 
 
 def print_header(message):
     """Print a formatted header."""
-    separator = '=' * 60
+    separator = "=" * 60
     newline = "\n"
     print(f"{newline}{BLUE}{separator}{RESET}")
     print(f"{BLUE}{message}{RESET}")
@@ -91,22 +92,34 @@ def create_test_product_with_history(token):
         user_id = user_response.json()["id"]
 
         # Insert test product
-        cursor.execute("""
+        cursor.execute(
+            """
             INSERT INTO products (user_id, name, url, image, current_price, target_price, last_checked, created_at)
             VALUES (%s, %s, %s, %s, %s, %s, NOW(), NOW())
             RETURNING id
-        """, (user_id, "Test Product for History", "https://example.com/test",
-              "https://example.com/image.jpg", 199.99, 150.0))
+        """,
+            (
+                user_id,
+                "Test Product for History",
+                "https://example.com/test",
+                "https://example.com/image.jpg",
+                199.99,
+                150.0,
+            ),
+        )
 
         product_id = cursor.fetchone()[0]
 
         # Insert multiple price history records
         prices = [199.99, 189.99, 195.50, 175.00, 180.25]
         for i, price in enumerate(prices):
-            cursor.execute("""
+            cursor.execute(
+                """
                 INSERT INTO price_history (product_id, price, recorded_at)
                 VALUES (%s, %s, NOW() - INTERVAL '%s days')
-            """, (product_id, price, len(prices) - i))
+            """,
+                (product_id, price, len(prices) - i),
+            )
 
         conn.commit()
         cursor.close()
@@ -138,7 +151,7 @@ def test_price_history_retrieval(token, product_id):
             print_test(
                 "Price history retrieval",
                 has_required_fields,
-                f"Records: {len(history)}, All required fields present: {has_required_fields}"
+                f"Records: {len(history)}, All required fields present: {has_required_fields}",
             )
             return has_required_fields
         else:
@@ -166,15 +179,11 @@ def test_price_history_ordering(token, product_id):
             print_test(
                 "Price history ordering (newest first)",
                 is_ordered,
-                f"Records: {len(history)}, Properly ordered: {is_ordered}"
+                f"Records: {len(history)}, Properly ordered: {is_ordered}",
             )
             return is_ordered
         else:
-            print_test(
-                "Price history ordering",
-                True,
-                f"Only {len(history)} record(s), ordering not applicable"
-            )
+            print_test("Price history ordering", True, f"Only {len(history)} record(s), ordering not applicable")
             return True
     else:
         print_test("Price history ordering", False, f"Status: {response.status_code}")
@@ -194,11 +203,7 @@ def test_price_history_limit(token, product_id):
         history = response.json()
         correct_limit = len(history) <= 3
 
-        print_test(
-            "Price history with limit=3",
-            correct_limit,
-            f"Requested: 3, Received: {len(history)}"
-        )
+        print_test("Price history with limit=3", correct_limit, f"Requested: 3, Received: {len(history)}")
         return correct_limit
     else:
         print_test("Price history limit", False, f"Status: {response.status_code}")
@@ -214,20 +219,17 @@ def test_price_statistics(token, product_id):
 
     if response.status_code == 200:
         stats = response.json()
-        required_fields = [
-            "current_price", "lowest_price", "highest_price",
-            "average_price", "total_records"
-        ]
+        required_fields = ["current_price", "lowest_price", "highest_price", "average_price", "total_records"]
 
         has_all_fields = all(field in stats for field in required_fields)
 
         if has_all_fields:
             # Check logical consistency
             logical = (
-                stats["lowest_price"] <= stats["current_price"] and
-                stats["current_price"] <= stats["highest_price"] and
-                stats["lowest_price"] <= stats["average_price"] <= stats["highest_price"] and
-                stats["total_records"] > 0
+                stats["lowest_price"] <= stats["current_price"]
+                and stats["current_price"] <= stats["highest_price"]
+                and stats["lowest_price"] <= stats["average_price"] <= stats["highest_price"]
+                and stats["total_records"] > 0
             )
 
             details = (
@@ -239,11 +241,7 @@ def test_price_statistics(token, product_id):
             print_test("Price statistics calculation", logical, details)
             return logical
         else:
-            print_test(
-                "Price statistics calculation",
-                False,
-                f"Missing fields. Expected: {required_fields}"
-            )
+            print_test("Price statistics calculation", False, f"Missing fields. Expected: {required_fields}")
             return False
     else:
         print_test("Price statistics calculation", False, f"Status: {response.status_code}")
@@ -265,18 +263,10 @@ def test_price_change_percentage(token, product_id):
             percentage = stats["price_change_percentage"]
             is_valid = isinstance(percentage, (int, float))
 
-            print_test(
-                "Price change percentage present",
-                is_valid,
-                f"Value: {percentage}%"
-            )
+            print_test("Price change percentage present", is_valid, f"Value: {percentage}%")
             return is_valid
         else:
-            print_test(
-                "Price change percentage",
-                has_percentage,
-                "Field present but may be null (acceptable)"
-            )
+            print_test("Price change percentage", has_percentage, "Field present but may be null (acceptable)")
             return has_percentage
     else:
         print_test("Price change percentage", False, f"Status: {response.status_code}")
@@ -324,11 +314,7 @@ def test_stats_for_nonexistent_product(token):
     response = requests.get(f"{BASE_URL}/products/999999/history/stats", headers=headers)
 
     not_found = response.status_code == 404
-    print_test(
-        "Statistics for non-existent product returns 404",
-        not_found,
-        f"Status: {response.status_code}"
-    )
+    print_test("Statistics for non-existent product returns 404", not_found, f"Status: {response.status_code}")
 
     return not_found
 
@@ -373,6 +359,7 @@ def main():
     except Exception as e:
         print(f"{RED}Test execution error: {str(e)}{RESET}")
         import traceback
+
         traceback.print_exc()
 
     # Summary
