@@ -1,18 +1,20 @@
 """
 Unit tests for admin service and endpoints
 """
+
+from datetime import datetime
+from unittest.mock import Mock, patch
+
 import pytest
-from unittest.mock import Mock, patch, MagicMock
-from datetime import datetime, timedelta
 from sqlalchemy.orm import Session
 
-from app.services.admin import AdminService
-from app.models.user import User
-from app.models.product import Product
 from app.models.price_history import PriceHistory
+from app.models.product import Product
 from app.models.scraping_stats import ScrapingStats
+from app.models.user import User
 from app.models.user_preferences import UserPreferences
-from app.schemas.admin import GlobalStats, UserStats, SiteStats
+from app.schemas.admin import GlobalStats, SiteStats, UserStats
+from app.services.admin import AdminService
 
 
 @pytest.mark.unit
@@ -74,7 +76,7 @@ class TestAdminService:
         db.query.side_effect = mock_query_side_effect
 
         # Mock stats by site
-        with patch.object(AdminService, '_get_stats_by_site', return_value={}):
+        with patch.object(AdminService, "_get_stats_by_site", return_value={}):
             stats = AdminService.get_global_stats(db)
 
         assert isinstance(stats, GlobalStats)
@@ -156,8 +158,8 @@ class TestAdminService:
         mock_join.filter.return_value.scalar.return_value = 10
 
         mock_filter.scalar.side_effect = [
-            5,   # total_products
-            4,   # active_products
+            5,  # total_products
+            4,  # active_products
         ]
 
         stats = AdminService.get_user_stats(db, 1)
@@ -204,7 +206,7 @@ class TestAdminService:
         mock_limit.all.return_value = mock_users
 
         # Mock get_user_stats calls
-        with patch.object(AdminService, 'get_user_stats') as mock_get_stats:
+        with patch.object(AdminService, "get_user_stats") as mock_get_stats:
             mock_stats = [
                 Mock(spec=UserStats, user_id=1),
                 Mock(spec=UserStats, user_id=2),
@@ -231,7 +233,7 @@ class TestAdminService:
                 status="success",
                 response_time=1.2,
                 error_message=None,
-                created_at=datetime.utcnow()
+                created_at=datetime.utcnow(),
             ),
             Mock(
                 spec=ScrapingStats,
@@ -241,7 +243,7 @@ class TestAdminService:
                 status="failure",
                 response_time=None,
                 error_message="Timeout",
-                created_at=datetime.utcnow()
+                created_at=datetime.utcnow(),
             ),
         ]
 
@@ -283,19 +285,12 @@ class TestAdminService:
                 target_price=89.99,
                 is_available=True,
                 last_checked=datetime.utcnow(),
-                created_at=datetime.utcnow()
+                created_at=datetime.utcnow(),
             )
         ]
 
         # Mock price history
-        mock_history = [
-            Mock(
-                spec=PriceHistory,
-                product_id=1,
-                price=99.99,
-                recorded_at=datetime.utcnow()
-            )
-        ]
+        mock_history = [Mock(spec=PriceHistory, product_id=1, price=99.99, recorded_at=datetime.utcnow())]
 
         # Mock preferences
         mock_prefs = Mock(
@@ -304,7 +299,7 @@ class TestAdminService:
             webhook_notifications=False,
             price_drop_alerts=True,
             weekly_summary=True,
-            availability_alerts=True
+            availability_alerts=True,
         )
 
         # Setup query mocks
@@ -329,10 +324,7 @@ class TestAdminService:
         mock_order.all.return_value = mock_history
 
         csv_content = AdminService.export_user_data_csv(
-            db, 1,
-            include_products=True,
-            include_price_history=True,
-            include_preferences=True
+            db, 1, include_products=True, include_price_history=True, include_preferences=True
         )
 
         assert "USER INFORMATION" in csv_content
@@ -378,19 +370,12 @@ class TestAdminService:
                 target_price=89.99,
                 is_available=True,
                 last_checked=datetime.utcnow(),
-                created_at=datetime.utcnow()
+                created_at=datetime.utcnow(),
             )
         ]
 
         # Mock price history
-        mock_history = [
-            Mock(
-                spec=PriceHistory,
-                product_id=1,
-                price=99.99,
-                recorded_at=datetime.utcnow()
-            )
-        ]
+        mock_history = [Mock(spec=PriceHistory, product_id=1, price=99.99, recorded_at=datetime.utcnow())]
 
         # Mock preferences
         mock_prefs = Mock(
@@ -402,7 +387,7 @@ class TestAdminService:
             availability_alerts=True,
             notification_frequency="daily",
             webhook_url=None,
-            webhook_type=None
+            webhook_type=None,
         )
 
         # Setup query mocks
@@ -427,10 +412,7 @@ class TestAdminService:
         mock_order.all.return_value = mock_history
 
         json_data = AdminService.export_user_data_json(
-            db, 1,
-            include_products=True,
-            include_price_history=True,
-            include_preferences=True
+            db, 1, include_products=True, include_price_history=True, include_preferences=True
         )
 
         assert "user" in json_data
@@ -460,10 +442,7 @@ class TestAdminService:
         mock_filter.first.return_value = mock_user
 
         json_data = AdminService.export_user_data_json(
-            db, 1,
-            include_products=False,
-            include_price_history=False,
-            include_preferences=False
+            db, 1, include_products=False, include_price_history=False, include_preferences=False
         )
 
         assert "user" in json_data
@@ -482,16 +461,11 @@ class TestAdminService:
         db.commit.return_value = None
         db.refresh.return_value = None
 
-        with patch('app.services.admin.ScrapingStats') as MockScrapingStats:
+        with patch("app.services.admin.ScrapingStats") as MockScrapingStats:
             MockScrapingStats.return_value = mock_stat
 
             stat = AdminService.log_scraping_stat(
-                db,
-                site_name="amazon",
-                status="success",
-                product_id=1,
-                response_time=1.5,
-                error_message=None
+                db, site_name="amazon", status="success", product_id=1, response_time=1.5, error_message=None
             )
 
         db.add.assert_called_once()
@@ -508,7 +482,7 @@ class TestAdminService:
         db.commit.return_value = None
         db.refresh.return_value = None
 
-        with patch('app.services.admin.ScrapingStats') as MockScrapingStats:
+        with patch("app.services.admin.ScrapingStats") as MockScrapingStats:
             MockScrapingStats.return_value = mock_stat
 
             stat = AdminService.log_scraping_stat(
@@ -517,7 +491,7 @@ class TestAdminService:
                 status="failure",
                 product_id=2,
                 response_time=None,
-                error_message="Connection timeout"
+                error_message="Connection timeout",
             )
 
         db.add.assert_called_once()
@@ -565,12 +539,8 @@ class TestAdminService:
         """Test getting stats for all sites"""
         db = Mock(spec=Session)
 
-        with patch.object(AdminService, 'get_site_stats') as mock_get_site:
-            mock_site_stats = Mock(
-                total_scrapes=100,
-                success_rate=95.0,
-                average_response_time=1.2
-            )
+        with patch.object(AdminService, "get_site_stats") as mock_get_site:
+            mock_site_stats = Mock(total_scrapes=100, success_rate=95.0, average_response_time=1.2)
             mock_get_site.return_value = mock_site_stats
 
             stats = AdminService._get_stats_by_site(db)
@@ -601,8 +571,9 @@ class TestAdminDependencies:
 
     def test_get_current_admin_user_not_admin(self):
         """Test admin dependency with non-admin user raises 403"""
-        from app.api.dependencies import get_current_admin_user
         from fastapi import HTTPException
+
+        from app.api.dependencies import get_current_admin_user
 
         mock_user = Mock(spec=User)
         mock_user.is_admin = False

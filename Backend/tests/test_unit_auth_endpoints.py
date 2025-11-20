@@ -3,13 +3,13 @@ Unit tests for authentication endpoints.
 Tests registration, login, token refresh, password reset, and verification endpoints.
 """
 
+from datetime import datetime
+from unittest.mock import Mock, patch
+
 import pytest
-from unittest.mock import Mock, MagicMock, patch, AsyncMock
 from fastapi import HTTPException, Request
 from sqlalchemy.orm import Session
-from datetime import datetime, timedelta
 
-from app.api.endpoints.auth import router
 from app.models.user import User
 from app.schemas.user import UserCreate, UserLogin
 
@@ -49,9 +49,11 @@ class TestRegisterEndpoint:
         from app.api.endpoints.auth import register
 
         # Mock the database operations
-        with patch.object(mock_db, "add") as mock_add, patch.object(mock_db, "commit") as mock_commit, patch.object(
-            mock_db, "refresh"
-        ) as mock_refresh:
+        with (
+            patch.object(mock_db, "add") as mock_add,
+            patch.object(mock_db, "commit") as mock_commit,
+            patch.object(mock_db, "refresh") as mock_refresh,
+        ):
 
             def refresh_user(user):
                 user.id = 1
@@ -135,9 +137,11 @@ class TestRegisterEndpoint:
 
         from app.api.endpoints.auth import register
 
-        with patch.object(mock_db, "add") as mock_add, patch.object(mock_db, "commit") as mock_commit, patch.object(
-            mock_db, "refresh"
-        ) as mock_refresh:
+        with (
+            patch.object(mock_db, "add") as mock_add,
+            patch.object(mock_db, "commit") as mock_commit,
+            patch.object(mock_db, "refresh") as mock_refresh,
+        ):
 
             def refresh_user(user):
                 user.id = 1

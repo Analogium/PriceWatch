@@ -1,26 +1,28 @@
-from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks, Query
-from sqlalchemy.orm import Session
-from sqlalchemy import or_, func
-from typing import List, Optional
 from datetime import datetime
 from math import ceil
+from typing import List, Optional
+
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query, status
+from sqlalchemy import func, or_
+from sqlalchemy.orm import Session
+
+from app.api.dependencies import get_current_user
 from app.db.base import get_db
-from app.schemas.product import (
-    ProductCreate,
-    ProductUpdate,
-    ProductResponse,
-    PaginatedProductsResponse,
-    PaginationMetadata,
-    ProductSortBy,
-    SortOrder,
-)
-from app.schemas.price_history import PriceHistoryResponse, PriceHistoryStats
 from app.models.product import Product
 from app.models.user import User
-from app.api.dependencies import get_current_user
-from app.services.scraper import scraper
+from app.schemas.price_history import PriceHistoryResponse, PriceHistoryStats
+from app.schemas.product import (
+    PaginatedProductsResponse,
+    PaginationMetadata,
+    ProductCreate,
+    ProductResponse,
+    ProductSortBy,
+    ProductUpdate,
+    SortOrder,
+)
 from app.services.email import email_service
 from app.services.price_history import price_history_service
+from app.services.scraper import scraper
 
 router = APIRouter()
 
@@ -80,7 +82,10 @@ def get_products(
         has_previous=page > 1,
     )
 
-    return PaginatedProductsResponse(items=products, metadata=metadata)
+    # Convert ORM models to Pydantic response models
+    product_responses = [ProductResponse.model_validate(p) for p in products]
+
+    return PaginatedProductsResponse(items=product_responses, metadata=metadata)
 
 
 @router.post("", response_model=ProductResponse, status_code=status.HTTP_201_CREATED)

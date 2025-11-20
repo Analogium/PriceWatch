@@ -1,31 +1,33 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Request
+from datetime import datetime, timedelta
+
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.orm import Session
-from datetime import timedelta, datetime
-from app.db.base import get_db
-from app.schemas.user import (
-    UserCreate,
-    UserLogin,
-    UserResponse,
-    Token,
-    RefreshTokenRequest,
-    PasswordResetRequest,
-    PasswordResetConfirm,
-    EmailVerification,
-)
-from app.models.user import User
+
+from app.api.dependencies import get_current_user
+from app.core.config import settings
+from app.core.rate_limit import rate_limiter
 from app.core.security import (
-    get_password_hash,
-    verify_password,
     create_access_token,
     create_refresh_token,
     decode_access_token,
-    validate_password_strength,
-    generate_verification_token,
     generate_reset_token,
+    generate_verification_token,
+    get_password_hash,
+    validate_password_strength,
+    verify_password,
 )
-from app.core.config import settings
-from app.api.dependencies import get_current_user
-from app.core.rate_limit import rate_limiter
+from app.db.base import get_db
+from app.models.user import User
+from app.schemas.user import (
+    EmailVerification,
+    PasswordResetConfirm,
+    PasswordResetRequest,
+    RefreshTokenRequest,
+    Token,
+    UserCreate,
+    UserLogin,
+    UserResponse,
+)
 from app.services.email import email_service
 
 router = APIRouter()
@@ -181,7 +183,7 @@ async def reset_password(request: Request, reset_data: PasswordResetConfirm, db:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid reset token")
 
     # Check if token expired
-    if user.reset_token_expires < datetime.utcnow():
+    if user.reset_token_expires is None or user.reset_token_expires < datetime.utcnow():
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Reset token has expired")
 
     # Update password

@@ -8,12 +8,15 @@ Tests include:
 - Checking if price should be recorded
 - Edge cases and error handling
 """
-import pytest
-from unittest.mock import Mock, MagicMock, patch
+
 from datetime import datetime, timedelta
-from app.services.price_history import PriceHistoryService, price_history_service
+from unittest.mock import MagicMock, Mock
+
+import pytest
+
 from app.models.price_history import PriceHistory
 from app.models.product import Product
+from app.services.price_history import PriceHistoryService, price_history_service
 
 
 class TestPriceHistoryService:
@@ -148,7 +151,7 @@ class TestPriceHistoryService:
             current_price=90.00,
             target_price=80.00,
             last_checked=datetime.utcnow(),
-            created_at=datetime.utcnow()
+            created_at=datetime.utcnow(),
         )
 
         # Mock statistics query result
@@ -191,13 +194,13 @@ class TestPriceHistoryService:
         result = self.service.get_price_statistics(self.mock_db, product_id)
 
         assert result is not None
-        assert result['current_price'] == 90.00
-        assert result['lowest_price'] == 85.00
-        assert result['highest_price'] == 120.00
-        assert result['average_price'] == 102.50
-        assert result['total_records'] == 5
+        assert result["current_price"] == 90.00
+        assert result["lowest_price"] == 85.00
+        assert result["highest_price"] == 120.00
+        assert result["average_price"] == 102.50
+        assert result["total_records"] == 5
         # Price dropped from 100 to 90: -10%
-        assert result['price_change_percentage'] == -10.0
+        assert result["price_change_percentage"] == -10.0
 
     @pytest.mark.unit
     def test_get_price_statistics_no_history(self):
@@ -212,7 +215,7 @@ class TestPriceHistoryService:
             current_price=99.99,
             target_price=80.00,
             last_checked=datetime.utcnow(),
-            created_at=datetime.utcnow()
+            created_at=datetime.utcnow(),
         )
 
         mock_stats = Mock()
@@ -237,12 +240,12 @@ class TestPriceHistoryService:
         result = self.service.get_price_statistics(self.mock_db, product_id)
 
         assert result is not None
-        assert result['current_price'] == 99.99
-        assert result['lowest_price'] == 99.99
-        assert result['highest_price'] == 99.99
-        assert result['average_price'] == 99.99
-        assert result['price_change_percentage'] == 0.0
-        assert result['total_records'] == 0
+        assert result["current_price"] == 99.99
+        assert result["lowest_price"] == 99.99
+        assert result["highest_price"] == 99.99
+        assert result["average_price"] == 99.99
+        assert result["price_change_percentage"] == 0.0
+        assert result["total_records"] == 0
 
     @pytest.mark.unit
     def test_get_price_statistics_product_not_found(self):
@@ -282,12 +285,7 @@ class TestPriceHistoryService:
         product_id = 1
         new_price = 89.99
 
-        mock_last_record = PriceHistory(
-            id=1,
-            product_id=1,
-            price=99.99,
-            recorded_at=datetime.utcnow()
-        )
+        mock_last_record = PriceHistory(id=1, product_id=1, price=99.99, recorded_at=datetime.utcnow())
 
         mock_query = MagicMock()
         mock_query.filter.return_value = mock_query
@@ -306,12 +304,7 @@ class TestPriceHistoryService:
         product_id = 1
         new_price = 99.99
 
-        mock_last_record = PriceHistory(
-            id=1,
-            product_id=1,
-            price=99.99,
-            recorded_at=datetime.utcnow()
-        )
+        mock_last_record = PriceHistory(id=1, product_id=1, price=99.99, recorded_at=datetime.utcnow())
 
         mock_query = MagicMock()
         mock_query.filter.return_value = mock_query
@@ -331,9 +324,14 @@ class TestPriceHistoryService:
         product_id = 1
 
         mock_product = Product(
-            id=1, user_id=1, name="Test", url="https://example.com",
-            current_price=120.00, target_price=80.00,
-            last_checked=datetime.utcnow(), created_at=datetime.utcnow()
+            id=1,
+            user_id=1,
+            name="Test",
+            url="https://example.com",
+            current_price=120.00,
+            target_price=80.00,
+            last_checked=datetime.utcnow(),
+            created_at=datetime.utcnow(),
         )
 
         mock_stats = Mock()
@@ -370,7 +368,7 @@ class TestPriceHistoryService:
 
         result = self.service.get_price_statistics(self.mock_db, product_id)
 
-        assert result['price_change_percentage'] == 20.0
+        assert result["price_change_percentage"] == 20.0
 
     @pytest.mark.unit
     def test_singleton_price_history_service_instance(self):

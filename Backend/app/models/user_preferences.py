@@ -1,31 +1,37 @@
-from sqlalchemy import Column, Integer, String, Boolean, ForeignKey
-from sqlalchemy.orm import relationship
+from typing import TYPE_CHECKING, Optional
+
+from sqlalchemy import ForeignKey, String
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+
 from app.db.base import Base
+
+if TYPE_CHECKING:
+    from app.models.user import User
 
 
 class UserPreferences(Base):
     __tablename__ = "user_preferences"
 
-    id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), unique=True, nullable=False)
+    id: Mapped[int] = mapped_column(primary_key=True, index=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), unique=True)
 
     # Notification channels
-    email_notifications = Column(Boolean, default=True, nullable=False)
-    webhook_notifications = Column(Boolean, default=False, nullable=False)
-    webhook_url = Column(String, nullable=True)  # For Slack, Discord, etc.
+    email_notifications: Mapped[bool] = mapped_column(default=True)
+    webhook_notifications: Mapped[bool] = mapped_column(default=False)
+    webhook_url: Mapped[Optional[str]] = mapped_column(String, nullable=True)  # For Slack, Discord, etc.
 
     # Notification frequency
     # Options: "instant", "daily", "weekly"
-    notification_frequency = Column(String, default="instant", nullable=False)
+    notification_frequency: Mapped[str] = mapped_column(String, default="instant")
 
     # Email preferences
-    price_drop_alerts = Column(Boolean, default=True, nullable=False)
-    weekly_summary = Column(Boolean, default=False, nullable=False)
-    availability_alerts = Column(Boolean, default=True, nullable=False)
+    price_drop_alerts: Mapped[bool] = mapped_column(default=True)
+    weekly_summary: Mapped[bool] = mapped_column(default=False)
+    availability_alerts: Mapped[bool] = mapped_column(default=True)
 
     # Webhook type (for future extension)
     # Options: "slack", "discord", "custom"
-    webhook_type = Column(String, nullable=True)
+    webhook_type: Mapped[Optional[str]] = mapped_column(String, nullable=True)
 
     # Relationship
-    user = relationship("User", back_populates="preferences")
+    user: Mapped["User"] = relationship(back_populates="preferences")

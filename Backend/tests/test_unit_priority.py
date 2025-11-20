@@ -3,9 +3,9 @@ Unit tests for product priority checking functionality.
 Tests the priority calculation and sorting logic for price checking.
 """
 
+from unittest.mock import MagicMock, Mock, patch
+
 import pytest
-from unittest.mock import Mock, patch, MagicMock
-from datetime import datetime, timedelta
 
 from app.models.product import Product
 
@@ -105,13 +105,11 @@ class TestPriorityCalculation:
 class TestCheckPricesByFrequencyWithPriority:
     """Test the check_prices_by_frequency task with priority sorting."""
 
-    @patch('tasks.SessionLocal')
-    @patch('tasks.scraper')
-    @patch('tasks.price_history_service')
-    @patch('tasks.logger')
-    def test_products_sorted_by_priority(
-        self, mock_logger, mock_price_service, mock_scraper, mock_session_local
-    ):
+    @patch("tasks.SessionLocal")
+    @patch("tasks.scraper")
+    @patch("tasks.price_history_service")
+    @patch("tasks.logger")
+    def test_products_sorted_by_priority(self, mock_logger, mock_price_service, mock_scraper, mock_session_local):
         """Test that products are checked in priority order."""
         from tasks import check_prices_by_frequency
 
@@ -179,12 +177,12 @@ class TestCheckPricesByFrequencyWithPriority:
         assert calls[1][0][0] == "https://amazon.fr/medium"  # Medium priority second
         assert calls[2][0][0] == "https://amazon.fr/low"  # Low priority last
 
-    @patch('tasks.SessionLocal')
-    @patch('tasks.scrape_products_parallel')
-    @patch('tasks.price_history_service')
-    @patch('tasks.email_service')
-    @patch('tasks.logger')
-    @patch('tasks.settings')
+    @patch("tasks.SessionLocal")
+    @patch("tasks.scrape_products_parallel")
+    @patch("tasks.price_history_service")
+    @patch("tasks.email_service")
+    @patch("tasks.logger")
+    @patch("tasks.settings")
     def test_priority_with_mixed_prices(
         self, mock_settings, mock_logger, mock_email, mock_price_service, mock_scrape_parallel, mock_session_local
     ):

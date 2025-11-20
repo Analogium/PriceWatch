@@ -2,13 +2,13 @@
 Logging configuration with structured logging and log rotation.
 """
 
+import json
 import logging
 import logging.handlers
 import sys
+from datetime import datetime
 from pathlib import Path
 from typing import Optional
-import json
-from datetime import datetime
 
 
 class JSONFormatter(logging.Formatter):
@@ -67,6 +67,7 @@ def setup_logging(
     console_handler = logging.StreamHandler(sys.stdout)
     console_handler.setLevel(getattr(logging, log_level.upper()))
 
+    console_formatter: logging.Formatter
     if enable_json:
         console_formatter = JSONFormatter()
     else:
@@ -82,6 +83,7 @@ def setup_logging(
         log_path = Path(log_dir)
         log_path.mkdir(parents=True, exist_ok=True)
 
+        file_handler: logging.Handler
         if enable_rotation:
             # Rotating file handler - daily rotation, keep 30 days
             file_handler = logging.handlers.TimedRotatingFileHandler(
@@ -96,6 +98,7 @@ def setup_logging(
 
         file_handler.setLevel(logging.DEBUG)  # Always log DEBUG to file
 
+        file_formatter: logging.Formatter
         if enable_json:
             file_formatter = JSONFormatter()
         else:

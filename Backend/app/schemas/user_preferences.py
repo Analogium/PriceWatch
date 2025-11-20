@@ -1,5 +1,6 @@
-from pydantic import BaseModel, HttpUrl, field_validator
-from typing import Optional, Literal
+from typing import Literal, Optional
+
+from pydantic import BaseModel, field_validator
 
 
 class UserPreferencesBase(BaseModel):

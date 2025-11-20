@@ -3,8 +3,9 @@ Unit tests for rate limiting functionality.
 Tests Redis-based rate limiting with mocked Redis client.
 """
 
+from unittest.mock import Mock, patch
+
 import pytest
-from unittest.mock import Mock, MagicMock, patch
 from fastapi import HTTPException, Request
 from redis import Redis
 

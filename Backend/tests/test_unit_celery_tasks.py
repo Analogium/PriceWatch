@@ -9,14 +9,17 @@ Tests include:
 - Error handling
 - Database session management
 """
-import pytest
-from unittest.mock import Mock, MagicMock, patch
+
 from datetime import datetime
-from tasks import check_all_prices, check_single_product
+from unittest.mock import MagicMock, Mock, patch
+
+import pytest
+
 from app.models.product import Product
 from app.models.user import User
 from app.models.user_preferences import UserPreferences
 from app.schemas.product import ProductScrapedData
+from tasks import check_all_prices, check_single_product
 
 
 class TestCeleryTasks:
@@ -24,13 +27,11 @@ class TestCeleryTasks:
 
     @pytest.mark.unit
     @pytest.mark.celery
-    @patch('tasks.SessionLocal')
-    @patch('tasks.scraper.scrape_product')
-    @patch('tasks.price_history_service.should_record_price')
-    @patch('tasks.price_history_service.record_price')
-    def test_check_all_prices_success(
-        self, mock_record_price, mock_should_record, mock_scrape, mock_session_local
-    ):
+    @patch("tasks.SessionLocal")
+    @patch("tasks.scraper.scrape_product")
+    @patch("tasks.price_history_service.should_record_price")
+    @patch("tasks.price_history_service.record_price")
+    def test_check_all_prices_success(self, mock_record_price, mock_should_record, mock_scrape, mock_session_local):
         """Test successful execution of check_all_prices task."""
         # Mock database session
         mock_db = MagicMock()
@@ -39,14 +40,24 @@ class TestCeleryTasks:
         # Create mock products
         mock_products = [
             Product(
-                id=1, user_id=1, name="Product 1", url="https://example.com/1",
-                current_price=100.00, target_price=80.00,
-                last_checked=datetime.utcnow(), created_at=datetime.utcnow()
+                id=1,
+                user_id=1,
+                name="Product 1",
+                url="https://example.com/1",
+                current_price=100.00,
+                target_price=80.00,
+                last_checked=datetime.utcnow(),
+                created_at=datetime.utcnow(),
             ),
             Product(
-                id=2, user_id=1, name="Product 2", url="https://example.com/2",
-                current_price=50.00, target_price=40.00,
-                last_checked=datetime.utcnow(), created_at=datetime.utcnow()
+                id=2,
+                user_id=1,
+                name="Product 2",
+                url="https://example.com/2",
+                current_price=50.00,
+                target_price=40.00,
+                last_checked=datetime.utcnow(),
+                created_at=datetime.utcnow(),
             ),
         ]
 
@@ -79,14 +90,13 @@ class TestCeleryTasks:
 
     @pytest.mark.unit
     @pytest.mark.celery
-    @patch('tasks.SessionLocal')
-    @patch('tasks.scraper.scrape_product')
-    @patch('tasks.price_history_service.should_record_price')
-    @patch('tasks.price_history_service.record_price')
-    @patch('tasks.email_service.send_price_alert')
+    @patch("tasks.SessionLocal")
+    @patch("tasks.scraper.scrape_product")
+    @patch("tasks.price_history_service.should_record_price")
+    @patch("tasks.price_history_service.record_price")
+    @patch("tasks.email_service.send_price_alert")
     def test_check_all_prices_triggers_alert(
-        self, mock_send_alert, mock_record_price, mock_should_record,
-        mock_scrape, mock_session_local
+        self, mock_send_alert, mock_record_price, mock_should_record, mock_scrape, mock_session_local
     ):
         """Test that check_all_prices triggers alert when price drops below target."""
         mock_db = MagicMock()
@@ -99,9 +109,14 @@ class TestCeleryTasks:
 
         # Create product with price above target
         mock_product = Product(
-            id=1, user_id=1, name="Test Product", url="https://example.com/product",
-            current_price=100.00, target_price=80.00,
-            last_checked=datetime.utcnow(), created_at=datetime.utcnow()
+            id=1,
+            user_id=1,
+            name="Test Product",
+            url="https://example.com/product",
+            current_price=100.00,
+            target_price=80.00,
+            last_checked=datetime.utcnow(),
+            created_at=datetime.utcnow(),
         )
 
         mock_db.query.return_value.all.return_value = [mock_product]
@@ -130,9 +145,7 @@ class TestCeleryTasks:
         mock_db.query.side_effect = query_side_effect
 
         # Mock scraper to return price below target
-        mock_scrape.return_value = ProductScrapedData(
-            name="Test Product", price=75.00, image=None
-        )
+        mock_scrape.return_value = ProductScrapedData(name="Test Product", price=75.00, image=None)
         mock_should_record.return_value = True
 
         # Execute task
@@ -145,13 +158,13 @@ class TestCeleryTasks:
             75.00,
             100.00,
             "https://example.com/product",
-            user_preferences=None  # No preferences set
+            user_preferences=None,  # No preferences set
         )
 
     @pytest.mark.unit
     @pytest.mark.celery
-    @patch('tasks.SessionLocal')
-    @patch('tasks.scraper.scrape_product')
+    @patch("tasks.SessionLocal")
+    @patch("tasks.scraper.scrape_product")
     def test_check_all_prices_handles_scraping_error(self, mock_scrape, mock_session_local):
         """Test that check_all_prices handles scraping errors gracefully."""
         mock_db = MagicMock()
@@ -159,14 +172,24 @@ class TestCeleryTasks:
 
         mock_products = [
             Product(
-                id=1, user_id=1, name="Product 1", url="https://example.com/1",
-                current_price=100.00, target_price=80.00,
-                last_checked=datetime.utcnow(), created_at=datetime.utcnow()
+                id=1,
+                user_id=1,
+                name="Product 1",
+                url="https://example.com/1",
+                current_price=100.00,
+                target_price=80.00,
+                last_checked=datetime.utcnow(),
+                created_at=datetime.utcnow(),
             ),
             Product(
-                id=2, user_id=1, name="Product 2", url="https://example.com/2",
-                current_price=50.00, target_price=40.00,
-                last_checked=datetime.utcnow(), created_at=datetime.utcnow()
+                id=2,
+                user_id=1,
+                name="Product 2",
+                url="https://example.com/2",
+                current_price=50.00,
+                target_price=40.00,
+                last_checked=datetime.utcnow(),
+                created_at=datetime.utcnow(),
             ),
         ]
 
@@ -189,10 +212,10 @@ class TestCeleryTasks:
 
     @pytest.mark.unit
     @pytest.mark.celery
-    @patch('tasks.SessionLocal')
-    @patch('tasks.scraper.scrape_product')
-    @patch('tasks.price_history_service.should_record_price')
-    @patch('tasks.price_history_service.record_price')
+    @patch("tasks.SessionLocal")
+    @patch("tasks.scraper.scrape_product")
+    @patch("tasks.price_history_service.should_record_price")
+    @patch("tasks.price_history_service.record_price")
     def test_check_all_prices_records_price_history(
         self, mock_record_price, mock_should_record, mock_scrape, mock_session_local
     ):
@@ -201,17 +224,20 @@ class TestCeleryTasks:
         mock_session_local.return_value = mock_db
 
         mock_product = Product(
-            id=1, user_id=1, name="Product", url="https://example.com/product",
-            current_price=100.00, target_price=80.00,
-            last_checked=datetime.utcnow(), created_at=datetime.utcnow()
+            id=1,
+            user_id=1,
+            name="Product",
+            url="https://example.com/product",
+            current_price=100.00,
+            target_price=80.00,
+            last_checked=datetime.utcnow(),
+            created_at=datetime.utcnow(),
         )
 
         mock_db.query.return_value.all.return_value = [mock_product]
 
         # Mock price change
-        mock_scrape.return_value = ProductScrapedData(
-            name="Product", price=95.00, image=None
-        )
+        mock_scrape.return_value = ProductScrapedData(name="Product", price=95.00, image=None)
         mock_should_record.return_value = True
 
         # Execute task
@@ -223,9 +249,9 @@ class TestCeleryTasks:
 
     @pytest.mark.unit
     @pytest.mark.celery
-    @patch('tasks.SessionLocal')
-    @patch('tasks.scraper.scrape_product')
-    @patch('tasks.price_history_service.should_record_price')
+    @patch("tasks.SessionLocal")
+    @patch("tasks.scraper.scrape_product")
+    @patch("tasks.price_history_service.should_record_price")
     def test_check_all_prices_skips_recording_unchanged_price(
         self, mock_should_record, mock_scrape, mock_session_local
     ):
@@ -234,17 +260,20 @@ class TestCeleryTasks:
         mock_session_local.return_value = mock_db
 
         mock_product = Product(
-            id=1, user_id=1, name="Product", url="https://example.com/product",
-            current_price=100.00, target_price=80.00,
-            last_checked=datetime.utcnow(), created_at=datetime.utcnow()
+            id=1,
+            user_id=1,
+            name="Product",
+            url="https://example.com/product",
+            current_price=100.00,
+            target_price=80.00,
+            last_checked=datetime.utcnow(),
+            created_at=datetime.utcnow(),
         )
 
         mock_db.query.return_value.all.return_value = [mock_product]
 
         # Same price
-        mock_scrape.return_value = ProductScrapedData(
-            name="Product", price=100.00, image=None
-        )
+        mock_scrape.return_value = ProductScrapedData(name="Product", price=100.00, image=None)
         mock_should_record.return_value = False
 
         # Execute task
@@ -255,21 +284,24 @@ class TestCeleryTasks:
 
     @pytest.mark.unit
     @pytest.mark.celery
-    @patch('tasks.SessionLocal')
-    @patch('tasks.scraper.scrape_product')
-    @patch('tasks.price_history_service.should_record_price')
-    @patch('tasks.price_history_service.record_price')
-    def test_check_single_product_success(
-        self, mock_record_price, mock_should_record, mock_scrape, mock_session_local
-    ):
+    @patch("tasks.SessionLocal")
+    @patch("tasks.scraper.scrape_product")
+    @patch("tasks.price_history_service.should_record_price")
+    @patch("tasks.price_history_service.record_price")
+    def test_check_single_product_success(self, mock_record_price, mock_should_record, mock_scrape, mock_session_local):
         """Test successful execution of check_single_product task."""
         mock_db = MagicMock()
         mock_session_local.return_value = mock_db
 
         mock_product = Product(
-            id=1, user_id=1, name="Single Product", url="https://example.com/product",
-            current_price=100.00, target_price=80.00,
-            last_checked=datetime.utcnow(), created_at=datetime.utcnow()
+            id=1,
+            user_id=1,
+            name="Single Product",
+            url="https://example.com/product",
+            current_price=100.00,
+            target_price=80.00,
+            last_checked=datetime.utcnow(),
+            created_at=datetime.utcnow(),
         )
 
         product_query = MagicMock()
@@ -279,9 +311,7 @@ class TestCeleryTasks:
         mock_db.query.return_value = product_query
 
         # Mock scraper
-        mock_scrape.return_value = ProductScrapedData(
-            name="Single Product", price=90.00, image=None
-        )
+        mock_scrape.return_value = ProductScrapedData(name="Single Product", price=90.00, image=None)
         mock_should_record.return_value = True
 
         # Execute task
@@ -295,14 +325,13 @@ class TestCeleryTasks:
 
     @pytest.mark.unit
     @pytest.mark.celery
-    @patch('tasks.SessionLocal')
-    @patch('tasks.scraper.scrape_product')
-    @patch('tasks.price_history_service.should_record_price')
-    @patch('tasks.price_history_service.record_price')
-    @patch('tasks.email_service.send_price_alert')
+    @patch("tasks.SessionLocal")
+    @patch("tasks.scraper.scrape_product")
+    @patch("tasks.price_history_service.should_record_price")
+    @patch("tasks.price_history_service.record_price")
+    @patch("tasks.email_service.send_price_alert")
     def test_check_single_product_sends_alert(
-        self, mock_send_alert, mock_record_price, mock_should_record,
-        mock_scrape, mock_session_local
+        self, mock_send_alert, mock_record_price, mock_should_record, mock_scrape, mock_session_local
     ):
         """Test that check_single_product sends alert when target is reached."""
         mock_db = MagicMock()
@@ -313,9 +342,14 @@ class TestCeleryTasks:
         mock_user.email = "user@example.com"
 
         mock_product = Product(
-            id=1, user_id=1, name="Alert Product", url="https://example.com/alert",
-            current_price=100.00, target_price=80.00,
-            last_checked=datetime.utcnow(), created_at=datetime.utcnow()
+            id=1,
+            user_id=1,
+            name="Alert Product",
+            url="https://example.com/alert",
+            current_price=100.00,
+            target_price=80.00,
+            last_checked=datetime.utcnow(),
+            created_at=datetime.utcnow(),
         )
 
         product_query = MagicMock()
@@ -343,9 +377,7 @@ class TestCeleryTasks:
         mock_db.query.side_effect = query_side_effect
 
         # Price drops below target
-        mock_scrape.return_value = ProductScrapedData(
-            name="Alert Product", price=75.00, image=None
-        )
+        mock_scrape.return_value = ProductScrapedData(name="Alert Product", price=75.00, image=None)
         mock_should_record.return_value = True
 
         # Execute task
@@ -358,12 +390,12 @@ class TestCeleryTasks:
             75.00,
             100.00,
             "https://example.com/alert",
-            user_preferences=None  # No preferences set
+            user_preferences=None,  # No preferences set
         )
 
     @pytest.mark.unit
     @pytest.mark.celery
-    @patch('tasks.SessionLocal')
+    @patch("tasks.SessionLocal")
     def test_check_single_product_not_found(self, mock_session_local):
         """Test check_single_product with non-existent product."""
         mock_db = MagicMock()
@@ -383,17 +415,22 @@ class TestCeleryTasks:
 
     @pytest.mark.unit
     @pytest.mark.celery
-    @patch('tasks.SessionLocal')
-    @patch('tasks.scraper.scrape_product')
+    @patch("tasks.SessionLocal")
+    @patch("tasks.scraper.scrape_product")
     def test_check_single_product_scraping_fails(self, mock_scrape, mock_session_local):
         """Test check_single_product when scraping returns None."""
         mock_db = MagicMock()
         mock_session_local.return_value = mock_db
 
         mock_product = Product(
-            id=1, user_id=1, name="Product", url="https://example.com/product",
-            current_price=100.00, target_price=80.00,
-            last_checked=datetime.utcnow(), created_at=datetime.utcnow()
+            id=1,
+            user_id=1,
+            name="Product",
+            url="https://example.com/product",
+            current_price=100.00,
+            target_price=80.00,
+            last_checked=datetime.utcnow(),
+            created_at=datetime.utcnow(),
         )
 
         product_query = MagicMock()
@@ -414,10 +451,10 @@ class TestCeleryTasks:
 
     @pytest.mark.unit
     @pytest.mark.celery
-    @patch('tasks.SessionLocal')
-    @patch('tasks.scraper.scrape_product')
-    @patch('tasks.price_history_service.should_record_price')
-    @patch('tasks.price_history_service.record_price')
+    @patch("tasks.SessionLocal")
+    @patch("tasks.scraper.scrape_product")
+    @patch("tasks.price_history_service.should_record_price")
+    @patch("tasks.price_history_service.record_price")
     def test_check_single_product_records_history(
         self, mock_record_price, mock_should_record, mock_scrape, mock_session_local
     ):
@@ -426,9 +463,14 @@ class TestCeleryTasks:
         mock_session_local.return_value = mock_db
 
         mock_product = Product(
-            id=1, user_id=1, name="Product", url="https://example.com/product",
-            current_price=100.00, target_price=80.00,
-            last_checked=datetime.utcnow(), created_at=datetime.utcnow()
+            id=1,
+            user_id=1,
+            name="Product",
+            url="https://example.com/product",
+            current_price=100.00,
+            target_price=80.00,
+            last_checked=datetime.utcnow(),
+            created_at=datetime.utcnow(),
         )
 
         product_query = MagicMock()
@@ -437,9 +479,7 @@ class TestCeleryTasks:
 
         mock_db.query.return_value = product_query
 
-        mock_scrape.return_value = ProductScrapedData(
-            name="Product", price=95.00, image=None
-        )
+        mock_scrape.return_value = ProductScrapedData(name="Product", price=95.00, image=None)
         mock_should_record.return_value = True
 
         # Execute task

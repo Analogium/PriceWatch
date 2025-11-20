@@ -1,31 +1,33 @@
 """
 Unit tests for error handling features (logging, retry logic, unavailability detection).
 """
+
+from unittest.mock import Mock, patch
+
 import pytest
-from unittest.mock import Mock, patch, MagicMock, call
-from bs4 import BeautifulSoup
 import requests
-from datetime import datetime
+from bs4 import BeautifulSoup
 
 from app.services.scraper import PriceScraper, ProductUnavailableError
-from app.schemas.product import ProductScrapedData
 
 
 @pytest.mark.unit
 class TestRetryLogic:
     """Test retry logic in scraper."""
 
-    @patch('app.services.scraper.time.sleep')
+    @patch("app.services.scraper.time.sleep")
     def test_retry_on_timeout(self, mock_sleep):
         """Test that scraper retries on timeout."""
         scraper = PriceScraper(max_retries=3, retry_delay=1)
 
         # Mock session.get to raise timeout, then succeed
-        scraper.session.get = Mock(side_effect=[
-            requests.exceptions.Timeout("Timeout 1"),
-            requests.exceptions.Timeout("Timeout 2"),
-            self._create_mock_response(200, self._create_amazon_html()),
-        ])
+        scraper.session.get = Mock(
+            side_effect=[
+                requests.exceptions.Timeout("Timeout 1"),
+                requests.exceptions.Timeout("Timeout 2"),
+                self._create_mock_response(200, self._create_amazon_html()),
+            ]
+        )
 
         result = scraper.scrape_product("https://amazon.fr/product")
 
@@ -37,7 +39,7 @@ class TestRetryLogic:
         assert result is not None
         assert result.name == "Test Product"
 
-    @patch('app.services.scraper.time.sleep')
+    @patch("app.services.scraper.time.sleep")
     def test_retry_exhaustion(self, mock_sleep):
         """Test that scraper gives up after max retries."""
         scraper = PriceScraper(max_retries=3, retry_delay=1)
@@ -58,9 +60,7 @@ class TestRetryLogic:
 
         mock_response = Mock()
         mock_response.status_code = 404
-        mock_response.raise_for_status.side_effect = requests.exceptions.HTTPError(
-            response=mock_response
-        )
+        mock_response.raise_for_status.side_effect = requests.exceptions.HTTPError(response=mock_response)
         scraper.session.get = Mock(return_value=mock_response)
 
         with pytest.raises(ProductUnavailableError):
@@ -69,8 +69,8 @@ class TestRetryLogic:
         # Should only attempt once (no retry on 404)
         assert scraper.session.get.call_count == 1
 
-    @patch('app.services.scraper.time.sleep')
-    @patch('app.services.scraper.random.uniform')
+    @patch("app.services.scraper.time.sleep")
+    @patch("app.services.scraper.random.uniform")
     def test_exponential_backoff(self, mock_uniform, mock_sleep):
         """Test that retry mechanism includes delays."""
         # Mock random.uniform to return fixed value for predictable testing
@@ -78,11 +78,13 @@ class TestRetryLogic:
 
         scraper = PriceScraper(max_retries=3, retry_delay=2)
 
-        scraper.session.get = Mock(side_effect=[
-            requests.exceptions.Timeout("Timeout 1"),
-            requests.exceptions.Timeout("Timeout 2"),
-            self._create_mock_response(200, self._create_amazon_html()),
-        ])
+        scraper.session.get = Mock(
+            side_effect=[
+                requests.exceptions.Timeout("Timeout 1"),
+                requests.exceptions.Timeout("Timeout 2"),
+                self._create_mock_response(200, self._create_amazon_html()),
+            ]
+        )
 
         result = scraper.scrape_product("https://amazon.fr/product")
 
@@ -96,7 +98,7 @@ class TestRetryLogic:
         """Helper to create mock response."""
         mock_response = Mock()
         mock_response.status_code = status_code
-        mock_response.content = html_content.encode('utf-8')
+        mock_response.content = html_content.encode("utf-8")
         mock_response.raise_for_status = Mock()
         return mock_response
 
@@ -129,7 +131,7 @@ class TestUnavailabilityDetection:
             </body>
         </html>
         """
-        soup = BeautifulSoup(html, 'html.parser')
+        soup = BeautifulSoup(html, "html.parser")
         scraper = PriceScraper()
 
         is_unavailable = scraper._is_product_unavailable(soup, "https://example.com")
@@ -146,7 +148,7 @@ class TestUnavailabilityDetection:
             </body>
         </html>
         """
-        soup = BeautifulSoup(html, 'html.parser')
+        soup = BeautifulSoup(html, "html.parser")
         scraper = PriceScraper()
 
         is_unavailable = scraper._is_product_unavailable(soup, "https://example.com")
@@ -162,7 +164,7 @@ class TestUnavailabilityDetection:
             </body>
         </html>
         """
-        soup = BeautifulSoup(html, 'html.parser')
+        soup = BeautifulSoup(html, "html.parser")
         scraper = PriceScraper()
 
         is_unavailable = scraper._is_product_unavailable(soup, "https://example.com")
@@ -178,7 +180,7 @@ class TestUnavailabilityDetection:
             </body>
         </html>
         """
-        soup = BeautifulSoup(html, 'html.parser')
+        soup = BeautifulSoup(html, "html.parser")
         scraper = PriceScraper()
 
         is_unavailable = scraper._is_product_unavailable(soup, "https://example.com")
@@ -196,7 +198,7 @@ class TestUnavailabilityDetection:
             </body>
         </html>
         """
-        soup = BeautifulSoup(html, 'html.parser')
+        soup = BeautifulSoup(html, "html.parser")
         scraper = PriceScraper()
 
         is_unavailable = scraper._is_product_unavailable(soup, "https://amazon.fr/product")
@@ -214,7 +216,7 @@ class TestUnavailabilityDetection:
         """
         mock_response = Mock()
         mock_response.status_code = 200
-        mock_response.content = html.encode('utf-8')
+        mock_response.content = html.encode("utf-8")
         mock_response.raise_for_status = Mock()
 
         scraper = PriceScraper(max_retries=1)
@@ -230,7 +232,7 @@ class TestUnavailabilityDetection:
 class TestLoggingIntegration:
     """Test that logging is properly integrated."""
 
-    @patch('app.services.scraper.logger')
+    @patch("app.services.scraper.logger")
     def test_logging_on_success(self, mock_logger):
         """Test that success is logged."""
         html = """
@@ -244,7 +246,7 @@ class TestLoggingIntegration:
         """
         mock_response = Mock()
         mock_response.status_code = 200
-        mock_response.content = html.encode('utf-8')
+        mock_response.content = html.encode("utf-8")
         mock_response.raise_for_status = Mock()
 
         scraper = PriceScraper()
@@ -256,7 +258,7 @@ class TestLoggingIntegration:
         assert mock_logger.info.called
         assert result is not None
 
-    @patch('app.services.scraper.logger')
+    @patch("app.services.scraper.logger")
     def test_logging_on_failure(self, mock_logger):
         """Test that failures are logged."""
         scraper = PriceScraper(max_retries=2)
@@ -270,13 +272,13 @@ class TestLoggingIntegration:
         assert mock_logger.error.called
         assert result is None
 
-    @patch('app.services.scraper.logger')
+    @patch("app.services.scraper.logger")
     def test_logging_unavailability(self, mock_logger):
         """Test that unavailability is logged."""
         html = "<html><body><p>Produit indisponible</p></body></html>"
         mock_response = Mock()
         mock_response.status_code = 200
-        mock_response.content = html.encode('utf-8')
+        mock_response.content = html.encode("utf-8")
         mock_response.raise_for_status = Mock()
 
         scraper = PriceScraper(max_retries=1)

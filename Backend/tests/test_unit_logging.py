@@ -3,15 +3,15 @@ Unit tests for logging configuration.
 Tests JSON formatter, logging setup, and context managers.
 """
 
-import pytest
-import logging
 import json
+import logging
 import tempfile
 from pathlib import Path
-from unittest.mock import Mock, patch, MagicMock
-from datetime import datetime
+from unittest.mock import MagicMock, Mock, call, patch
 
-from app.core.logging_config import JSONFormatter, setup_logging, get_logger, LogContext
+import pytest
+
+from app.core.logging_config import JSONFormatter, LogContext, get_logger, setup_logging
 
 
 @pytest.mark.unit
@@ -176,7 +176,9 @@ class TestSetupLogging:
             # Note: Files may not exist until first log write
 
             # Check handlers
-            file_handlers = [h for h in root_logger.handlers if isinstance(h, logging.handlers.TimedRotatingFileHandler)]
+            file_handlers = [
+                h for h in root_logger.handlers if isinstance(h, logging.handlers.TimedRotatingFileHandler)
+            ]
             assert len(file_handlers) >= 1
 
     def test_setup_logging_with_json_and_files(self):

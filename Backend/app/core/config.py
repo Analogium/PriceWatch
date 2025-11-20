@@ -1,5 +1,6 @@
-from pydantic_settings import BaseSettings
 from typing import Optional
+
+from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
@@ -46,9 +47,15 @@ class Settings(BaseSettings):
     MAX_PARALLEL_SCRAPERS: int = 5  # Maximum number of concurrent scrapers
     SCRAPING_BATCH_SIZE: int = 10  # Number of products to scrape in parallel batches
 
+    # Sentry Error Monitoring
+    SENTRY_DSN: Optional[str] = None
+    SENTRY_ENVIRONMENT: str = "development"
+    SENTRY_TRACES_SAMPLE_RATE: float = 0.1  # 10% of transactions traced
+    SENTRY_PROFILES_SAMPLE_RATE: float = 0.1  # 10% of transactions profiled
+
     class Config:
         env_file = ".env"
         case_sensitive = True
 
 
-settings = Settings()
+settings = Settings()  # type: ignore[call-arg]

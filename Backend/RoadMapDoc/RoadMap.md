@@ -137,7 +137,8 @@ Ce document trace l'état d'avancement du backend de PriceWatch, ce qui a été 
   - [x] Tests check frequency (13 tests, 100% coverage) ✅ **NEW**
   - [x] Tests priority calculation (10 tests, 100% coverage) ✅ **NEW**
   - [x] Tests parallel scraping (11 tests, 100% coverage) ✅ **NEW**
-  - **Total: 248 tests unitaires** avec **60% de couverture globale**
+  - [x] Tests health endpoints (20 tests, 100% coverage) ✅ **NEW**
+  - **Total: 284 tests unitaires** avec **62% de couverture globale**
 - [x] Infrastructure de tests ✨ NEW
   - [x] pytest avec markers (unit, integration, scraper, email, celery) ✨ NEW
   - [x] pytest-cov pour coverage reporting (**60% total**) ✨ **AMÉLIORÉ**
@@ -194,7 +195,8 @@ Ce document trace l'état d'avancement du backend de PriceWatch, ce qui a été 
   - [x] User preferences (14 tests, 100% coverage) ✨ **NEW**
   - [x] Check frequency (13 tests, 100% coverage) ✨ **NEW**
   - [x] Priority calculation (10 tests, 100% coverage) ✨ **NEW**
-  - **Total: 237 tests unitaires** avec **60% de couverture globale**
+  - [x] Tests health endpoints (20 tests, 100% coverage) ✅ **NEW**
+  - **Total: 284 tests unitaires** avec **62% de couverture globale**
 - [x] **Infrastructure de tests** ✨ NEW
   - pytest avec markers (unit, integration, scraper, email, celery)
   - pytest-cov pour coverage tracking avec seuil minimal de 70%
@@ -318,14 +320,27 @@ Ce document trace l'état d'avancement du backend de PriceWatch, ce qui a été 
   - Tests dependencies (get_current_admin_user)
   - Tests cas d'erreur et edge cases
 
-#### 🔧 DevOps & Déploiement
-- [ ] **CI/CD pipeline** (GitHub Actions / GitLab CI)
-  - Tests automatiques sur chaque commit
-  - Déploiement automatisé
-- [ ] **Healthchecks avancés** (vérification DB, Redis, Celery)
-  - Monitoring de tous les composants
-- [ ] **Monitoring** (Sentry pour erreurs)
-  - Détection rapide des problèmes en production
+#### 🔧 DevOps & Déploiement - ✅ COMPLÉTÉ
+- [x] **CI/CD pipeline** (GitHub Actions) ✨ **NEW**
+  - Tests automatiques sur chaque commit (lint, unit tests, security scan)
+  - Build Docker automatisé
+  - Tests d'intégration sur main/master
+  - Placeholder pour déploiement automatisé
+- [x] **Healthchecks avancés** (vérification DB, Redis, Celery) ✨ **NEW**
+  - `GET /health/` - Health check basique
+  - `GET /health/detailed` - Health check détaillé de tous les composants
+  - `GET /health/ready` - Kubernetes readiness probe
+  - `GET /health/live` - Kubernetes liveness probe
+  - Monitoring de PostgreSQL, Redis et Celery workers
+- [x] **Monitoring** (Sentry pour erreurs) ✨ **NEW**
+  - Intégration Sentry avec FastAPI, SQLAlchemy, Celery et Redis
+  - Performance monitoring avec traces et profiling
+  - Configuration via variables d'environnement
+- [x] **Docker Compose production** ✨ **NEW**
+  - Configuration optimisée avec limites de ressources
+  - Nginx reverse proxy avec rate limiting et SSL
+  - Réseau Docker isolé pour la sécurité
+  - Healthchecks Docker natifs
 
 ---
 
@@ -415,6 +430,8 @@ Ce document trace l'état d'avancement du backend de PriceWatch, ce qui a été 
 ### Fichiers de documentation
 - **[RoadMap.md](RoadMap.md)** - Ce fichier : Vue d'ensemble et roadmap
 - **[SECURITY_FEATURES.md](SECURITY_FEATURES.md)** - Documentation sécurité
+- **[ADMIN_FEATURES.md](ADMIN_FEATURES.md)** - Documentation administration et analytics
+- **[DEVOPS.md](DEVOPS.md)** - Documentation DevOps, CI/CD et déploiement ✨ **NEW**
 
 ### Scripts utiles
 - **[migrate.sh](../migrate.sh)** - Génération et application de migrations Alembic
@@ -451,8 +468,9 @@ Ce document trace l'état d'avancement du backend de PriceWatch, ce qui a été 
 - **[tests/test_unit_preferences.py](../tests/test_unit_preferences.py)** - Tests user preferences (14 tests, 100% coverage) ✨ **NEW**
 - **[tests/test_unit_check_frequency.py](../tests/test_unit_check_frequency.py)** - Tests check frequency (13 tests, 100% coverage) ✨ **NEW**
 - **[tests/test_unit_priority.py](../tests/test_unit_priority.py)** - Tests priority calculation (10 tests, 100% coverage) ✨ **NEW**
+- **[tests/test_unit_health.py](../tests/test_unit_health.py)** - Tests health endpoints (20 tests, 100% coverage) ✨ **NEW**
 
-**Total : 237 tests unitaires avec 60% de couverture globale**
+**Total : 284 tests unitaires avec 62% de couverture globale**
 
 ### Lancer les tests
 
@@ -541,4 +559,4 @@ docker-compose exec backend alembic current
 
 ---
 
-**Dernière mise à jour** : 2025-11-18
+**Dernière mise à jour** : 2025-11-20

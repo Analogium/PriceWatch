@@ -1,12 +1,14 @@
-import requests
-from bs4 import BeautifulSoup
-from typing import Optional, Callable
-from app.schemas.product import ProductScrapedData
+import random
 import re
 import time
-import random
+from typing import Optional
 from urllib.parse import urlparse
+
+import requests
+from bs4 import BeautifulSoup
+
 from app.core.logging_config import get_logger
+from app.schemas.product import ProductScrapedData
 
 logger = get_logger(__name__)
 

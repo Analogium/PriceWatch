@@ -1,7 +1,8 @@
-from pydantic import BaseModel, HttpUrl, field_validator
 from datetime import datetime
-from typing import Optional, List, Generic, TypeVar
 from enum import Enum
+from typing import List, Optional
+
+from pydantic import BaseModel, field_validator
 
 
 class ProductBase(BaseModel):
@@ -9,12 +10,12 @@ class ProductBase(BaseModel):
     target_price: float
     check_frequency: Optional[int] = 24  # Default to 24 hours
 
-    @field_validator('check_frequency')
+    @field_validator("check_frequency")
     @classmethod
     def validate_check_frequency(cls, v):
         """Validate that check_frequency is one of the allowed values."""
         if v not in [6, 12, 24]:
-            raise ValueError('check_frequency must be 6, 12, or 24 hours')
+            raise ValueError("check_frequency must be 6, 12, or 24 hours")
         return v
 
 
@@ -27,12 +28,12 @@ class ProductUpdate(BaseModel):
     target_price: Optional[float] = None
     check_frequency: Optional[int] = None
 
-    @field_validator('check_frequency')
+    @field_validator("check_frequency")
     @classmethod
     def validate_check_frequency(cls, v):
         """Validate that check_frequency is one of the allowed values."""
         if v is not None and v not in [6, 12, 24]:
-            raise ValueError('check_frequency must be 6, 12, or 24 hours')
+            raise ValueError("check_frequency must be 6, 12, or 24 hours")
         return v
 
 

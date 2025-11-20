@@ -1,26 +1,20 @@
 """
 Admin service for analytics and statistics
 """
-from sqlalchemy.orm import Session
-from sqlalchemy import func, case
-from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Any
-import csv
-import io
-import json
-from pathlib import Path
 
-from app.models.user import User
-from app.models.product import Product
+import io
+from datetime import datetime, timedelta
+from typing import Any, Dict, List, Optional
+
+from sqlalchemy import func
+from sqlalchemy.orm import Session
+
 from app.models.price_history import PriceHistory
+from app.models.product import Product
 from app.models.scraping_stats import ScrapingStats
+from app.models.user import User
 from app.models.user_preferences import UserPreferences
-from app.schemas.admin import (
-    GlobalStats,
-    UserStats,
-    SiteStats,
-    ScrapingStatsResponse,
-)
+from app.schemas.admin import GlobalStats, ScrapingStatsResponse, SiteStats, UserStats
 
 
 class AdminService:
@@ -31,48 +25,33 @@ class AdminService:
         """Get global system statistics"""
         # User stats
         total_users = db.query(func.count(User.id)).scalar() or 0
-        verified_users = db.query(func.count(User.id)).filter(User.is_verified == True).scalar() or 0
-        admin_users = db.query(func.count(User.id)).filter(User.is_admin == True).scalar() or 0
+        verified_users = db.query(func.count(User.id)).filter(User.is_verified == True).scalar() or 0  # noqa: E712
+        admin_users = db.query(func.count(User.id)).filter(User.is_admin == True).scalar() or 0  # noqa: E712
 
         # Product stats
         total_products = db.query(func.count(Product.id)).scalar() or 0
 
         # Active products (checked in last 48h)
         two_days_ago = datetime.utcnow() - timedelta(hours=48)
-        active_products = (
-            db.query(func.count(Product.id))
-            .filter(Product.last_checked >= two_days_ago)
-            .scalar() or 0
-        )
+        active_products = db.query(func.count(Product.id)).filter(Product.last_checked >= two_days_ago).scalar() or 0
 
         unavailable_products = (
-            db.query(func.count(Product.id))
-            .filter(Product.is_available == False)
-            .scalar() or 0
+            db.query(func.count(Product.id)).filter(Product.is_available == False).scalar() or 0  # noqa: E712
         )
 
         # Scraping stats
         total_scrapes = db.query(func.count(ScrapingStats.id)).scalar() or 0
         successful_scrapes = (
-            db.query(func.count(ScrapingStats.id))
-            .filter(ScrapingStats.status == "success")
-            .scalar() or 0
+            db.query(func.count(ScrapingStats.id)).filter(ScrapingStats.status == "success").scalar() or 0
         )
-        failed_scrapes = (
-            db.query(func.count(ScrapingStats.id))
-            .filter(ScrapingStats.status == "failure")
-            .scalar() or 0
-        )
+        failed_scrapes = db.query(func.count(ScrapingStats.id)).filter(ScrapingStats.status == "failure").scalar() or 0
 
-        scraping_success_rate = (
-            (successful_scrapes / total_scrapes * 100) if total_scrapes > 0 else 0.0
-        )
+        scraping_success_rate = (successful_scrapes / total_scrapes * 100) if total_scrapes > 0 else 0.0
 
         # Average response time
         avg_response_time = (
-            db.query(func.avg(ScrapingStats.response_time))
-            .filter(ScrapingStats.response_time.isnot(None))
-            .scalar() or 0.0
+            db.query(func.avg(ScrapingStats.response_time)).filter(ScrapingStats.response_time.isnot(None)).scalar()
+            or 0.0
         )
 
         # Total price checks (from price history)
@@ -116,47 +95,33 @@ class AdminService:
     def get_site_stats(db: Session, site_name: str) -> SiteStats:
         """Get statistics for a specific site"""
         total_scrapes = (
-            db.query(func.count(ScrapingStats.id))
-            .filter(ScrapingStats.site_name == site_name)
-            .scalar() or 0
+            db.query(func.count(ScrapingStats.id)).filter(ScrapingStats.site_name == site_name).scalar() or 0
         )
 
         successful_scrapes = (
             db.query(func.count(ScrapingStats.id))
-            .filter(
-                ScrapingStats.site_name == site_name,
-                ScrapingStats.status == "success"
-            )
-            .scalar() or 0
+            .filter(ScrapingStats.site_name == site_name, ScrapingStats.status == "success")
+            .scalar()
+            or 0
         )
 
         failed_scrapes = (
             db.query(func.count(ScrapingStats.id))
-            .filter(
-                ScrapingStats.site_name == site_name,
-                ScrapingStats.status == "failure"
-            )
-            .scalar() or 0
+            .filter(ScrapingStats.site_name == site_name, ScrapingStats.status == "failure")
+            .scalar()
+            or 0
         )
 
-        success_rate = (
-            (successful_scrapes / total_scrapes * 100) if total_scrapes > 0 else 0.0
-        )
+        success_rate = (successful_scrapes / total_scrapes * 100) if total_scrapes > 0 else 0.0
 
         avg_response_time = (
             db.query(func.avg(ScrapingStats.response_time))
-            .filter(
-                ScrapingStats.site_name == site_name,
-                ScrapingStats.response_time.isnot(None)
-            )
-            .scalar() or 0.0
+            .filter(ScrapingStats.site_name == site_name, ScrapingStats.response_time.isnot(None))
+            .scalar()
+            or 0.0
         )
 
-        last_scrape = (
-            db.query(func.max(ScrapingStats.created_at))
-            .filter(ScrapingStats.site_name == site_name)
-            .scalar()
-        )
+        last_scrape = db.query(func.max(ScrapingStats.created_at)).filter(ScrapingStats.site_name == site_name).scalar()
 
         return SiteStats(
             site_name=site_name,
@@ -175,39 +140,28 @@ class AdminService:
         if not user:
             return None
 
-        total_products = (
-            db.query(func.count(Product.id))
-            .filter(Product.user_id == user_id)
-            .scalar() or 0
-        )
+        total_products = db.query(func.count(Product.id)).filter(Product.user_id == user_id).scalar() or 0
 
         two_days_ago = datetime.utcnow() - timedelta(hours=48)
         active_products = (
             db.query(func.count(Product.id))
-            .filter(
-                Product.user_id == user_id,
-                Product.last_checked >= two_days_ago
-            )
-            .scalar() or 0
+            .filter(Product.user_id == user_id, Product.last_checked >= two_days_ago)
+            .scalar()
+            or 0
         )
 
         # Count price checks for user's products
         total_price_checks = (
-            db.query(func.count(PriceHistory.id))
-            .join(Product)
-            .filter(Product.user_id == user_id)
-            .scalar() or 0
+            db.query(func.count(PriceHistory.id)).join(Product).filter(Product.user_id == user_id).scalar() or 0
         )
 
         # Count alerts sent (price history entries where price <= target_price)
         alerts_sent = (
             db.query(func.count(PriceHistory.id))
             .join(Product)
-            .filter(
-                Product.user_id == user_id,
-                PriceHistory.price <= Product.target_price
-            )
-            .scalar() or 0
+            .filter(Product.user_id == user_id, PriceHistory.price <= Product.target_price)
+            .scalar()
+            or 0
         )
 
         return UserStats(
@@ -224,24 +178,14 @@ class AdminService:
         )
 
     @staticmethod
-    def get_all_users_stats(
-        db: Session,
-        skip: int = 0,
-        limit: int = 100
-    ) -> List[UserStats]:
+    def get_all_users_stats(db: Session, skip: int = 0, limit: int = 100) -> List[UserStats]:
         """Get statistics for all users with pagination"""
         users = db.query(User).offset(skip).limit(limit).all()
-        return [
-            AdminService.get_user_stats(db, user.id)
-            for user in users
-        ]
+        stats = [AdminService.get_user_stats(db, user.id) for user in users]
+        return [s for s in stats if s is not None]
 
     @staticmethod
-    def get_recent_scraping_stats(
-        db: Session,
-        hours: int = 24,
-        limit: int = 100
-    ) -> List[ScrapingStatsResponse]:
+    def get_recent_scraping_stats(db: Session, hours: int = 24, limit: int = 100) -> List[ScrapingStatsResponse]:
         """Get recent scraping statistics"""
         cutoff_time = datetime.utcnow() - timedelta(hours=hours)
 
@@ -261,7 +205,7 @@ class AdminService:
         user_id: int,
         include_products: bool = True,
         include_price_history: bool = True,
-        include_preferences: bool = True
+        include_preferences: bool = True,
     ) -> str:
         """Export user data to CSV format (GDPR compliance)"""
         user = db.query(User).filter(User.id == user_id).first()
@@ -272,7 +216,7 @@ class AdminService:
 
         # User info
         output.write("=== USER INFORMATION ===\n")
-        output.write(f"ID,Email,Verified,Admin,Created At\n")
+        output.write("ID,Email,Verified,Admin,Created At\n")
         output.write(f"{user.id},{user.email},{user.is_verified},{user.is_admin},{user.created_at}\n\n")
 
         # Products
@@ -310,7 +254,9 @@ class AdminService:
             output.write("=== PREFERENCES ===\n")
             prefs = db.query(UserPreferences).filter(UserPreferences.user_id == user_id).first()
             if prefs:
-                output.write("Email Notifications,Webhook Notifications,Price Drop Alerts,Weekly Summary,Availability Alerts\n")
+                output.write(
+                    "Email Notifications,Webhook Notifications,Price Drop Alerts,Weekly Summary,Availability Alerts\n"
+                )
                 output.write(
                     f"{prefs.email_notifications},{prefs.webhook_notifications},"
                     f"{prefs.price_drop_alerts},{prefs.weekly_summary},{prefs.availability_alerts}\n"
@@ -325,14 +271,14 @@ class AdminService:
         user_id: int,
         include_products: bool = True,
         include_price_history: bool = True,
-        include_preferences: bool = True
+        include_preferences: bool = True,
     ) -> Dict[str, Any]:
         """Export user data to JSON format (GDPR compliance)"""
         user = db.query(User).filter(User.id == user_id).first()
         if not user:
             raise ValueError(f"User {user_id} not found")
 
-        data = {
+        data: Dict[str, Any] = {
             "user": {
                 "id": user.id,
                 "email": user.email,
@@ -398,7 +344,7 @@ class AdminService:
         status: str,
         product_id: Optional[int] = None,
         response_time: Optional[float] = None,
-        error_message: Optional[str] = None
+        error_message: Optional[str] = None,
     ) -> ScrapingStats:
         """Log a scraping attempt for analytics"""
         stat = ScrapingStats(

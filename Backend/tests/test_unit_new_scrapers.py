@@ -1,12 +1,13 @@
 """
 Unit tests for new scraper functions (Cdiscount, Boulanger, Leclerc).
 """
+
+from unittest.mock import Mock
+
 import pytest
-from unittest.mock import Mock, patch
 from bs4 import BeautifulSoup
 
 from app.services.scraper import PriceScraper
-from app.schemas.product import ProductScrapedData
 
 
 @pytest.mark.unit
@@ -25,7 +26,7 @@ class TestCdiscountScraper:
             </body>
         </html>
         """
-        soup = BeautifulSoup(html, 'html.parser')
+        soup = BeautifulSoup(html, "html.parser")
         scraper = PriceScraper()
 
         result = scraper._scrape_cdiscount(soup)
@@ -46,7 +47,7 @@ class TestCdiscountScraper:
             </body>
         </html>
         """
-        soup = BeautifulSoup(html, 'html.parser')
+        soup = BeautifulSoup(html, "html.parser")
         scraper = PriceScraper()
 
         result = scraper._scrape_cdiscount(soup)
@@ -63,7 +64,7 @@ class TestCdiscountScraper:
             </body>
         </html>
         """
-        soup = BeautifulSoup(html, 'html.parser')
+        soup = BeautifulSoup(html, "html.parser")
         scraper = PriceScraper()
 
         result = scraper._scrape_cdiscount(soup)
@@ -87,7 +88,7 @@ class TestBoulangerScraper:
             </body>
         </html>
         """
-        soup = BeautifulSoup(html, 'html.parser')
+        soup = BeautifulSoup(html, "html.parser")
         scraper = PriceScraper()
 
         result = scraper._scrape_boulanger(soup)
@@ -108,7 +109,7 @@ class TestBoulangerScraper:
             </body>
         </html>
         """
-        soup = BeautifulSoup(html, 'html.parser')
+        soup = BeautifulSoup(html, "html.parser")
         scraper = PriceScraper()
 
         result = scraper._scrape_boulanger(soup)
@@ -125,7 +126,7 @@ class TestBoulangerScraper:
             </body>
         </html>
         """
-        soup = BeautifulSoup(html, 'html.parser')
+        soup = BeautifulSoup(html, "html.parser")
         scraper = PriceScraper()
 
         result = scraper._scrape_boulanger(soup)
@@ -149,7 +150,7 @@ class TestLeclercScraper:
             </body>
         </html>
         """
-        soup = BeautifulSoup(html, 'html.parser')
+        soup = BeautifulSoup(html, "html.parser")
         scraper = PriceScraper()
 
         result = scraper._scrape_leclerc(soup)
@@ -170,7 +171,7 @@ class TestLeclercScraper:
             </body>
         </html>
         """
-        soup = BeautifulSoup(html, 'html.parser')
+        soup = BeautifulSoup(html, "html.parser")
         scraper = PriceScraper()
 
         result = scraper._scrape_leclerc(soup)
@@ -187,7 +188,7 @@ class TestLeclercScraper:
             </body>
         </html>
         """
-        soup = BeautifulSoup(html, 'html.parser')
+        soup = BeautifulSoup(html, "html.parser")
         scraper = PriceScraper()
 
         result = scraper._scrape_leclerc(soup)
@@ -212,7 +213,7 @@ class TestScraperSiteRouting:
         """
         mock_response = Mock()
         mock_response.status_code = 200
-        mock_response.content = html.encode('utf-8')
+        mock_response.content = html.encode("utf-8")
         mock_response.raise_for_status = Mock()
 
         scraper = PriceScraper(max_retries=1)
@@ -236,7 +237,7 @@ class TestScraperSiteRouting:
         """
         mock_response = Mock()
         mock_response.status_code = 200
-        mock_response.content = html.encode('utf-8')
+        mock_response.content = html.encode("utf-8")
         mock_response.raise_for_status = Mock()
 
         scraper = PriceScraper(max_retries=1)
@@ -260,7 +261,7 @@ class TestScraperSiteRouting:
         """
         mock_response = Mock()
         mock_response.status_code = 200
-        mock_response.content = html.encode('utf-8')
+        mock_response.content = html.encode("utf-8")
         mock_response.raise_for_status = Mock()
 
         scraper = PriceScraper(max_retries=1)
@@ -285,7 +286,7 @@ class TestScraperSiteRouting:
         """
         mock_response = Mock()
         mock_response.status_code = 200
-        mock_response.content = html.encode('utf-8')
+        mock_response.content = html.encode("utf-8")
         mock_response.raise_for_status = Mock()
 
         scraper = PriceScraper(max_retries=1)

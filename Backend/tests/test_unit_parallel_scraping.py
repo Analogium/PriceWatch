@@ -3,9 +3,9 @@ Unit tests for parallel scraping functionality.
 Tests the concurrent scraping of multiple products.
 """
 
+from unittest.mock import MagicMock, Mock, patch
+
 import pytest
-from unittest.mock import Mock, patch, MagicMock
-from datetime import datetime, timedelta
 
 from app.models.product import Product
 from app.services.scraper import ProductUnavailableError
@@ -15,7 +15,7 @@ from app.services.scraper import ProductUnavailableError
 class TestScrapeSingleProductSafe:
     """Test the scrape_single_product_safe function."""
 
-    @patch('tasks.scraper')
+    @patch("tasks.scraper")
     def test_scrape_single_product_safe_success(self, mock_scraper):
         """Test successful scraping of a single product."""
         from tasks import scrape_single_product_safe
@@ -39,7 +39,7 @@ class TestScrapeSingleProductSafe:
         assert exception is None
         mock_scraper.scrape_product.assert_called_once_with(product.url)
 
-    @patch('tasks.scraper')
+    @patch("tasks.scraper")
     def test_scrape_single_product_safe_unavailable(self, mock_scraper):
         """Test scraping when product is unavailable."""
         from tasks import scrape_single_product_safe
@@ -61,7 +61,7 @@ class TestScrapeSingleProductSafe:
         assert isinstance(exception, ProductUnavailableError)
         assert str(exception) == "Out of stock"
 
-    @patch('tasks.scraper')
+    @patch("tasks.scraper")
     def test_scrape_single_product_safe_error(self, mock_scraper):
         """Test scraping with generic error."""
         from tasks import scrape_single_product_safe
@@ -83,7 +83,7 @@ class TestScrapeSingleProductSafe:
         assert isinstance(exception, Exception)
         assert str(exception) == "Network error"
 
-    @patch('tasks.scraper')
+    @patch("tasks.scraper")
     def test_scrape_single_product_safe_no_data(self, mock_scraper):
         """Test scraping when no data is returned."""
         from tasks import scrape_single_product_safe
@@ -110,7 +110,7 @@ class TestScrapeSingleProductSafe:
 class TestScrapeProductsParallel:
     """Test the scrape_products_parallel function."""
 
-    @patch('tasks.scrape_single_product_safe')
+    @patch("tasks.scrape_single_product_safe")
     def test_scrape_products_parallel_success(self, mock_scrape_safe):
         """Test parallel scraping of multiple products."""
         from tasks import scrape_products_parallel
@@ -140,7 +140,7 @@ class TestScrapeProductsParallel:
         scraped_ids = {result[0].id for result in results}
         assert scraped_ids == {1, 2, 3, 4, 5}
 
-    @patch('tasks.scrape_single_product_safe')
+    @patch("tasks.scrape_single_product_safe")
     def test_scrape_products_parallel_mixed_results(self, mock_scrape_safe):
         """Test parallel scraping with mixed success/failure."""
         from tasks import scrape_products_parallel
@@ -184,7 +184,7 @@ class TestScrapeProductsParallel:
         assert error_result[1] is None
         assert isinstance(error_result[2], Exception)
 
-    @patch('tasks.scrape_single_product_safe')
+    @patch("tasks.scrape_single_product_safe")
     def test_scrape_products_parallel_empty_list(self, mock_scrape_safe):
         """Test parallel scraping with empty product list."""
         from tasks import scrape_products_parallel
@@ -196,8 +196,8 @@ class TestScrapeProductsParallel:
         assert len(results) == 0
         assert mock_scrape_safe.call_count == 0
 
-    @patch('tasks.scrape_single_product_safe')
-    @patch('tasks.settings')
+    @patch("tasks.scrape_single_product_safe")
+    @patch("tasks.settings")
     def test_scrape_products_parallel_uses_config(self, mock_settings, mock_scrape_safe):
         """Test that parallel scraping uses configured max_workers."""
         from tasks import scrape_products_parallel
@@ -223,11 +223,11 @@ class TestScrapeProductsParallel:
 class TestCheckPricesByFrequencyWithParallel:
     """Test the check_prices_by_frequency task with parallel scraping."""
 
-    @patch('tasks.SessionLocal')
-    @patch('tasks.scrape_products_parallel')
-    @patch('tasks.price_history_service')
-    @patch('tasks.logger')
-    @patch('tasks.settings')
+    @patch("tasks.SessionLocal")
+    @patch("tasks.scrape_products_parallel")
+    @patch("tasks.price_history_service")
+    @patch("tasks.logger")
+    @patch("tasks.settings")
     def test_check_prices_by_frequency_uses_parallel_scraping(
         self, mock_settings, mock_logger, mock_price_service, mock_scrape_parallel, mock_session_local
     ):
@@ -284,11 +284,11 @@ class TestCheckPricesByFrequencyWithParallel:
         assert len(first_call_batch) == 2
         assert len(second_call_batch) == 1
 
-    @patch('tasks.SessionLocal')
-    @patch('tasks.scrape_products_parallel')
-    @patch('tasks.price_history_service')
-    @patch('tasks.logger')
-    @patch('tasks.settings')
+    @patch("tasks.SessionLocal")
+    @patch("tasks.scrape_products_parallel")
+    @patch("tasks.price_history_service")
+    @patch("tasks.logger")
+    @patch("tasks.settings")
     def test_check_prices_by_frequency_handles_parallel_errors(
         self, mock_settings, mock_logger, mock_price_service, mock_scrape_parallel, mock_session_local
     ):
@@ -303,12 +303,36 @@ class TestCheckPricesByFrequencyWithParallel:
         mock_session_local.return_value = mock_db
 
         # Create mock products
-        product1 = Mock(spec=Product, id=1, name="Product 1", url="https://test1.com",
-                       current_price=100.0, target_price=90.0, is_available=True, check_frequency=24)
-        product2 = Mock(spec=Product, id=2, name="Product 2", url="https://test2.com",
-                       current_price=100.0, target_price=90.0, is_available=True, check_frequency=24)
-        product3 = Mock(spec=Product, id=3, name="Product 3", url="https://test3.com",
-                       current_price=100.0, target_price=90.0, is_available=True, check_frequency=24)
+        product1 = Mock(
+            spec=Product,
+            id=1,
+            name="Product 1",
+            url="https://test1.com",
+            current_price=100.0,
+            target_price=90.0,
+            is_available=True,
+            check_frequency=24,
+        )
+        product2 = Mock(
+            spec=Product,
+            id=2,
+            name="Product 2",
+            url="https://test2.com",
+            current_price=100.0,
+            target_price=90.0,
+            is_available=True,
+            check_frequency=24,
+        )
+        product3 = Mock(
+            spec=Product,
+            id=3,
+            name="Product 3",
+            url="https://test3.com",
+            current_price=100.0,
+            target_price=90.0,
+            is_available=True,
+            check_frequency=24,
+        )
 
         products = [product1, product2, product3]
 
@@ -346,11 +370,12 @@ class TestCheckPricesByFrequencyWithParallel:
 class TestParallelScrapingPerformance:
     """Test performance characteristics of parallel scraping."""
 
-    @patch('tasks.scrape_single_product_safe')
+    @patch("tasks.scrape_single_product_safe")
     def test_parallel_scraping_faster_than_sequential(self, mock_scrape_safe):
         """Test that parallel scraping completes faster than sequential (conceptual test)."""
-        from tasks import scrape_products_parallel
         import time
+
+        from tasks import scrape_products_parallel
 
         # Create mock products
         products = [Mock(spec=Product, id=i, url=f"https://test.com/{i}") for i in range(10)]

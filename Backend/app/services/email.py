@@ -1,7 +1,10 @@
 import smtplib
-import requests
-from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from typing import Any, Dict
+
+import requests
+
 from app.core.config import settings
 from app.core.logging_config import get_logger
 
@@ -48,7 +51,11 @@ class EmailService:
 
         subject = f"🔔 Baisse de prix détectée sur {product_name}"
 
-        html_content = f"""
+        # Pre-calculate savings
+        savings = old_price - new_price
+        savings_percent = (savings / old_price * 100) if old_price > 0 else 0
+
+        html_content = """
         <html>
             <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
                 <h2 style="color: #4CAF50;">Bonne nouvelle ! 🎉</h2>
@@ -57,7 +64,7 @@ class EmailService:
                 <div style="background-color: #f4f4f4; padding: 15px; border-radius: 5px; margin: 20px 0;">
                     <p style="margin: 5px 0;"><strong>Nouveau prix :</strong> <span style="color: #4CAF50; font-size: 1.2em;">{new_price:.2f} €</span></p>
                     <p style="margin: 5px 0;"><strong>Ancien prix :</strong> <span style="text-decoration: line-through; color: #999;">{old_price:.2f} €</span></p>
-                    <p style="margin: 5px 0;"><strong>Économie :</strong> <span style="color: #FF5722;">{(old_price - new_price):.2f} € ({((old_price - new_price) / old_price * 100):.1f}%)</span></p>
+                    <p style="margin: 5px 0;"><strong>Économie :</strong> <span style="color: #FF5722;">{savings:.2f} € ({savings_percent:.1f}%)</span></p>
                 </div>
                 <p>
                     <a href="{product_url}" style="display: inline-block; padding: 10px 20px; background-color: #4CAF50; color: white; text-decoration: none; border-radius: 5px;">
@@ -71,7 +78,14 @@ class EmailService:
                 </p>
             </body>
         </html>
-        """
+        """.format(
+            product_name=product_name,
+            new_price=new_price,
+            old_price=old_price,
+            product_url=product_url,
+            savings=savings,
+            savings_percent=savings_percent,
+        )
 
         self._send_email(to_email, subject, html_content)
 
@@ -93,7 +107,7 @@ class EmailService:
         # Note: In production, use the actual frontend URL
         verification_url = f"http://localhost:5173/verify-email?token={token}"
 
-        html_content = f"""
+        html_content = """
         <html>
             <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
                 <h2 style="color: #4CAF50;">Bienvenue sur PriceWatch ! 👋</h2>
@@ -114,7 +128,9 @@ class EmailService:
                 </p>
             </body>
         </html>
-        """
+        """.format(
+            verification_url=verification_url
+        )
 
         self._send_email(to_email, subject, html_content)
 
@@ -125,7 +141,7 @@ class EmailService:
         # Note: In production, use the actual frontend URL
         reset_url = f"http://localhost:5173/reset-password?token={token}"
 
-        html_content = f"""
+        html_content = """
         <html>
             <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
                 <h2 style="color: #FF5722;">Réinitialisation de mot de passe</h2>
@@ -148,7 +164,9 @@ class EmailService:
                 </p>
             </body>
         </html>
-        """
+        """.format(
+            reset_url=reset_url
+        )
 
         self._send_email(to_email, subject, html_content)
 
@@ -202,9 +220,10 @@ class EmailService:
             logger.info(f"Sending webhook notification to {webhook_url} (type: {webhook_type})")
 
             # Prepare payload based on webhook type
+            payload: Dict[str, Any]
             if webhook_type == "slack":
                 payload = {
-                    "text": f"🔔 Price Drop Alert!",
+                    "text": "🔔 Price Drop Alert!",
                     "blocks": [
                         {
                             "type": "section",

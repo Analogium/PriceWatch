@@ -37,8 +37,9 @@ class TestMainApp:
 
     def test_app_has_cors_middleware(self):
         """Test that CORS middleware is configured."""
-        from app.main import app
         from fastapi.middleware.cors import CORSMiddleware
+
+        from app.main import app
 
         # Check that CORS middleware is added
         middleware_types = [type(m) for m in app.user_middleware]
@@ -69,8 +70,8 @@ class TestMainApp:
 
     def test_app_title(self):
         """Test that app has correct title."""
-        from app.main import app
         from app.core.config import settings
+        from app.main import app
 
         assert app.title == settings.PROJECT_NAME
 

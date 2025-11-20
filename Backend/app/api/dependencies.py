@@ -1,8 +1,11 @@
+from typing import Optional
+
 from fastapi import Depends, HTTPException, status
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.orm import Session
-from app.db.base import get_db
+
 from app.core.security import decode_access_token
+from app.db.base import get_db
 from app.models.user import User
 
 security = HTTPBearer()
@@ -25,7 +28,7 @@ def get_current_user(
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    email: str = payload.get("sub")
+    email: Optional[str] = payload.get("sub")
     if email is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -44,16 +47,11 @@ def get_current_user(
     return user
 
 
-def get_current_admin_user(
-    current_user: User = Depends(get_current_user)
-) -> User:
+def get_current_admin_user(current_user: User = Depends(get_current_user)) -> User:
     """
     Dependency to verify the current user is an admin.
     Raises 403 Forbidden if user is not an admin.
     """
     if not current_user.is_admin:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Admin privileges required"
-        )
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Admin privileges required")
     return current_user
