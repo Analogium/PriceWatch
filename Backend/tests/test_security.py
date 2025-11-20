@@ -107,17 +107,13 @@ def test_3_login_and_tokens():
     print_info(f"Refresh token received (length: {len(tokens.get('refresh_token', ''))})")
 
     # Test access token
-    me_response = requests.get(
-        f"{BASE_URL}/auth/me", headers={"Authorization": f"Bearer {tokens['access_token']}"}
-    )
+    me_response = requests.get(f"{BASE_URL}/auth/me", headers={"Authorization": f"Bearer {tokens['access_token']}"})
     assert me_response.status_code == 200, "Access token invalid"
     print_success(f"Access token valid ✓ User: {me_response.json()['email']}")
 
     # Test refresh token
     assert "refresh_token" in tokens, "No refresh token received"
-    refresh_response = requests.post(
-        f"{BASE_URL}/auth/refresh", json={"refresh_token": tokens["refresh_token"]}
-    )
+    refresh_response = requests.post(f"{BASE_URL}/auth/refresh", json={"refresh_token": tokens["refresh_token"]})
     assert refresh_response.status_code == 200, f"Refresh token failed: {refresh_response.json()}"
 
     new_tokens = refresh_response.json()
