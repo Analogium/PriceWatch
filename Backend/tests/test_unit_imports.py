@@ -11,7 +11,7 @@ class TestImports:
 
     def test_import_models(self):
         """Test that all models can be imported."""
-        from app.models import user, product, price_history, user_preferences
+        from app.models import price_history, product, user, user_preferences
 
         assert user.User is not None
         assert product.Product is not None
@@ -20,7 +20,7 @@ class TestImports:
 
     def test_import_schemas(self):
         """Test that all schemas can be imported."""
-        from app.schemas import user, product, price_history, user_preferences
+        from app.schemas import price_history, product, user, user_preferences
 
         assert user.UserCreate is not None
         assert product.ProductCreate is not None
@@ -29,7 +29,7 @@ class TestImports:
 
     def test_import_services(self):
         """Test that all services can be imported."""
-        from app.services import email, scraper, price_history
+        from app.services import email, price_history, scraper
 
         assert email.EmailService is not None
         assert scraper.PriceScraper is not None
@@ -37,7 +37,7 @@ class TestImports:
 
     def test_import_api_endpoints(self):
         """Test that API endpoints can be imported."""
-        from app.api.endpoints import auth, products, preferences
+        from app.api.endpoints import auth, preferences, products
 
         assert auth.router is not None
         assert products.router is not None
@@ -45,7 +45,7 @@ class TestImports:
 
     def test_import_core_modules(self):
         """Test that core modules can be imported."""
-        from app.core import config, security, rate_limit, logging_config
+        from app.core import config, logging_config, rate_limit, security
 
         assert config.settings is not None
         assert security.get_password_hash is not None

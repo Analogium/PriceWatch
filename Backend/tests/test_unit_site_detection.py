@@ -3,6 +3,7 @@ Unit tests for site detection functionality.
 """
 
 import pytest
+
 from app.services.scraper import SiteDetector
 
 

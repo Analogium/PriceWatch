@@ -2,10 +2,11 @@
 Unit tests for error handling features (logging, retry logic, unavailability detection).
 """
 
-import pytest
 from unittest.mock import Mock, patch
-from bs4 import BeautifulSoup
+
+import pytest
 import requests
+from bs4 import BeautifulSoup
 
 from app.services.scraper import PriceScraper, ProductUnavailableError
 

@@ -2,18 +2,19 @@
 Unit tests for admin service and endpoints
 """
 
-import pytest
-from unittest.mock import Mock, patch
 from datetime import datetime
+from unittest.mock import Mock, patch
+
+import pytest
 from sqlalchemy.orm import Session
 
-from app.services.admin import AdminService
-from app.models.user import User
-from app.models.product import Product
 from app.models.price_history import PriceHistory
+from app.models.product import Product
 from app.models.scraping_stats import ScrapingStats
+from app.models.user import User
 from app.models.user_preferences import UserPreferences
-from app.schemas.admin import GlobalStats, UserStats, SiteStats
+from app.schemas.admin import GlobalStats, SiteStats, UserStats
+from app.services.admin import AdminService
 
 
 @pytest.mark.unit
@@ -570,8 +571,9 @@ class TestAdminDependencies:
 
     def test_get_current_admin_user_not_admin(self):
         """Test admin dependency with non-admin user raises 403"""
-        from app.api.dependencies import get_current_admin_user
         from fastapi import HTTPException
+
+        from app.api.dependencies import get_current_admin_user
 
         mock_user = Mock(spec=User)
         mock_user.is_admin = False

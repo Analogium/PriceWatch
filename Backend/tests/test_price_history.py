@@ -11,9 +11,10 @@ Tests include:
 - Access control and security
 """
 
-import requests
 import time
+
 import psycopg2
+import requests
 
 # Configuration
 BASE_URL = "http://localhost:8000/api/v1"

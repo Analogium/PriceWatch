@@ -2,24 +2,19 @@
 Admin service for analytics and statistics
 """
 
-from sqlalchemy.orm import Session
-from sqlalchemy import func
-from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Any
-
 import io
+from datetime import datetime, timedelta
+from typing import Any, Dict, List, Optional
 
-from app.models.user import User
-from app.models.product import Product
+from sqlalchemy import func
+from sqlalchemy.orm import Session
+
 from app.models.price_history import PriceHistory
+from app.models.product import Product
 from app.models.scraping_stats import ScrapingStats
+from app.models.user import User
 from app.models.user_preferences import UserPreferences
-from app.schemas.admin import (
-    GlobalStats,
-    UserStats,
-    SiteStats,
-    ScrapingStatsResponse,
-)
+from app.schemas.admin import GlobalStats, ScrapingStatsResponse, SiteStats, UserStats
 
 
 class AdminService:

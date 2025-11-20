@@ -3,8 +3,9 @@ Unit tests for API dependencies.
 Tests authentication and database dependencies.
 """
 
-import pytest
 from unittest.mock import Mock, patch
+
+import pytest
 from fastapi import HTTPException
 from fastapi.security import HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session

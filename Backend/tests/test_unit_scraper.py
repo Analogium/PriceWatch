@@ -10,9 +10,11 @@ Tests include:
 - Price parsing edge cases
 """
 
-import pytest
 from unittest.mock import Mock, patch
+
+import pytest
 from bs4 import BeautifulSoup
+
 from app.services.scraper import PriceScraper, scraper
 
 

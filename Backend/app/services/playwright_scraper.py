@@ -6,11 +6,15 @@ This scraper uses browser automation to bypass CAPTCHA and Cloudflare protection
 
 import asyncio
 import random
-from typing import Optional
-from playwright.async_api import async_playwright, Browser, Page, TimeoutError as PlaywrightTimeoutError
-from app.schemas.product import ProductScrapedData
-from app.core.logging_config import get_logger
 import re
+from typing import Optional
+
+from playwright.async_api import Browser, Page
+from playwright.async_api import TimeoutError as PlaywrightTimeoutError
+from playwright.async_api import async_playwright
+
+from app.core.logging_config import get_logger
+from app.schemas.product import ProductScrapedData
 
 logger = get_logger(__name__)
 

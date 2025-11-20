@@ -3,11 +3,12 @@ Unit tests for authentication endpoints.
 Tests registration, login, token refresh, password reset, and verification endpoints.
 """
 
-import pytest
+from datetime import datetime
 from unittest.mock import Mock, patch
+
+import pytest
 from fastapi import HTTPException, Request
 from sqlalchemy.orm import Session
-from datetime import datetime
 
 from app.models.user import User
 from app.schemas.user import UserCreate, UserLogin

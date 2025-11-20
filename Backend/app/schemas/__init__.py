@@ -1,16 +1,16 @@
-from app.schemas.user import UserCreate, UserLogin, UserResponse, Token, TokenData
+from app.schemas.price_history import PriceHistoryCreate, PriceHistoryResponse, PriceHistoryStats
 from app.schemas.product import (
-    ProductCreate,
-    ProductUpdate,
-    ProductResponse,
-    ProductScrapedData,
-    SortOrder,
-    ProductSortBy,
     PaginatedProductsResponse,
     PaginationMetadata,
+    ProductCreate,
+    ProductResponse,
+    ProductScrapedData,
+    ProductSortBy,
+    ProductUpdate,
+    SortOrder,
 )
-from app.schemas.price_history import PriceHistoryCreate, PriceHistoryResponse, PriceHistoryStats
-from app.schemas.user_preferences import UserPreferencesCreate, UserPreferencesUpdate, UserPreferencesResponse
+from app.schemas.user import Token, TokenData, UserCreate, UserLogin, UserResponse
+from app.schemas.user_preferences import UserPreferencesCreate, UserPreferencesResponse, UserPreferencesUpdate
 
 __all__ = [
     "UserCreate",

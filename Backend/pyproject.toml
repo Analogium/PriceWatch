@@ -16,8 +16,9 @@ extend-exclude = '''
 [tool.isort]
 profile = "black"
 line_length = 120
-skip_gitignore = true
-known_first_party = ["app"]
+skip_gitignore = false
+known_first_party = ["app", "tasks"]
+skip = [".git", "__pycache__", "migrations", "venv", ".venv", "alembic/versions"]
 
 [tool.mypy]
 python_version = "3.11"

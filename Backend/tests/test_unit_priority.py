@@ -3,9 +3,9 @@ Unit tests for product priority checking functionality.
 Tests the priority calculation and sorting logic for price checking.
 """
 
-import pytest
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import MagicMock, Mock, patch
 
+import pytest
 
 from app.models.product import Product
 

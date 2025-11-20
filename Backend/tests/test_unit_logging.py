@@ -3,14 +3,15 @@ Unit tests for logging configuration.
 Tests JSON formatter, logging setup, and context managers.
 """
 
-import pytest
-import logging
 import json
+import logging
 import tempfile
 from pathlib import Path
-from unittest.mock import call, MagicMock, Mock, patch
+from unittest.mock import MagicMock, Mock, call, patch
 
-from app.core.logging_config import JSONFormatter, setup_logging, get_logger, LogContext
+import pytest
+
+from app.core.logging_config import JSONFormatter, LogContext, get_logger, setup_logging
 
 
 @pytest.mark.unit

@@ -1,11 +1,13 @@
 """Service for managing price history records."""
 
-from sqlalchemy.orm import Session
-from sqlalchemy import func
-from app.models.price_history import PriceHistory
-from app.models.product import Product
 from datetime import datetime
 from typing import List, Optional
+
+from sqlalchemy import func
+from sqlalchemy.orm import Session
+
+from app.models.price_history import PriceHistory
+from app.models.product import Product
 
 
 class PriceHistoryService:

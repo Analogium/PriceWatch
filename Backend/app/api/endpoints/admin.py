@@ -2,19 +2,15 @@
 Admin endpoints for analytics and system management
 """
 
-from fastapi import APIRouter, Depends, HTTPException, status, Query, Response
-from sqlalchemy.orm import Session
 from typing import List
+
+from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
+from sqlalchemy.orm import Session
 
 from app.api.dependencies import get_current_admin_user, get_db
 from app.models.user import User
+from app.schemas.admin import GlobalStats, ScrapingStatsResponse, SiteStats, UserStats
 from app.services.admin import AdminService
-from app.schemas.admin import (
-    GlobalStats,
-    UserStats,
-    SiteStats,
-    ScrapingStatsResponse,
-)
 
 router = APIRouter()
 

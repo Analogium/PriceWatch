@@ -3,8 +3,9 @@ Test script for all security features.
 Run this with: python test_security.py
 """
 
-import requests
 import time
+
+import requests
 
 BASE_URL = "http://localhost:8000/api/v1"
 

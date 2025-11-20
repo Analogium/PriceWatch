@@ -10,14 +10,16 @@ Tests include:
 - Database session management
 """
 
-import pytest
-from unittest.mock import Mock, MagicMock, patch
 from datetime import datetime
-from tasks import check_all_prices, check_single_product
+from unittest.mock import MagicMock, Mock, patch
+
+import pytest
+
 from app.models.product import Product
 from app.models.user import User
 from app.models.user_preferences import UserPreferences
 from app.schemas.product import ProductScrapedData
+from tasks import check_all_prices, check_single_product
 
 
 class TestCeleryTasks:

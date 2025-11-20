@@ -2,10 +2,12 @@
 Rate limiting middleware using Redis.
 """
 
-from fastapi import Request, HTTPException, status
-from typing import Optional
 import time
+from typing import Optional
+
+from fastapi import HTTPException, Request, status
 from redis import Redis
+
 from app.core.config import settings
 
 

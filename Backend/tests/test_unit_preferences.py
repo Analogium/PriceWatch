@@ -10,8 +10,10 @@ Tests include:
 - Default preferences creation
 """
 
+from unittest.mock import MagicMock, Mock, patch
+
 import pytest
-from unittest.mock import Mock, patch, MagicMock
+
 from app.models.user_preferences import UserPreferences
 from app.schemas.user_preferences import UserPreferencesCreate, UserPreferencesUpdate
 

@@ -3,20 +3,22 @@ Celery tasks for background jobs.
 This file contains the price checking task that runs periodically.
 """
 
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from datetime import datetime, timedelta
+from typing import List, Optional, Tuple
+
 from celery import Celery
 from sqlalchemy.orm import Session
-from datetime import datetime, timedelta
-from concurrent.futures import ThreadPoolExecutor, as_completed
-from typing import List, Tuple, Optional
+
 from app.core.config import settings
+from app.core.logging_config import get_logger
 from app.db.base import SessionLocal
 from app.models.product import Product
 from app.models.user import User
 from app.models.user_preferences import UserPreferences
-from app.services.scraper import scraper, ProductUnavailableError
 from app.services.email import email_service
 from app.services.price_history import price_history_service
-from app.core.logging_config import get_logger
+from app.services.scraper import ProductUnavailableError, scraper
 
 logger = get_logger(__name__)
 

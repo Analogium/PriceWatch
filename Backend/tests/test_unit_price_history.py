@@ -9,12 +9,14 @@ Tests include:
 - Edge cases and error handling
 """
 
-import pytest
-from unittest.mock import Mock, MagicMock
 from datetime import datetime, timedelta
-from app.services.price_history import PriceHistoryService, price_history_service
+from unittest.mock import MagicMock, Mock
+
+import pytest
+
 from app.models.price_history import PriceHistory
 from app.models.product import Product
+from app.services.price_history import PriceHistoryService, price_history_service
 
 
 class TestPriceHistoryService:

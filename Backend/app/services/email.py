@@ -1,7 +1,9 @@
 import smtplib
-import requests
-from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+
+import requests
+
 from app.core.config import settings
 from app.core.logging_config import get_logger
 

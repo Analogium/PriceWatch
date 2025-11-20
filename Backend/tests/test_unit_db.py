@@ -2,11 +2,12 @@
 Unit tests for database configuration and session management.
 """
 
-import pytest
 from unittest.mock import Mock, patch
+
+import pytest
 from sqlalchemy.orm import Session
 
-from app.db.base import get_db, Base
+from app.db.base import Base, get_db
 
 
 @pytest.mark.unit

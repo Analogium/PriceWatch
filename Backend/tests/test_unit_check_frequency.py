@@ -3,14 +3,14 @@ Unit tests for check_frequency functionality.
 Tests the product check frequency feature (6h, 12h, 24h).
 """
 
-import pytest
-
-from app.schemas.product import ProductCreate, ProductUpdate
-from unittest.mock import Mock, patch, MagicMock
 from datetime import datetime, timedelta
+from unittest.mock import MagicMock, Mock, patch
+
+import pytest
 from pydantic import ValidationError
 
 from app.models.product import Product
+from app.schemas.product import ProductCreate, ProductUpdate
 
 
 @pytest.mark.unit
@@ -161,9 +161,9 @@ class TestCheckPricesByFrequency:
         self, mock_logger, mock_email, mock_price_service, mock_scraper, mock_session_local
     ):
         """Test that task sends alert when price drops below target."""
-        from tasks import check_prices_by_frequency
         from app.models.user import User
         from app.models.user_preferences import UserPreferences
+        from tasks import check_prices_by_frequency
 
         # Mock database session
         mock_db = MagicMock()

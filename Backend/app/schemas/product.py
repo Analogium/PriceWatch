@@ -1,7 +1,8 @@
-from pydantic import BaseModel, field_validator
 from datetime import datetime
-from typing import Optional, List
 from enum import Enum
+from typing import List, Optional
+
+from pydantic import BaseModel, field_validator
 
 
 class ProductBase(BaseModel):

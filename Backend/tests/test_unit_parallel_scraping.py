@@ -3,9 +3,9 @@ Unit tests for parallel scraping functionality.
 Tests the concurrent scraping of multiple products.
 """
 
-import pytest
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import MagicMock, Mock, patch
 
+import pytest
 
 from app.models.product import Product
 from app.services.scraper import ProductUnavailableError
@@ -373,8 +373,9 @@ class TestParallelScrapingPerformance:
     @patch("tasks.scrape_single_product_safe")
     def test_parallel_scraping_faster_than_sequential(self, mock_scrape_safe):
         """Test that parallel scraping completes faster than sequential (conceptual test)."""
-        from tasks import scrape_products_parallel
         import time
+
+        from tasks import scrape_products_parallel
 
         # Create mock products
         products = [Mock(spec=Product, id=i, url=f"https://test.com/{i}") for i in range(10)]
