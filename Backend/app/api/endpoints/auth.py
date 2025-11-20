@@ -183,7 +183,7 @@ async def reset_password(request: Request, reset_data: PasswordResetConfirm, db:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid reset token")
 
     # Check if token expired
-    if user.reset_token_expires < datetime.utcnow():
+    if user.reset_token_expires is None or user.reset_token_expires < datetime.utcnow():
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Reset token has expired")
 
     # Update password

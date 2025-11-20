@@ -1,6 +1,7 @@
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+from typing import Any, Dict
 
 import requests
 
@@ -219,6 +220,7 @@ class EmailService:
             logger.info(f"Sending webhook notification to {webhook_url} (type: {webhook_type})")
 
             # Prepare payload based on webhook type
+            payload: Dict[str, Any]
             if webhook_type == "slack":
                 payload = {
                     "text": "🔔 Price Drop Alert!",

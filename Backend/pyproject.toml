@@ -26,13 +26,6 @@ warn_return_any = false
 warn_unused_configs = true
 disallow_untyped_defs = false
 ignore_missing_imports = true
-# Disable specific error codes that cause false positives
-disable_error_code = [
-    "arg-type",      # SQLAlchemy filter() with == expressions
-    "operator",      # Redis/async type issues
-    "misc",          # List comprehension type issues
-    "dict-item"      # Dict literal type inference
-]
 exclude = [
     "migrations/",
     "alembic/",

@@ -25,8 +25,8 @@ class AdminService:
         """Get global system statistics"""
         # User stats
         total_users = db.query(func.count(User.id)).scalar() or 0
-        verified_users = db.query(func.count(User.id)).filter(User.is_verified is True).scalar() or 0
-        admin_users = db.query(func.count(User.id)).filter(User.is_admin is True).scalar() or 0
+        verified_users = db.query(func.count(User.id)).filter(User.is_verified == True).scalar() or 0  # noqa: E712
+        admin_users = db.query(func.count(User.id)).filter(User.is_admin == True).scalar() or 0  # noqa: E712
 
         # Product stats
         total_products = db.query(func.count(Product.id)).scalar() or 0
@@ -35,7 +35,9 @@ class AdminService:
         two_days_ago = datetime.utcnow() - timedelta(hours=48)
         active_products = db.query(func.count(Product.id)).filter(Product.last_checked >= two_days_ago).scalar() or 0
 
-        unavailable_products = db.query(func.count(Product.id)).filter(Product.is_available is False).scalar() or 0
+        unavailable_products = (
+            db.query(func.count(Product.id)).filter(Product.is_available == False).scalar() or 0  # noqa: E712
+        )
 
         # Scraping stats
         total_scrapes = db.query(func.count(ScrapingStats.id)).scalar() or 0
@@ -179,7 +181,8 @@ class AdminService:
     def get_all_users_stats(db: Session, skip: int = 0, limit: int = 100) -> List[UserStats]:
         """Get statistics for all users with pagination"""
         users = db.query(User).offset(skip).limit(limit).all()
-        return [AdminService.get_user_stats(db, user.id) for user in users]
+        stats = [AdminService.get_user_stats(db, user.id) for user in users]
+        return [s for s in stats if s is not None]
 
     @staticmethod
     def get_recent_scraping_stats(db: Session, hours: int = 24, limit: int = 100) -> List[ScrapingStatsResponse]:

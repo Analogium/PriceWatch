@@ -44,7 +44,7 @@ jobs:
         run: flake8 app/ tests/
 
       - name: Type check with mypy
-        run: mypy app/ --ignore-missing-imports
+        run: mypy app/ tasks.py
 
   # Run unit tests
   test:

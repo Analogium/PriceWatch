@@ -82,7 +82,10 @@ def get_products(
         has_previous=page > 1,
     )
 
-    return PaginatedProductsResponse(items=products, metadata=metadata)
+    # Convert ORM models to Pydantic response models
+    product_responses = [ProductResponse.model_validate(p) for p in products]
+
+    return PaginatedProductsResponse(items=product_responses, metadata=metadata)
 
 
 @router.post("", response_model=ProductResponse, status_code=status.HTTP_201_CREATED)

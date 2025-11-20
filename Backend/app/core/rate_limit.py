@@ -39,7 +39,7 @@ class RateLimiter:
             window_key = f"rate_limit:{key}:{current_time // self.period}"
 
             # Increment the counter
-            count = self.redis_client.incr(window_key)
+            count: int = self.redis_client.incr(window_key)  # type: ignore[assignment]
 
             # Set expiration on first request
             if count == 1:
