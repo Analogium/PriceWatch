@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+
+<html class="light" lang="fr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>PriceWatch - Surveillez les prix et économisez automatiquement</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings:
+            'FILL' 0,
+            'wght' 400,
+            'GRAD' 0,
+            'opsz' 24
+        }
+    </style>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#2563EB",
+                        "background-light": "#F8FAFC",
+                        "background-dark": "#101722",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem",
+                        "lg": "0.75rem",
+                        "xl": "1rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+</head>
+<body class="font-display bg-background-light dark:bg-background-dark text-[#1E293B] dark:text-gray-200">
+<div class="relative flex min-h-screen w-full flex-col group/design-root overflow-x-hidden">
+<div class="layout-container flex h-full grow flex-col">
+<div class="flex flex-1 justify-center">
+<div class="layout-content-container flex flex-col w-full max-w-5xl flex-1">
+<!-- TopNavBar -->
+<header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-gray-200 dark:border-gray-800 px-10 py-4 sticky top-0 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-sm z-50">
+<div class="flex items-center gap-3 text-primary">
+<div class="size-6">
+<svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.5" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M2.25 18.75a60.07 60.07 0 0 1 15.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 0 1 3 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 0 0-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 0 1-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 0 0 3 15h-.75M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm3 0h.008v.008H18V10.5Zm-12 0h.008v.008H6V10.5Z" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+</div>
+<h2 class="text-[#1E293B] dark:text-gray-100 text-xl font-bold leading-tight tracking-[-0.015em]">PriceWatch</h2>
+</div>
+<div class="hidden md:flex flex-1 justify-center gap-8">
+<div class="flex items-center gap-9">
+<a class="text-[#1E293B] dark:text-gray-300 text-sm font-medium leading-normal hover:text-primary dark:hover:text-primary" href="#features">Fonctionnalités</a>
+<a class="text-[#1E293B] dark:text-gray-300 text-sm font-medium leading-normal hover:text-primary dark:hover:text-primary" href="#testimonials">Témoignages</a>
+<a class="text-[#1E293B] dark:text-gray-300 text-sm font-medium leading-normal hover:text-primary dark:hover:text-primary" href="#faq">FAQ</a>
+</div>
+</div>
+<button class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-5 bg-primary text-white text-sm font-bold leading-normal tracking-[0.015em] hover:opacity-90 transition-opacity">
+<span class="truncate">S'inscrire</span>
+</button>
+</header>
+<main class="flex flex-col gap-16 md:gap-24 py-16 md:py-24 px-4 md:px-10">
+<!-- HeroSection -->
+<section class="@container">
+<div class="flex flex-col-reverse gap-10 @[864px]:flex-row @[864px]:items-center">
+<div class="flex flex-col gap-6 text-center @[864px]:text-left @[864px]:flex-1">
+<div class="flex flex-col gap-2">
+<h1 class="text-[#1E293B] dark:text-white text-4xl font-black leading-tight tracking-[-0.033em] md:text-6xl">
+                                            Surveillez les prix et économisez automatiquement
+                                        </h1>
+<h2 class="text-[#94A3B8] text-base font-normal leading-normal md:text-lg">
+                                            Surveillez les prix, pas vos onglets.
+                                        </h2>
+</div>
+<label class="flex flex-col min-w-40 h-14 w-full md:h-16">
+<div class="flex w-full flex-1 items-stretch rounded-lg shadow-sm">
+<input class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-l-lg text-[#1E293B] dark:text-gray-200 bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700 focus:border-primary focus:ring-primary h-full placeholder:text-[#94A3B8] px-4 text-sm font-normal leading-normal md:text-base" placeholder="Collez l'URL d'un produit ici..." value=""/>
+<button class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-r-lg h-full px-5 bg-primary text-white text-sm font-bold leading-normal tracking-[0.015em] md:text-base hover:opacity-90 transition-opacity">
+<span class="truncate">Suivre ce produit</span>
+</button>
+</div>
+</label>
+</div>
+<div class="w-full bg-center bg-no-repeat aspect-square bg-cover rounded-xl @[864px]:w-2/5" data-alt="Abstract gradient illustration of a shopping chart" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAA9yGbePz44sQic5eNCK5vCtBrleB9v_pcA4OQPaYrR56UyhCO_ElgdBAB6_67u_NJ22LedTjG7Tu2jh7etWkNvwbvJ9z3DtlGgmvYhI4VNLw9uX2-dNZXh0yThCq3bSL72f4bqAAL51NaUtNsil1tPDtjUNr9UWtJEU4-GUDnmQpEh1ydBpmV1V99Hb13Ieb_lcDPIwl0SnnarHRHbpCwhzFUHjeFD2pEKJTuvKpLXrEPby3_Bzknj2toNXccDq5Mx4dTJHft4jNb");'></div>
+</div>
+</section>
+<!-- How it works -->
+<section class="flex flex-col gap-8 items-center">
+<h2 class="text-[#1E293B] dark:text-white text-3xl font-bold leading-tight tracking-tight">Comment ça marche ?</h2>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 w-full">
+<div class="flex flex-1 gap-4 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900/50 p-6 flex-col items-center text-center">
+<div class="text-primary bg-primary/10 p-3 rounded-full">
+<span class="material-symbols-outlined !text-3xl">link</span>
+</div>
+<div class="flex flex-col gap-1">
+<h3 class="text-[#1E293B] dark:text-white text-lg font-bold leading-tight">Étape 1: Collez l'URL</h3>
+<p class="text-[#94A3B8] text-sm font-normal leading-normal">Trouvez un produit sur votre site e-commerce préféré et copiez son lien.</p>
+</div>
+</div>
+<div class="flex flex-1 gap-4 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900/50 p-6 flex-col items-center text-center">
+<div class="text-primary bg-primary/10 p-3 rounded-full">
+<span class="material-symbols-outlined !text-3xl">notifications_active</span>
+</div>
+<div class="flex flex-col gap-1">
+<h3 class="text-[#1E293B] dark:text-white text-lg font-bold leading-tight">Étape 2: Définissez l'alerte</h3>
+<p class="text-[#94A3B8] text-sm font-normal leading-normal">Fixez le prix souhaité et laissez notre système faire le reste pour vous.</p>
+</div>
+</div>
+<div class="flex flex-1 gap-4 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900/50 p-6 flex-col items-center text-center">
+<div class="text-primary bg-primary/10 p-3 rounded-full">
+<span class="material-symbols-outlined !text-3xl">mark_email_read</span>
+</div>
+<div class="flex flex-col gap-1">
+<h3 class="text-[#1E293B] dark:text-white text-lg font-bold leading-tight">Étape 3: Recevez une notification</h3>
+<p class="text-[#94A3B8] text-sm font-normal leading-normal">Nous vous envoyons un e-mail dès que le prix du produit baisse.</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Supported Sites -->
+<section class="flex flex-col gap-8 items-center">
+<h2 class="text-[#1E293B] dark:text-white text-3xl font-bold leading-tight tracking-tight text-center">Compatible avec vos sites préférés</h2>
+<div class="w-full grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-8 items-center">
+<img class="h-8 w-auto mx-auto grayscale opacity-60 hover:grayscale-0 hover:opacity-100 transition-all" data-alt="Amazon logo" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAMi2JY3LBx8HmGMzoZSII4nv9APE2lrLNWUA-5W0fr1RZn2uU9r9m8OmUYuKUhEe5tPJK8xFJrG5LJNJvBWyS0cwoYD1xy4760-wwbeino2Hg2BaRn81M5OFiqSOmPr7-1DqZ95UaBhKbdfkM619PYBnLt4t3inJMCCmMIEawZkOkT1NVukS5T1_6drfqybvN5bq3gjyQ9pnTNKs8dk-7lyfgssdz04_QvcWsNTVSv2N9d01btT6aUABsmRCgBPFfVTj6vKzq17PuJ"/>
+<img class="h-8 w-auto mx-auto grayscale opacity-60 hover:grayscale-0 hover:opacity-100 transition-all" data-alt="Fnac logo" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCk8br1F86rPj3xcC28AgyPGlLfGlhewgP75l8pzRGvOG7JDRKzP3TvQhXTqAMdYbTxO--nE1wE2z-3Kw5ukm-4JJwr-UeMc1FfdUqdvh4bqhE6F9z5ZeRvuG_ACy2r7ZFjo0WSN2tXGljpgwPjt39mDQOdbYPFCfSO827OkjJdZSziuHbuSBPOqKfFiN5VRKf7nBW2_-pzGehDhMjw6v3nbLQ9l23h6vZtpDsfU6PDJLc_KVYWZZ_wRd_5VvpBJwrZY5EbJV-ZJWbx"/>
+<img class="h-7 w-auto mx-auto grayscale opacity-60 hover:grayscale-0 hover:opacity-100 transition-all" data-alt="Darty logo" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDbi8dIQJV890Cg15Qq1RlGNDOTfiUYilKKtnVydMSyncfSP8rSYvE1Ttg36UsBRdHb6zTtvN5U6ZAFFkjW1e3AqU06HfhT31uKwwXSRotjZSRdwLNxecjjZ7UYZDzOHWtU4QtP4EQcLv7uPuCGM-2HKo2Vmwp4qGedNagjt-MdoFcZ9rt0H4tiGHIa_ZBlNUlo1w0C3rKKu01kSWX0lCQq0BGPBnlICk4HURLFH9Xcu6K8ZnER_9eBJDCJIms8UbjVLW60qtVdmwmm"/>
+<img class="h-6 w-auto mx-auto grayscale opacity-60 hover:grayscale-0 hover:opacity-100 transition-all" data-alt="Cdiscount logo" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBuaySyNjNrOq3KHbNIcJYlU89fPYA6CawvsRBR2SVQ4j9Pj67DAZ_PJ27wITnkXYMUFPqgyVUSbDfSmO6Ok_6g6FthGg9KGlPqgkRPYPy4PP8QY8wnmjV6Wk_0XF99tjh6AeUN__r-KTUP6WN-PctLXgRZg15LNQfNSw0aiML_zTEu3oqgAY9M1AzaOK8sCoqSEHSh7LPyilQxF_U3ml8nwR_Ui1rU2N604b5dQPHw43Tii3UcC0sQaZLClS8ZHsV18CnzIqM8cteM"/>
+<img class="h-8 w-auto mx-auto grayscale opacity-60 hover:grayscale-0 hover:opacity-100 transition-all" data-alt="Boulanger logo" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCQeE4QHXxuuMu6uMPmGciuxVg6Lpj2-Anfs9FR2PU51j4r4oOyfpShr9UCHCVdiFtNe_Md7gkoRabpVNIlMlRN_pH8CwoyVmTUzaMxn6l0GmgAu3FmHwAUa9kWF-c5aY_WX-I0lKKykmJAWYusP7qQapTJMsK1u2gX-uRxnPky8j0k0NgWCJBl2svXxs3b6JvXJW0J5VR5yTQ0RGVON9RVI7n7I0yEkti5han4hODFiZHrTGkMYrb6brU7NCWVGLJawJ6wIaYcmma2"/>
+<img class="h-10 w-auto mx-auto grayscale opacity-60 hover:grayscale-0 hover:opacity-100 transition-all" data-alt="E.Leclerc logo" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBZBi2sVR4xElw7EtJhik7cMcU92UFkvsXJWfHuE8NXQ6MMcF51CMYGqr-Vjbi-KuU9P7mg0elk8K_zhaJRNtx1J38U3SpiemAX4YRKPffZHKJVIa62XpP4kVYvj1Q7pxQEqxgEIVDAGHGOTveQlxUVnSMxEtl2elkp1g-i2pmHEpw64Wuegnh6D30NcDCvqfFG9CG447dwPKjlM2uAx-kDPKG8pDPSMsbVav1aoqblJX82l9r61RuQiOYlPxZyybNM7nH6vX91XGZD"/>
+</div>
+</section>
+<!-- Benefits Section -->
+<section class="flex flex-col gap-8 items-center" id="features">
+<h2 class="text-[#1E293B] dark:text-white text-3xl font-bold leading-tight tracking-tight text-center">Tout ce dont vous avez besoin pour économiser</h2>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
+<div class="flex gap-4 p-6 rounded-xl bg-white dark:bg-gray-900/50 border border-gray-200 dark:border-gray-800">
+<div class="text-primary"><span class="material-symbols-outlined">update</span></div>
+<div class="flex flex-col gap-1">
+<h3 class="text-[#1E293B] dark:text-white text-lg font-bold leading-tight">Alertes en temps réel</h3>
+<p class="text-[#94A3B8] text-sm font-normal leading-normal">Soyez le premier à savoir quand les prix baissent grâce à nos notifications instantanées.</p>
+</div>
+</div>
+<div class="flex gap-4 p-6 rounded-xl bg-white dark:bg-gray-900/50 border border-gray-200 dark:border-gray-800">
+<div class="text-primary"><span class="material-symbols-outlined">history</span></div>
+<div class="flex flex-col gap-1">
+<h3 class="text-[#1E293B] dark:text-white text-lg font-bold leading-tight">Historique des prix</h3>
+<p class="text-[#94A3B8] text-sm font-normal leading-normal">Visualisez l'évolution des prix pour prendre des décisions d'achat éclairées.</p>
+</div>
+</div>
+<div class="flex gap-4 p-6 rounded-xl bg-white dark:bg-gray-900/50 border border-gray-200 dark:border-gray-800">
+<div class="text-primary"><span class="material-symbols-outlined">cloud_off</span></div>
+<div class="flex flex-col gap-1">
+<h3 class="text-[#1E293B] dark:text-white text-lg font-bold leading-tight">Aucune installation requise</h3>
+<p class="text-[#94A3B8] text-sm font-normal leading-normal">Accédez à notre service depuis n'importe quel navigateur, sans télécharger d'extension.</p>
+</div>
+</div>
+<div class="flex gap-4 p-6 rounded-xl bg-white dark:bg-gray-900/50 border border-gray-200 dark:border-gray-800">
+<div class="text-primary"><span class="material-symbols-outlined">redeem</span></div>
+<div class="flex flex-col gap-1">
+<h3 class="text-[#1E293B] dark:text-white text-lg font-bold leading-tight">Totalement gratuit</h3>
+<p class="text-[#94A3B8] text-sm font-normal leading-normal">Notre service de surveillance de base est et restera toujours gratuit.</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Testimonials -->
+<section class="flex flex-col gap-8 items-center" id="testimonials">
+<h2 class="text-[#1E293B] dark:text-white text-3xl font-bold leading-tight tracking-tight text-center">Ils nous font confiance</h2>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 w-full">
+<div class="flex flex-col gap-4 p-6 rounded-xl bg-white dark:bg-gray-900/50 border border-gray-200 dark:border-gray-800">
+<div class="flex items-center gap-4">
+<img class="h-12 w-12 rounded-full object-cover" data-alt="Avatar de Marie Dubois" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCkqz2pz5Yh_jhF52YM3egQciH3xVqR3j8L_F8l6cAWpW1xGQSmHEVXyA246g1wxoGLbIZHT12g5fDZBnaljhnANBbFVQ8q5yD3lecnUFP0kqwSdp3H79ncQ8aWK08-x6KvC0dOcf75xZoIUWsQmPU6ncA0OdL4AgvPe6ocOy1qTGANbM5uiAGiystLgA8IIl4WrHl6Y8QUeQjWtjUFfmGzHPBk8QK3DwGNcsBU8Cd0lISYvbT-mrc39wkgGnfBmLco333u91w103Xx"/>
+<div>
+<h4 class="font-bold text-[#1E293B] dark:text-white">Marie Dubois</h4>
+<div class="flex text-yellow-400">
+<span class="material-symbols-outlined !text-base" style="font-variation-settings: 'FILL' 1;">star</span><span class="material-symbols-outlined !text-base" style="font-variation-settings: 'FILL' 1;">star</span><span class="material-symbols-outlined !text-base" style="font-variation-settings: 'FILL' 1;">star</span><span class="material-symbols-outlined !text-base" style="font-variation-settings: 'FILL' 1;">star</span><span class="material-symbols-outlined !text-base" style="font-variation-settings: 'FILL' 1;">star</span>
+</div>
+</div>
+</div>
+<p class="text-[#94A3B8] text-sm">"Incroyable ! J'ai économisé 50€ sur un casque audio que je voulais depuis des mois. L'alerte est arrivée au bon moment. Je recommande !"</p>
+</div>
+<div class="flex flex-col gap-4 p-6 rounded-xl bg-white dark:bg-gray-900/50 border border-gray-200 dark:border-gray-800">
+<div class="flex items-center gap-4">
+<img class="h-12 w-12 rounded-full object-cover" data-alt="Avatar de Julien Petit" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDxcE8We9qbivyXMRA28GrHiGgqjEZlbCBXF6gAOVCQ6cmcAvYDTks_uORBzarkkplm7mr8xZs8o5IiQ23Ay0ab-_r5aOUQKYv544Qdf-M3HMAhT0bWbORTZNBmpOEgZhccR15yX3Ft-ta_-GJC4ODrXfpgLutM25kK2YdUXsTg9H2_ZI0ZET5FxtRN3DhXj3DN_S71yUf4AiG6SwCKxg9IVoaB1rTFmI3kdofxUrm0NT1z3jxlwX6XjTSRjfBMWy294TZwFxA1raZr"/>
+<div>
+<h4 class="font-bold text-[#1E293B] dark:text-white">Julien Petit</h4>
+<div class="flex text-yellow-400">
+<span class="material-symbols-outlined !text-base" style="font-variation-settings: 'FILL' 1;">star</span><span class="material-symbols-outlined !text-base" style="font-variation-settings: 'FILL' 1;">star</span><span class="material-symbols-outlined !text-base" style="font-variation-settings: 'FILL' 1;">star</span><span class="material-symbols-outlined !text-base" style="font-variation-settings: 'FILL' 1;">star</span><span class="material-symbols-outlined !text-base" style="font-variation-settings: 'FILL' 1;">star</span>
+</div>
+</div>
+</div>
+<p class="text-[#94A3B8] text-sm">"Simple, efficace et gratuit. PriceWatch fait exactement ce qu'il promet. Fini les heures passées à comparer les prix manuellement."</p>
+</div>
+<div class="flex flex-col gap-4 p-6 rounded-xl bg-white dark:bg-gray-900/50 border border-gray-200 dark:border-gray-800">
+<div class="flex items-center gap-4">
+<img class="h-12 w-12 rounded-full object-cover" data-alt="Avatar de Sophie Martin" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCvCX0J5KASJRrOCEe2mpINiBPc_N19P2Fkj6yB70xoA9vGM3cGDk4XyS5Yy6JioMkAm0zM6yntEzaonTdj_MHNsMIZZ-AztHBLPaG9mspYWMRmHvX8e3fyHLbcuO8P8s3WkxV8k_0YSTCfCa-pb4kXlCjArZgUWWJHvIuhAf262fRqvW3ADTkpuzcP71a97Rfi8p4fL34_tmBk6TiHxK7tAgHcY2Ud-WSgT7v32DF73e9gLYih2Fg27AOGLXdiOAH00DgQJVKqDz-T"/>
+<div>
+<h4 class="font-bold text-[#1E293B] dark:text-white">Sophie Martin</h4>
+<div class="flex text-yellow-400">
+<span class="material-symbols-outlined !text-base" style="font-variation-settings: 'FILL' 1;">star</span><span class="material-symbols-outlined !text-base" style="font-variation-settings: 'FILL' 1;">star</span><span class="material-symbols-outlined !text-base" style="font-variation-settings: 'FILL' 1;">star</span><span class="material-symbols-outlined !text-base" style="font-variation-settings: 'FILL' 1;">star</span><span class="material-symbols-outlined !text-base" style="font-variation-settings: 'FILL' 1;">star</span>
+</div>
+</div>
+</div>
+<p class="text-[#94A3B8] text-sm">"J'utilise PriceWatch pour les cadeaux de Noël et les anniversaires. Ça me permet de planifier mes achats et de respecter mon budget."</p>
+</div>
+</div>
+</section>
+<!-- FAQ Section -->
+<section class="flex flex-col gap-8 items-center w-full max-w-3xl mx-auto" id="faq">
+<h2 class="text-[#1E293B] dark:text-white text-3xl font-bold leading-tight tracking-tight text-center">Questions fréquentes</h2>
+<div class="w-full flex flex-col gap-3">
+<details class="group p-4 rounded-xl bg-white dark:bg-gray-900/50 border border-gray-200 dark:border-gray-800 cursor-pointer">
+<summary class="flex items-center justify-between font-bold text-[#1E293B] dark:text-white list-none">
+                                        PriceWatch est-il vraiment gratuit ?
+                                        <span class="material-symbols-outlined transition-transform duration-300 group-open:rotate-180">expand_more</span>
+</summary>
+<p class="text-[#94A3B8] text-sm mt-3">Oui, notre service principal de suivi de prix et d'alertes par e-mail est entièrement gratuit. Nous prévoyons d'ajouter des fonctionnalités premium optionnelles à l'avenir.</p>
+</details>
+<details class="group p-4 rounded-xl bg-white dark:bg-gray-900/50 border border-gray-200 dark:border-gray-800 cursor-pointer">
+<summary class="flex items-center justify-between font-bold text-[#1E293B] dark:text-white list-none">
+                                        Mes données personnelles sont-elles en sécurité ?
+                                        <span class="material-symbols-outlined transition-transform duration-300 group-open:rotate-180">expand_more</span>
+</summary>
+<p class="text-[#94A3B8] text-sm mt-3">Absolument. Nous ne demandons que votre adresse e-mail pour vous envoyer des alertes. Nous ne vendons ni ne partageons vos données avec des tiers. Votre vie privée est notre priorité.</p>
+</details>
+<details class="group p-4 rounded-xl bg-white dark:bg-gray-900/50 border border-gray-200 dark:border-gray-800 cursor-pointer">
+<summary class="flex items-center justify-between font-bold text-[#1E293B] dark:text-white list-none">
+                                        Combien de produits puis-je suivre en même temps ?
+                                        <span class="material-symbols-outlined transition-transform duration-300 group-open:rotate-180">expand_more</span>
+</summary>
+<p class="text-[#94A3B8] text-sm mt-3">Avec notre compte gratuit, vous pouvez suivre jusqu'à 10 produits simultanément. Nous proposerons des limites plus élevées dans nos futurs plans premium.</p>
+</details>
+</div>
+</section>
+<!-- Final CTA -->
+<section class="flex flex-col gap-6 items-center text-center bg-primary/10 dark:bg-primary/20 p-10 rounded-xl">
+<h2 class="text-[#1E293B] dark:text-white text-3xl font-bold leading-tight tracking-tight">Prêt à commencer à économiser ?</h2>
+<p class="text-[#94A3B8] max-w-xl">Créez votre compte gratuit en quelques secondes et ne manquez plus jamais une bonne affaire.</p>
+<button class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-6 bg-primary text-white text-base font-bold leading-normal tracking-[0.015em] hover:opacity-90 transition-opacity">
+<span class="truncate">Créer mon compte gratuit</span>
+</button>
+</section>
+</main>
+<!-- Footer -->
+<footer class="border-t border-gray-200 dark:border-gray-800 px-10 py-12">
+<div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+<div class="flex flex-col gap-4">
+<div class="flex items-center gap-3 text-primary">
+<div class="size-6">
+<svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.5" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M2.25 18.75a60.07 60.07 0 0 1 15.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 0 1 3 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 0 0-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 0 1-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 0 0 3 15h-.75M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm3 0h.008v.008H18V10.5Zm-12 0h.008v.008H6V10.5Z" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+</div>
+<h2 class="text-[#1E293B] dark:text-gray-100 text-xl font-bold">PriceWatch</h2>
+</div>
+<p class="text-sm text-[#94A3B8]">© 2024 PriceWatch. Tous droits réservés.</p>
+</div>
+<div class="flex flex-col gap-3">
+<h4 class="font-bold text-[#1E293B] dark:text-white">Navigation</h4>
+<a class="text-sm text-[#94A3B8] hover:text-primary" href="#features">Fonctionnalités</a>
+<a class="text-sm text-[#94A3B8] hover:text-primary" href="#testimonials">Témoignages</a>
+<a class="text-sm text-[#94A3B8] hover:text-primary" href="#faq">FAQ</a>
+</div>
+<div class="flex flex-col gap-3">
+<h4 class="font-bold text-[#1E293B] dark:text-white">Légal</h4>
+<a class="text-sm text-[#94A3B8] hover:text-primary" href="#">Mentions Légales</a>
+<a class="text-sm text-[#94A3B8] hover:text-primary" href="#">Conditions Générales d'Utilisation</a>
+<a class="text-sm text-[#94A3B8] hover:text-primary" href="#">Politique de confidentialité</a>
+</div>
+<div class="flex flex-col gap-3">
+<h4 class="font-bold text-[#1E293B] dark:text-white">Suivez-nous</h4>
+<div class="flex gap-4">
+<a class="text-[#94A3B8] hover:text-primary" href="#"><svg class="h-6 w-6" fill="currentColor" viewbox="0 0 24 24"><path d="M22.46,6C21.69,6.35 20.86,6.58 20,6.69C20.88,6.16 21.56,5.32 21.88,4.31C21.05,4.81 20.13,5.16 19.16,5.36C18.37,4.5 17.26,4 16,4C13.65,4 11.73,5.92 11.73,8.29C11.73,8.63 11.77,8.96 11.84,9.27C8.28,9.09 5.11,7.38 3,4.79C2.63,5.42 2.42,6.16 2.42,6.94C2.42,8.43 3.17,9.75 4.33,10.5C3.62,10.5 2.96,10.3 2.38,10C2.38,10 2.38,10 2.38,10.03C2.38,12.11 3.86,13.85 5.82,14.24C5.46,14.34 5.08,14.39 4.69,14.39C4.42,14.39 4.15,14.36 3.89,14.31C4.43,16 6,17.26 7.89,17.29C6.43,18.45 4.58,19.13 2.56,19.13C2.22,19.13 1.88,19.11 1.54,19.07C3.44,20.29 5.7,21 8.12,21C16,21 20.33,14.46 20.33,8.84C20.33,8.63 20.33,8.42 20.32,8.21C21.17,7.63 21.88,6.87 22.46,6Z"></path></svg></a>
+<a class="text-[#94A3B8] hover:text-primary" href="#"><svg class="h-6 w-6" fill="currentColor" viewbox="0 0 24 24"><path d="M19,3H5C3.89,3 3,3.89 3,5V19C3,20.1 3.9,21 5,21H19C20.1,21 21,20.1 21,19V5C21,3.89 20.1,3 19,3M19,5V19H5V5H19M16,11.23V18H13V11.85C13,10 12.2,9.5 11.5,9.5C10.5,9.5 10,10.25 10,11.23V18H7V8H10V9.28C10.5,8.4 11.2,8 12.35,8C14.5,8 16,9.5 16,11.23Z"></path></svg></a>
+</div>
+</div>
+</div>
+</footer>
+</div>
+</div>
+</div>
+</div>
+</body></html>

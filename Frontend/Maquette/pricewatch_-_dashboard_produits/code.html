@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+
+<html class="light" lang="fr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>PriceWatch Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary": "#3B82F6", // Adjusted primary color as per plan
+              "background-light": "#F3F4F6",
+              "background-dark": "#101722",
+              "success": "#16A34A"
+            },
+            fontFamily: {
+              "display": ["Inter", "sans-serif"]
+            },
+            borderRadius: {"DEFAULT": "0.375rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            font-feature-settings: "liga";
+            -webkit-font-smoothing: antialiased;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display">
+<div class="relative flex min-h-screen w-full flex-col">
+<header class="sticky top-0 z-10 w-full border-b border-gray-200/80 dark:border-gray-800/80 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-sm">
+<div class="container mx-auto flex items-center justify-between whitespace-nowrap px-4 sm:px-6 lg:px-8 py-3">
+<div class="flex items-center gap-4 text-gray-900 dark:text-gray-100">
+<div class="text-primary text-2xl">
+<span class="material-symbols-outlined !text-4xl">pie_chart</span>
+</div>
+<h2 class="text-lg font-bold">PriceWatch</h2>
+</div>
+<nav class="hidden md:flex items-center gap-9">
+<a class="text-gray-900 dark:text-gray-100 text-sm font-medium hover:text-primary dark:hover:text-primary transition-colors" href="#">Dashboard</a>
+<a class="text-gray-500 dark:text-gray-400 text-sm font-medium hover:text-primary dark:hover:text-primary transition-colors" href="#">Mon Compte</a>
+</nav>
+<div class="flex flex-1 justify-end items-center gap-4">
+<button class="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-gray-200/80 dark:bg-gray-800/80 text-gray-600 dark:text-gray-300 hover:bg-gray-300/80 dark:hover:bg-gray-700/80 transition-colors">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10" data-alt="User profile picture" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCgQtpMrrKX50UYfOkailU6WD0PkQn_Glyl5F1JCutW_93eH5_7XicayB5q67B6u70Wim5Dfw8MRpOhI7p129nPMdlVdI2WXSMZuM-KcU12oOw0DXhxBmU2mMiflLBe-pKVojFaKH1TPrFfF1q5XiSlTxelCW-YC1Kn42zM7yF0Eq9NvZ3S5gubxa-JA11iAyMXp7HLYH-0lX9X8SPTJGzI8LuzmbgZBfOAf2-DiYkgze3EK5ahjMU2il7TfGxP_6TGIbDGb6_3oX4F");'></div>
+</div>
+</div>
+</header>
+<main class="container mx-auto flex-1 px-4 sm:px-6 lg:px-8 py-8">
+<div class="flex flex-col gap-8">
+<!-- Page Heading -->
+<div class="flex flex-wrap items-center justify-between gap-4">
+<div class="flex min-w-72 flex-col gap-2">
+<h1 class="text-gray-900 dark:text-gray-100 text-3xl md:text-4xl font-black tracking-tighter">Mes Produits Surveillés</h1>
+<p class="text-gray-600 dark:text-gray-400 text-base font-normal">Suivez et gérez les prix de tous vos produits en un seul endroit.</p>
+</div>
+</div>
+<!-- Toolbar & Search -->
+<div class="flex flex-col md:flex-row items-center justify-between gap-4 p-4 bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800">
+<div class="w-full md:max-w-md">
+<label class="flex flex-col min-w-40 h-11 w-full">
+<div class="flex w-full flex-1 items-stretch rounded-lg h-full">
+<div class="text-gray-500 dark:text-gray-400 flex bg-gray-100 dark:bg-gray-800 items-center justify-center pl-3.5 rounded-l-lg">
+<span class="material-symbols-outlined !text-2xl">search</span>
+</div>
+<input class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-r-lg text-gray-900 dark:text-gray-100 focus:outline-0 focus:ring-2 focus:ring-primary/50 border-0 bg-gray-100 dark:bg-gray-800 h-full placeholder:text-gray-500 dark:placeholder:text-gray-400 px-4 pl-2 text-sm" placeholder="Rechercher par nom de produit ou URL..." value=""/>
+</div>
+</label>
+</div>
+<div class="flex items-center gap-2 w-full md:w-auto">
+<div class="relative w-full md:w-auto">
+<select class="w-full h-11 appearance-none form-select bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg pl-4 pr-10 text-sm text-gray-900 dark:text-gray-100 hover:border-gray-400 dark:hover:border-gray-600 focus:ring-2 focus:ring-primary/50 focus:border-primary/50 cursor-pointer">
+<option>Trier par: Prix</option>
+<option>Trier par: Date d'ajout</option>
+<option>Trier par: Nom</option>
+</select>
+<span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400 pointer-events-none">unfold_more</span>
+</div>
+<button class="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+<span class="material-symbols-outlined">arrow_upward</span>
+</button>
+<button class="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+<span class="material-symbols-outlined">arrow_downward</span>
+</button>
+<button class="hidden md:flex flex-1 md:flex-initial max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-11 bg-primary text-white gap-2 text-sm font-bold tracking-wide min-w-0 px-4 hover:bg-primary/90 transition-colors">
+<span class="material-symbols-outlined !text-xl">add</span>
+<span class="truncate">Ajouter un produit</span>
+</button>
+</div>
+</div>
+<!-- Product Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+<!-- Product Card 1: Target Reached -->
+<div class="flex flex-col gap-4 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4 shadow-sm hover:shadow-lg hover:border-primary/50 dark:hover:border-primary/50 transition-all duration-300">
+<div class="flex items-start gap-4">
+<div class="w-20 h-20 bg-center bg-no-repeat aspect-square bg-cover rounded-lg shrink-0" data-alt="Professional Audio Headphones" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDDyebTw-NUIKcL45PZmfM84sUjbtqt4zPLfgn32f1CFAzVNf0OZLE0eRRnQIAJrXuN5IsfTBH2Y9pS1SW7YD4yewVwJo42187eCTYmQm8KWAXMsn4I2ILajzS8XNvnEJfIxj5YI2AS7tFg9bQHDTjPm8kK17BSdSvkpOHN8CFeIyvog8IowT5rZBioVUMflJXuXFRP8uGs-0mVjxxCswtaqdeW00KJ9RlL7ZbNvW6j1FDdi3IOmiEQNYSkKTUdm3dmU4r9Zm19KVGd");'></div>
+<div class="flex flex-col flex-1">
+<h3 class="text-gray-900 dark:text-gray-100 text-base font-bold leading-tight">Casque Audio Pro</h3>
+<div class="flex items-baseline gap-2 mt-1">
+<p class="text-success text-xl font-bold">149,99€</p>
+<p class="text-gray-500 dark:text-gray-400 text-sm line-through">159,99€</p>
+</div>
+<div class="flex flex-wrap gap-2 mt-2">
+<span class="inline-flex items-center gap-1.5 rounded-full bg-green-100 dark:bg-green-900/50 px-2.5 py-0.5 text-xs font-medium text-success dark:text-green-300">
+<span class="material-symbols-outlined !text-sm">military_tech</span> Cible atteinte
+                                    </span>
+<span class="inline-flex items-center rounded-full bg-gray-100 dark:bg-gray-800 px-2.5 py-0.5 text-xs font-medium text-gray-700 dark:text-gray-300">En stock</span>
+</div>
+</div>
+<button class="text-gray-500 dark:text-gray-400 p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</div>
+<div class="flex flex-col gap-2">
+<div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
+<div class="bg-success h-1.5 rounded-full" style="width: 100%"></div>
+</div>
+<div class="flex justify-between text-xs text-gray-500 dark:text-gray-400">
+<span>Dern. vérif: il y a 2h</span>
+<span>Fréq: 6h</span>
+</div>
+</div>
+</div>
+<!-- Product Card 2: In Monitoring -->
+<div class="flex flex-col gap-4 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4 shadow-sm hover:shadow-lg hover:border-primary/50 dark:hover:border-primary/50 transition-all duration-300">
+<div class="flex items-start gap-4">
+<div class="w-20 h-20 bg-center bg-no-repeat aspect-square bg-cover rounded-lg shrink-0" data-alt="Modern Smartphone X1" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDfIUCj_ooUpV-kpwkF9YteurXwGthklVEQUJWW09aP9ZH5oPXmfNV2SOQ24tlDBCev8_DX3Hq1HX3P6fp3Vw_j-9KOeR4QpYEAn-jnSE_418XybRNmyLe7c8rSGWfk05rM96q0yOwk66C1ra0JYEk1oD1asQz_lhx5i_obhthKAJlqb-t8ZSmH1ot2CYKNrj9F7HyR-baNmoxapcraCXqhTAdMe632IpP8mCOkS1Ll5wIyz3Ro0qH_u_HH9oRv2kfdMItna2Kf2Qz0");'></div>
+<div class="flex flex-col flex-1">
+<h3 class="text-gray-900 dark:text-gray-100 text-base font-bold leading-tight">Smartphone X1</h3>
+<div class="flex items-baseline gap-2 mt-1">
+<p class="text-gray-800 dark:text-gray-200 text-xl font-bold">669,00€</p>
+<p class="text-gray-500 dark:text-gray-400 text-sm">/ 649,00€</p>
+</div>
+<div class="flex flex-wrap gap-2 mt-2">
+<span class="inline-flex items-center gap-1.5 rounded-full bg-blue-100 dark:bg-blue-900/50 px-2.5 py-0.5 text-xs font-medium text-primary dark:text-blue-300">
+<span class="material-symbols-outlined !text-sm">update</span> En surveillance
+                                    </span>
+<span class="inline-flex items-center rounded-full bg-gray-100 dark:bg-gray-800 px-2.5 py-0.5 text-xs font-medium text-gray-700 dark:text-gray-300">En stock</span>
+</div>
+</div>
+<button class="text-gray-500 dark:text-gray-400 p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</div>
+<div class="flex flex-col gap-2">
+<div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
+<div class="bg-primary h-1.5 rounded-full" style="width: 75%"></div>
+</div>
+<div class="flex justify-between text-xs text-gray-500 dark:text-gray-400">
+<span>Dern. vérif: il y a 15min</span>
+<span>Fréq: 1h</span>
+</div>
+</div>
+</div>
+<!-- Product Card 3: Out of stock -->
+<div class="flex flex-col gap-4 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4 shadow-sm hover:shadow-lg hover:border-primary/50 dark:hover:border-primary/50 transition-all duration-300">
+<div class="flex items-start gap-4">
+<div class="w-20 h-20 bg-center bg-no-repeat aspect-square bg-cover rounded-lg shrink-0" data-alt="Automatic Coffee Machine" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCe9NsRSOAODOSVRDDFCddyXYUcEqysow6iELCjXgejhNrIhP_9efyByzadCX5B7j6XKhhZr3YR5bKteGBFiyMeAQ_5vcX2jHhUTQCG8HOAXXZ6ZnDZMEOD7JpmcMS38PFPrCx6QbE8_5w4k5jCm1ST0Dw48phsCtl0Seee8Q2LedKXregWmoF2bTaojJ2gJdnkkN5PR8cwhEhrhbmrgZep2FZvwinQGgJbplRh5XDH2Q_PonK0E8rTlMsuE7p6rCqrXQbpEwvi6q0e");'></div>
+<div class="flex flex-col flex-1">
+<h3 class="text-gray-900 dark:text-gray-100 text-base font-bold leading-tight">Machine à Café Auto</h3>
+<div class="flex items-baseline gap-2 mt-1">
+<p class="text-gray-800 dark:text-gray-200 text-xl font-bold">89,99€</p>
+<p class="text-gray-500 dark:text-gray-400 text-sm">/ 85,50€</p>
+</div>
+<div class="flex flex-wrap gap-2 mt-2">
+<span class="inline-flex items-center gap-1.5 rounded-full bg-blue-100 dark:bg-blue-900/50 px-2.5 py-0.5 text-xs font-medium text-primary dark:text-blue-300">
+<span class="material-symbols-outlined !text-sm">update</span> En surveillance
+                                    </span>
+<span class="inline-flex items-center rounded-full bg-gray-200 dark:bg-gray-700 px-2.5 py-0.5 text-xs font-medium text-gray-600 dark:text-gray-400">Indisponible</span>
+</div>
+</div>
+<button class="text-gray-500 dark:text-gray-400 p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</div>
+<div class="flex flex-col gap-2">
+<div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
+<div class="bg-gray-400 dark:bg-gray-500 h-1.5 rounded-full" style="width: 20%"></div>
+</div>
+<div class="flex justify-between text-xs text-gray-500 dark:text-gray-400">
+<span>Dern. vérif: il y a 8h</span>
+<span>Fréq: 24h</span>
+</div>
+</div>
+</div>
+<!-- More product cards... -->
+<div class="flex flex-col gap-4 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4 shadow-sm hover:shadow-lg hover:border-primary/50 dark:hover:border-primary/50 transition-all duration-300">
+<div class="flex items-start gap-4">
+<div class="w-20 h-20 bg-center bg-no-repeat aspect-square bg-cover rounded-lg shrink-0" data-alt="Fit Smartwatch" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAmjvAUFk4ZFb1D1UtToYPbke4P7hIOe_WmGFaYQ1fy3faB7imwhgD21q5OnpPIIMfMbx4RPIVlekYmI279YtZR5-kNyxzFstIvqdIrvkZLYWjRMZImAPI9GsunXuTKDX7xjHtrXn1mMWXaqsH8z6rXkewyH9_O9X10524PanKURJ_A4v0ynXKEHzRQgoITGsvz7P-nPvU7E-rNb2suSsLxXO1HHEzIXdbVVgShRqj_Q12yg7svv6posj8d-B6LyUdullEGK1JoyKD1");'></div>
+<div class="flex flex-col flex-1">
+<h3 class="text-gray-900 dark:text-gray-100 text-base font-bold leading-tight">Smartwatch Fit</h3>
+<div class="flex items-baseline gap-2 mt-1">
+<p class="text-success text-xl font-bold">229,99€</p>
+<p class="text-gray-500 dark:text-gray-400 text-sm line-through">249,99€</p>
+</div>
+<div class="flex flex-wrap gap-2 mt-2">
+<span class="inline-flex items-center gap-1.5 rounded-full bg-green-100 dark:bg-green-900/50 px-2.5 py-0.5 text-xs font-medium text-success dark:text-green-300">
+<span class="material-symbols-outlined !text-sm">military_tech</span> Cible atteinte
+                                    </span>
+<span class="inline-flex items-center rounded-full bg-gray-100 dark:bg-gray-800 px-2.5 py-0.5 text-xs font-medium text-gray-700 dark:text-gray-300">En stock</span>
+</div>
+</div>
+<button class="text-gray-500 dark:text-gray-400 p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</div>
+<div class="flex flex-col gap-2">
+<div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
+<div class="bg-success h-1.5 rounded-full" style="width: 100%"></div>
+</div>
+<div class="flex justify-between text-xs text-gray-500 dark:text-gray-400">
+<span>Dern. vérif: il y a 1h</span>
+<span>Fréq: 2h</span>
+</div>
+</div>
+</div>
+<div class="flex flex-col gap-4 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4 shadow-sm hover:shadow-lg hover:border-primary/50 dark:hover:border-primary/50 transition-all duration-300">
+<div class="flex items-start gap-4">
+<div class="w-20 h-20 bg-center bg-no-repeat aspect-square bg-cover rounded-lg shrink-0" data-alt="The Great Novel book cover" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDKmEjBu8Hl4yQsokAisKHeSS8CLtqdEJqMR32WEYZz6Pnf-NZSTWY2NgDeBwEbYkkF0XS2i0tFpNq9m35R-A1toUWC6Oi7PIkjbkloq9FHooyT-7_UTciqyDns1epfyBbxITfcAobmv74IFDYrAqz4WTLvWhOIeheU2NPJaTCIHbipb1TtrrVzG9IYI7NYh23lhJKwO9i5CJP8regnMA2u3ESEQD7uk5oCPyIa2pxE5vfsNggBP2IleEKQpwzuz3h-1UsRJFCJytkW");'></div>
+<div class="flex flex-col flex-1">
+<h3 class="text-gray-900 dark:text-gray-100 text-base font-bold leading-tight">Le Grand Roman</h3>
+<div class="flex items-baseline gap-2 mt-1">
+<p class="text-gray-800 dark:text-gray-200 text-xl font-bold">19,95€</p>
+<p class="text-gray-500 dark:text-gray-400 text-sm">/ 19,95€</p>
+</div>
+<div class="flex flex-wrap gap-2 mt-2">
+<span class="inline-flex items-center gap-1.5 rounded-full bg-blue-100 dark:bg-blue-900/50 px-2.5 py-0.5 text-xs font-medium text-primary dark:text-blue-300">
+<span class="material-symbols-outlined !text-sm">update</span> En surveillance
+                                    </span>
+<span class="inline-flex items-center rounded-full bg-gray-100 dark:bg-gray-800 px-2.5 py-0.5 text-xs font-medium text-gray-700 dark:text-gray-300">En stock</span>
+</div>
+</div>
+<button class="text-gray-500 dark:text-gray-400 p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</div>
+<div class="flex flex-col gap-2">
+<div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
+<div class="bg-primary h-1.5 rounded-full" style="width: 100%"></div>
+</div>
+<div class="flex justify-between text-xs text-gray-500 dark:text-gray-400">
+<span>Dern. vérif: il y a 1 jour</span>
+<span>Fréq: 7j</span>
+</div>
+</div>
+</div>
+<div class="flex flex-col gap-4 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4 shadow-sm hover:shadow-lg hover:border-primary/50 dark:hover:border-primary/50 transition-all duration-300">
+<div class="flex items-start gap-4">
+<div class="w-20 h-20 bg-center bg-no-repeat aspect-square bg-cover rounded-lg shrink-0" data-alt="Urban Backpack" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuD51zj1ezKPzT6-PzL-G2QZcM5oS204sQ2BQ_m9AHw3272dyFP8M8K-Mbtm4-3kO3kljwkBCz0zaA7g1MAtWoC5nEiE7O-XOKfNZlPeGrzCtxOgeGmiS9QvVJm0jStiibdIrQz_K4m6fLY56ElI1bRLdPZZ78ol61Lv6F8wK0RhSgI3iu2g1M1jxXq75oNW7ucTduQNaFi4-E0tNZCUkm4zncudfWgc5GLxawmVdg2QhSHigwadR51XGf88_Y_HD-zOqKvhhJ7bI_uf");'></div>
+<div class="flex flex-col flex-1">
+<h3 class="text-gray-900 dark:text-gray-100 text-base font-bold leading-tight">Sac à dos Urbain</h3>
+<div class="flex items-baseline gap-2 mt-1">
+<p class="text-gray-800 dark:text-gray-200 text-xl font-bold">58,00€</p>
+<p class="text-gray-500 dark:text-gray-400 text-sm">/ 55,00€</p>
+</div>
+<div class="flex flex-wrap gap-2 mt-2">
+<span class="inline-flex items-center gap-1.5 rounded-full bg-blue-100 dark:bg-blue-900/50 px-2.5 py-0.5 text-xs font-medium text-primary dark:text-blue-300">
+<span class="material-symbols-outlined !text-sm">update</span> En surveillance
+                                    </span>
+<span class="inline-flex items-center rounded-full bg-gray-100 dark:bg-gray-800 px-2.5 py-0.5 text-xs font-medium text-gray-700 dark:text-gray-300">En stock</span>
+</div>
+</div>
+<button class="text-gray-500 dark:text-gray-400 p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</div>
+<div class="flex flex-col gap-2">
+<div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
+<div class="bg-primary h-1.5 rounded-full" style="width: 80%"></div>
+</div>
+<div class="flex justify-between text-xs text-gray-500 dark:text-gray-400">
+<span>Dern. vérif: il y a 30min</span>
+<span>Fréq: 1h</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Pagination -->
+<div class="flex items-center justify-center pt-8">
+<nav aria-label="Pagination" class="flex items-center gap-2">
+<a class="inline-flex h-10 w-10 items-center justify-center rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors" href="#">
+<span class="material-symbols-outlined">chevron_left</span>
+</a>
+<a class="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-white font-medium text-sm transition-colors" href="#">1</a>
+<a class="inline-flex h-10 w-10 items-center justify-center rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 font-medium text-sm transition-colors" href="#">2</a>
+<a class="inline-flex h-10 w-10 items-center justify-center rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 font-medium text-sm transition-colors" href="#">3</a>
+<span class="inline-flex h-10 w-10 items-center justify-center text-gray-500 dark:text-gray-400 text-sm">...</span>
+<a class="inline-flex h-10 w-10 items-center justify-center rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 font-medium text-sm transition-colors" href="#">8</a>
+<a class="inline-flex h-10 w-10 items-center justify-center rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors" href="#">
+<span class="material-symbols-outlined">chevron_right</span>
+</a>
+</nav>
+</div>
+</div>
+</main>
+</div>
+</body></html>

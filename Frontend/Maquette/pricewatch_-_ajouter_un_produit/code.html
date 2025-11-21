@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+
+<html class="light" lang="fr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Ajouter un nouveau produit - PriceWatch</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings:
+            'FILL' 0,
+            'wght' 400,
+            'GRAD' 0,
+            'opsz' 24
+        }
+    </style>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary": "#206cee",
+              "background-light": "#f6f7f8",
+              "background-dark": "#101722",
+            },
+            fontFamily: {
+              "display": ["Inter", "sans-serif"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+</head>
+<body class="font-display">
+<div class="relative flex min-h-screen w-full flex-col items-center justify-center bg-background-light dark:bg-background-dark p-4 sm:p-6 md:p-8">
+<!-- Modal Container -->
+<div class="w-full max-w-2xl rounded-xl bg-white dark:bg-gray-900 shadow-2xl ring-1 ring-gray-200 dark:ring-gray-800">
+<div class="flex flex-col gap-6 p-6 sm:p-8">
+<!-- PageHeading Component -->
+<div class="flex flex-col gap-1">
+<h1 class="text-2xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-3xl">Suivre un nouveau produit</h1>
+<p class="text-sm text-gray-500 dark:text-gray-400">Entrez l'URL du produit que vous souhaitez suivre pour commencer.</p>
+</div>
+<!-- Main Form -->
+<div class="flex flex-col gap-6">
+<!-- Section 1: Product URL -->
+<div class="flex flex-col gap-2">
+<label class="text-sm font-medium text-gray-800 dark:text-gray-200" for="product-url">URL du produit</label>
+<div class="relative flex w-full items-center">
+<input class="peer h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2 text-gray-900 placeholder:text-gray-400 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 dark:border-gray-700 dark:text-white dark:focus:border-primary" id="product-url" placeholder="Collez l'URL du produit ici" type="url" value="https://www.exemple.com/produit/super-casque-audio"/>
+<span class="material-symbols-outlined absolute right-3 text-gray-400 peer-focus:text-primary dark:text-gray-500">link</span>
+</div>
+</div>
+<!-- Section 2: Product Preview Card (Conditional) -->
+<div class="rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-gray-800 dark:bg-gray-800/50">
+<div class="flex items-start justify-between gap-4">
+<div class="flex flex-1 flex-col gap-1">
+<p class="text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">Aperçu du produit</p>
+<p class="text-base font-bold text-gray-900 dark:text-white">Casque Audio Pro Sans Fil</p>
+<p class="text-sm text-gray-600 dark:text-gray-300">Prix actuel: <span class="font-semibold text-primary">149.99€</span></p>
+</div>
+<div class="h-20 w-20 flex-shrink-0 overflow-hidden rounded-lg bg-gray-200 dark:bg-gray-700">
+<img class="h-full w-full object-cover" data-alt="A pair of black wireless headphones on a yellow background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBJP5__qDJksAdWcBMyadkYKqUhRS-qmRzg4fVV9CTzz6rjQhaU1YSh88YsYpVMS3S3TarXkttrlii_SObjlaXgoLCXk8KfyCzkvFABJoKRLCVn8JAFp7J_DV4g8qgUOEHgmzO0nvRGGhhcOX04niNYOdUAXhOzOIHIXgpYrpfyGyWV2kisuslqJnKqcMeFvJWauza8oiNC5y1COfuL2rcFcRHn7JbrrFgoW75uUbaLeqlciVCBF0vzTM7KxUPvhrUSwHoMxMHtFXvm"/>
+</div>
+</div>
+</div>
+<!-- Section 3: Tracking Settings -->
+<div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+<!-- Target Price -->
+<div class="flex flex-col gap-2">
+<label class="text-sm font-medium text-gray-800 dark:text-gray-200" for="target-price">Prix cible souhaité</label>
+<div class="relative flex w-full items-center">
+<input class="peer h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2 text-gray-900 placeholder:text-gray-400 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 dark:border-gray-700 dark:text-white dark:focus:border-primary" id="target-price" placeholder="0.00" step="0.01" type="number"/>
+<span class="material-symbols-outlined absolute right-3 text-gray-400 peer-focus:text-primary dark:text-gray-500">euro</span>
+</div>
+</div>
+<!-- Check Frequency -->
+<div class="flex flex-col gap-2">
+<label class="text-sm font-medium text-gray-800 dark:text-gray-200">Fréquence de vérification</label>
+<div class="grid grid-cols-3 gap-2 rounded-lg bg-gray-100 p-1 dark:bg-gray-800">
+<label class="relative">
+<input class="peer sr-only" name="frequency" type="radio" value="6h"/>
+<div class="cursor-pointer rounded-md py-2 text-center text-sm font-medium text-gray-600 ring-1 ring-transparent transition-all hover:bg-white peer-checked:bg-white peer-checked:text-primary peer-checked:shadow-sm dark:text-gray-300 dark:hover:bg-gray-700 dark:peer-checked:bg-primary dark:peer-checked:text-white">6h</div>
+</label>
+<label class="relative">
+<input checked="" class="peer sr-only" name="frequency" type="radio" value="12h"/>
+<div class="cursor-pointer rounded-md py-2 text-center text-sm font-medium text-gray-600 ring-1 ring-transparent transition-all hover:bg-white peer-checked:bg-white peer-checked:text-primary peer-checked:shadow-sm dark:text-gray-300 dark:hover:bg-gray-700 dark:peer-checked:bg-primary dark:peer-checked:text-white">12h</div>
+</label>
+<label class="relative">
+<input class="peer sr-only" name="frequency" type="radio" value="24h"/>
+<div class="cursor-pointer rounded-md py-2 text-center text-sm font-medium text-gray-600 ring-1 ring-transparent transition-all hover:bg-white peer-checked:bg-white peer-checked:text-primary peer-checked:shadow-sm dark:text-gray-300 dark:hover:bg-gray-700 dark:peer-checked:bg-primary dark:peer-checked:text-white">24h</div>
+</label>
+</div>
+</div>
+</div>
+</div>
+<!-- Section 4: Actions -->
+<div class="flex flex-col-reverse items-center gap-3 border-t border-gray-200 pt-5 sm:flex-row sm:justify-end dark:border-gray-800">
+<button class="h-10 w-full rounded-lg px-4 text-sm font-semibold text-gray-600 transition-colors hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-400 focus-visible:ring-offset-2 dark:text-gray-300 dark:hover:bg-gray-800 dark:focus-visible:ring-gray-500 sm:w-auto" type="button">Annuler</button>
+<button class="h-10 w-full rounded-lg bg-primary px-4 text-sm font-semibold text-white transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 sm:w-auto" type="submit">Ajouter le produit</button>
+</div>
+</div>
+</div>
+</div>
+</body></html>

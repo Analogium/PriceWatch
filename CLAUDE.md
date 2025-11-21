@@ -4,331 +4,111 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**PriceWatch** is a price tracking application with automatic notifications. It monitors product prices from e-commerce sites (Amazon, Fnac, Darty) and sends email alerts when prices drop below user-defined thresholds.
+PriceWatch is a price monitoring application that tracks product prices from e-commerce websites and sends notifications when prices drop below target thresholds. Built with FastAPI, PostgreSQL, Redis, and Celery for background task processing.
 
-**Tech Stack:**
-- Backend: FastAPI (Python 3.12)
-- Database: PostgreSQL + SQLAlchemy ORM
-- Task Queue: Celery + Redis
-- Containerization: Docker + Docker Compose
-- Testing: pytest with full mocking
+## Development Commands
 
-## Key Commands
-
-### Development
-
-```bash
-# Start all services (backend, PostgreSQL, Redis, Celery)
-docker-compose up -d
-
-# View backend logs
-docker-compose logs -f backend
-
-# Access backend shell
-docker-compose exec backend bash
-
-# Stop all services
-docker-compose down
-```
+All commands run via Docker Compose. Start services first with `docker-compose up -d`.
 
 ### Testing
 
 ```bash
-cd Backend
+# Run unit tests with coverage (requires services running)
+./Backend/run_unit_tests.sh
 
-# Run ALL unit tests with coverage (in Docker - RECOMMENDED)
-./run_unit_tests.sh
+# Run single test file
+docker-compose exec backend python3 -m pytest tests/test_unit_auth_endpoints.py -v -m unit
 
-# Run specific test file
-docker-compose exec backend python3 -m pytest tests/test_unit_scraper.py -v
-
-# Run tests with specific marker
-docker-compose exec backend python3 -m pytest tests/ -m unit -v
-docker-compose exec backend python3 -m pytest tests/ -m email -v
-
-# Run with coverage report
-docker-compose exec backend python3 -m pytest tests/ --cov=app --cov-report=html -m unit
+# Run specific test
+docker-compose exec backend python3 -m pytest tests/test_unit_auth_endpoints.py::TestRegister::test_register_success -v
 ```
 
-### Code Quality
+Tests use `@pytest.mark.unit` for unit tests and `@pytest.mark.scraper` for scraper tests. Coverage threshold is 70%.
+
+### Linting and Formatting
 
 ```bash
-cd Backend
-
 # Run all linting checks
-./run_linting.sh
+./Backend/run_linting.sh
 
-# Format code with black
-docker-compose exec backend black app/ tests/
+# Inside container
+docker-compose exec backend python3 -m black --check app/ tests/
+docker-compose exec backend python3 -m isort --check-only app/ tests/
+docker-compose exec backend python3 -m flake8 app/ tests/
+docker-compose exec backend python3 -m mypy app/ tasks.py
 
-# Check with flake8
-docker-compose exec backend flake8 app/ tests/
-
-# Sort imports
-docker-compose exec backend isort app/ tests/
-
-# Type checking
-docker-compose exec backend mypy app/
+# Auto-fix formatting
+docker-compose exec backend python3 -m black app/ tests/
+docker-compose exec backend python3 -m isort app/ tests/
 ```
 
 ### Database Migrations
 
 ```bash
-cd Backend
+# Generate and apply migration
+./Backend/migrate.sh "migration message"
 
-# Create and apply a new migration
-./migrate.sh "description of changes"
-
-# Reset database (WARNING: deletes all data)
-./reset_db.sh
-
-# Check current migration version
-docker-compose exec backend alembic current
-
-# View migration history
-docker-compose exec backend alembic history
+# Manual migration commands
+docker-compose exec -T backend alembic revision --autogenerate -m "message"
+docker-compose exec -T backend alembic upgrade head
+docker-compose exec -T backend alembic current
 ```
 
 ## Architecture
 
-### High-Level Structure
+### Backend Structure
 
-```
-Backend/
-├── app/
-│   ├── api/
-│   │   ├── dependencies.py           # Auth & DB dependencies
-│   │   └── endpoints/
-│   │       ├── auth.py               # JWT auth, registration, login, password reset
-│   │       ├── products.py           # Product CRUD, price history, pagination
-│   │       ├── preferences.py        # User preferences management
-│   │       └── admin.py              # Admin endpoints (stats, user management, exports)
-│   ├── core/
-│   │   ├── config.py                 # Settings (loaded from .env)
-│   │   ├── security.py               # JWT, password hashing, validation
-│   │   └── rate_limit.py             # Redis-based rate limiting
-│   ├── db/
-│   │   └── base.py                   # SQLAlchemy base and session
-│   ├── models/                       # SQLAlchemy ORM models
-│   │   ├── user.py                   # User model (auth, verification, reset tokens, is_admin)
-│   │   ├── product.py                # Product model
-│   │   ├── price_history.py         # Price history tracking
-│   │   ├── user_preferences.py      # User preferences model
-│   │   └── scraping_stats.py        # Scraping performance tracking
-│   ├── schemas/                      # Pydantic validation schemas
-│   │   ├── user.py
-│   │   ├── product.py
-│   │   ├── price_history.py
-│   │   ├── user_preferences.py
-│   │   └── admin.py                  # Admin schemas (stats, exports)
-│   ├── services/                     # Business logic
-│   │   ├── scraper.py                # Web scraping (BeautifulSoup)
-│   │   ├── email.py                  # SMTP email sending
-│   │   ├── price_history.py         # Price tracking logic
-│   │   └── admin.py                  # Admin analytics and data export
-│   └── main.py                       # FastAPI app entry point
-├── tasks.py                          # Celery tasks (price checking)
-├── tests/
-│   ├── test_unit_*.py                # Unit tests (pytest + mocks)
-│   └── test_*.py                     # Integration tests (optional, require running server)
-└── migrations/                       # Alembic database migrations
-```
+- **app/api/endpoints/** - FastAPI route handlers (auth, products, admin, health, preferences)
+- **app/api/dependencies.py** - Dependency injection (auth, database sessions)
+- **app/core/** - Configuration, security (JWT, password hashing), rate limiting, logging
+- **app/models/** - SQLAlchemy ORM models (user, product, price_history, scraping_stats, user_preferences)
+- **app/schemas/** - Pydantic validation schemas
+- **app/services/** - Business logic (scraper, playwright_scraper, email, price_history, admin)
+- **app/db/base.py** - SQLAlchemy engine and session configuration
+- **tasks.py** - Celery task definitions for background price checking
 
-### Key Design Patterns
+### Services (Docker Compose)
 
-1. **Dependency Injection**: FastAPI's `Depends()` for database sessions and authentication
-2. **Service Layer**: Business logic isolated in `services/` (scraper, email, price_history)
-3. **Repository Pattern**: SQLAlchemy ORM models act as repositories
-4. **Background Tasks**: Celery for async price checking (runs every 24h by default)
-5. **Singleton Services**: Email and scraper services use singleton pattern for efficiency
+- **backend** - FastAPI app (port 8000)
+- **db** - PostgreSQL 15 (port 5432)
+- **redis** - Redis 7 for Celery broker (port 6379)
+- **celery_worker** - Background task processor
+- **celery_beat** - Scheduled task scheduler
+- **pgadmin** - Database admin UI (port 5050)
+- **redis_commander** - Redis admin UI (port 8081)
 
-### Authentication Flow
+### Scraping System
 
-1. User registers → `POST /api/v1/auth/register`
-   - Password strength validation (8+ chars, uppercase, lowercase, digit, special char)
-   - Password hashed with bcrypt
-   - Optional: Verification email sent with token
+Two scraper implementations exist:
+- `services/scraper.py` - Basic HTTP scraper using requests/BeautifulSoup
+- `services/playwright_scraper.py` - Browser-based scraper for JavaScript-rendered sites
 
-2. User logs in → `POST /api/v1/auth/login`
-   - Returns JWT access token (30 min) + refresh token (7 days)
-   - Tokens created in `core/security.py`
+Scraping runs in parallel batches controlled by `MAX_PARALLEL_SCRAPERS` and `SCRAPING_BATCH_SIZE` settings.
 
-3. Protected endpoints check token → `Depends(get_current_user)`
-   - Decodes JWT and loads user from database
-   - Returns 401 if invalid/expired
+## Code Style
 
-4. Token refresh → `POST /api/v1/auth/refresh`
-   - Accepts refresh token, returns new access token
+- Line length: 120 characters
+- Python 3.12 target
+- Black formatting, isort imports, flake8 linting, mypy type checking
+- Exclude migrations/alembic from linting
 
-### Admin Access Control
+## API Structure
 
-1. **Admin role**: Users have `is_admin` field (default: False)
-   - Must be manually set in database or via admin promotion endpoint
-   - All admin endpoints use `Depends(get_current_admin_user)` dependency
+All endpoints prefixed with `/api/v1/`:
+- `/auth` - Authentication (register, login, me)
+- `/products` - Product CRUD and price checking
+- `/users` - User preferences
+- `/admin` - Admin features
+- `/health` - Health check (no prefix)
 
-2. **Admin capabilities**:
-   - View global system statistics and analytics
-   - View per-site scraping performance metrics
-   - View detailed user statistics
-   - Export user data (CSV/JSON) for GDPR compliance
-   - Promote/revoke admin privileges
-   - Delete user accounts
+## Environment Variables
 
-3. **Security protections**:
-   - Admins cannot revoke their own admin status
-   - Admins cannot delete their own account
-   - All admin endpoints return 403 Forbidden for non-admin users
-
-4. **Admin endpoints**: All prefixed with `/api/v1/admin`
-   - Statistics: `/stats/global`, `/stats/site/{name}`, `/stats/users`
-   - Exports: `/export/user/{id}/csv`, `/export/user/{id}/json`
-   - User management: `POST /users/{id}/admin`, `DELETE /users/{id}/admin`, `DELETE /users/{id}`
-
-See [ADMIN_FEATURES.md](RoadMapDoc/ADMIN_FEATURES.md) for complete documentation.
-
-### Price Tracking Flow
-
-1. User adds product → `POST /api/v1/products`
-   - URL is scraped immediately (`services/scraper.py`)
-   - Product info (name, price, image) extracted
-   - Saved to database with `target_price`
-   - Initial price recorded in `price_history`
-
-2. Celery Beat triggers price checking based on product frequency
-   - Three separate tasks: `check_prices_by_frequency(6)`, `check_prices_by_frequency(12)`, `check_prices_by_frequency(24)`
-   - Run every 6h, 12h, and 24h respectively
-   - Each task filters products by their `check_frequency` field
-   - Only checks products where `last_checked` is older than the frequency interval
-   - **Products are sorted by priority** (closest to target price first)
-     - Priority = 0 for products at/below target (highest priority)
-     - Priority increases with distance from target (e.g., 0.1 for 10% above)
-     - Optimizes early detection of price drops
-   - **Products are scraped in parallel batches** for better performance
-     - ThreadPoolExecutor with configurable workers (default: 5 concurrent scrapers)
-     - Products processed in batches (default: 10 products per batch)
-     - Thread-safe scraping with error isolation per product
-   - Scrapes current price
-   - Records price change in `price_history` (if changed)
-   - Sends email alert if `current_price <= target_price`
-
-3. User views history → `GET /api/v1/products/{id}/history`
-   - Returns time-series price data
-   - Can request statistics (min, max, avg, % change)
-
-### Testing Strategy
-
-**All tests are unit tests with full mocking** - no external dependencies required.
-
-- **Test markers**: `@pytest.mark.unit`, `@pytest.mark.scraper`, `@pytest.mark.email`, `@pytest.mark.celery`
-- **Mocking**: Uses `unittest.mock` to mock database, HTTP requests, SMTP
-- **Coverage**: 70%+ total, 100% on services
-- **Run in Docker**: Tests execute in backend container for consistency
-
-**Test files:**
-- `test_unit_scraper.py` (17 tests) - Web scraping with mocked HTTP responses
-- `test_unit_email.py` (14 tests) - Email sending with mocked SMTP
-- `test_unit_price_history.py` (14 tests) - Price tracking logic with mocked DB
-- `test_unit_celery_tasks.py` (11 tests) - Celery tasks with mocked everything
-- `test_unit_security.py` (16 tests) - Password validation, token generation
-- `test_unit_check_frequency.py` (13 tests) - Frequency-based checking
-- `test_unit_priority.py` (10 tests) - Priority calculation and sorting
-- `test_unit_parallel_scraping.py` (11 tests) - Parallel scraping with ThreadPoolExecutor
-- `test_unit_admin.py` (16 tests) - Admin service and endpoints with mocked DB
-- Total: 264 unit tests
-
-### Common Patterns
-
-**Adding a new endpoint:**
-1. Define Pydantic schema in `schemas/`
-2. Add endpoint function in `api/endpoints/`
-3. Use `Depends(get_current_user)` for authenticated routes
-4. Use `Depends(get_db)` for database access
-5. Write unit tests in `tests/test_unit_*.py`
-
-**Adding a model field:**
-1. Modify model in `models/`
-2. Create migration: `./migrate.sh "add field description"`
-   - If adding NOT NULL field to existing table, use `server_default` in migration
-3. Update corresponding Pydantic schema in `schemas/`
-   - Add field validators if needed (e.g., `@field_validator`)
-4. Update tests
-5. Update documentation (CLAUDE.md, RoadMap.md)
-
-**Testing with mocks:**
-```python
-@pytest.mark.unit
-@patch('app.services.scraper.requests.get')
-def test_scrape_amazon(mock_get):
-    mock_get.return_value.content = b"<html>...</html>"
-    mock_get.return_value.status_code = 200
-
-    result = scraper.scrape_amazon("https://amazon.fr/...")
-    assert result.price == 199.99
-```
-
-### Important Configuration
-
-**Environment variables** (`.env`):
+Required in `Backend/.env`:
 - `DATABASE_URL` - PostgreSQL connection string
-- `SECRET_KEY` - JWT signing key (generate with `python -c "import secrets; print(secrets.token_urlsafe(32))"`)
-- `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD` - Email configuration
-- `REDIS_URL` - Redis for Celery and rate limiting
-- `ACCESS_TOKEN_EXPIRE_MINUTES=30` - JWT expiry
-- `REFRESH_TOKEN_EXPIRE_DAYS=7` - Refresh token expiry
-- `MAX_PARALLEL_SCRAPERS=5` - Maximum concurrent scrapers in parallel mode
-- `SCRAPING_BATCH_SIZE=10` - Number of products to scrape per batch
+- `SECRET_KEY` - JWT signing key
+- `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD`, `EMAIL_FROM` - Email config
+- `REDIS_URL` - Redis connection (default: redis://localhost:6379/0)
 
-**API Pagination:**
-All product list endpoints support:
-- `?page=1&page_size=20` - Pagination
-- `?search=query` - Search by name/URL
-- `?sort_by=current_price&sort_order=asc` - Sorting
-- Can combine: `?page=1&search=laptop&sort_by=price&sort_order=desc`
-
-### Known Quirks
-
-1. **SQLAlchemy model comparisons**: Use `is` instead of `==` when comparing model classes in tests to avoid triggering SQLAlchemy's `__eq__` operator
-   ```python
-   # Correct
-   if args[0] is Product:
-
-   # Wrong (causes SQLAlchemy error)
-   if args[0] == Product:
-   ```
-
-2. **Email HTML encoding**: Email bodies are base64-encoded by MIME. In tests, decode with:
-   ```python
-   html_content = payload[0].get_payload(decode=True).decode('utf-8')
-   ```
-
-3. **Celery Beat persistence**: Schedule state is not persisted. Restarting containers resets the schedule.
-
-4. **Scraping fragility**: Site HTML structure changes break scrapers. Add retry logic and error handling.
-
-5. **User model password**: The model has `password_hash` field, not `password`. Never use `User(password_hash=...)` in tests; use `Mock(spec=User)` with manual attribute setting.
-
-### Deployment Notes
-
-- Docker Compose is configured for development
-- For production: use separate containers, external PostgreSQL, Redis cluster
-- Enable HTTPS/SSL for production API
-- Set up proper log rotation and monitoring
-- Configure Celery worker scaling based on load
-- Rate limiting is per-IP (100 req/min by default)
-
-### Documentation Files
-
-- `README.md` - Setup and quick start
-- `RoadMapDoc/RoadMap.md` - Feature roadmap and implementation status
-- `RoadMapDoc/TESTING.md` - Testing infrastructure documentation
-- `RoadMapDoc/SECURITY_FEATURES.md` - Security features documentation
-- `RoadMapDoc/ADMIN_FEATURES.md` - Administration and analytics documentation
-
-### When Making Changes
-
-1. Write unit tests first (TDD encouraged)
-2. Run `./run_unit_tests.sh` to ensure tests pass
-3. Run `./run_linting.sh` to check code quality
-4. Update relevant documentation in `RoadMapDoc/`
-5. For new features, mark as completed in `RoadMap.md`
-6. For API changes, test with Swagger UI at `/docs`
+Optional:
+- `SENTRY_DSN` - Error monitoring
+- `LOG_LEVEL`, `LOG_DIR`, `ENABLE_JSON_LOGS`, `ENABLE_LOG_ROTATION` - Logging config
