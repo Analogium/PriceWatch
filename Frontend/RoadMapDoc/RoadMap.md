@@ -6,6 +6,8 @@ Ce document trace les fonctionnalités à développer pour le frontend de PriceW
 
 > **Note** : Ce frontend est dédié aux utilisateurs finaux. Un frontend admin séparé sera développé ultérieurement.
 
+> **Référence Design** : Voir [DESIGN_SYSTEM.md](DESIGN_SYSTEM.md) pour les spécifications complètes des couleurs, typographie, composants et styles.
+
 ---
 
 ## Fonctionnalités Implémentées
@@ -25,8 +27,17 @@ Ce document trace les fonctionnalités à développer pour le frontend de PriceW
   - Structure de dossiers organisée
 - [ ] **Configuration Tailwind CSS**
   - Installation et configuration
-  - Thème personnalisé (couleurs, fonts)
+  - Thème personnalisé avec couleurs du design system :
+    - `primary`: #2563EB
+    - `background-light`: #F8FAFC
+    - `background-dark`: #101722
+    - `success`: #16A34A
+    - `danger`: #DC3545
   - Plugin forms et typography
+  - Border radius custom (0.375rem, 0.5rem, 0.75rem)
+- [ ] **Import des Google Fonts**
+  - Police Inter (weights 400, 500, 600, 700, 900)
+  - Material Symbols Outlined pour les icônes
 - [ ] **Configuration des outils de qualité**
   - ESLint avec règles TypeScript/React
   - Prettier pour le formatage
@@ -36,7 +47,29 @@ Ce document trace les fonctionnalités à développer pour le frontend de PriceW
   - Configuration API_URL
   - Mode développement/production
 
-#### 1.2 Infrastructure Technique
+#### 1.2 Design System - Composants de Base
+- [ ] **Composants UI fondamentaux**
+  - Button (primary, secondary, danger)
+    - Styles : `bg-primary text-white rounded-lg h-10/h-11 px-4`
+    - États : hover, focus, disabled
+  - Input avec icônes
+    - Styles : `rounded-lg border-gray-300 bg-gray-50 h-11 px-4`
+    - Support dark mode
+  - Card de base
+    - Styles : `rounded-xl border bg-white shadow-sm p-4/p-6`
+    - Hover effect : `hover:shadow-lg hover:border-primary/50`
+  - Badge/Tag
+    - Variantes : success, primary, neutral
+    - Styles : `rounded-full px-2.5 py-0.5 text-xs`
+- [ ] **Composants feedback essentiels**
+  - Toast/Notification (succès, erreur, info)
+  - Modal/Dialog de base
+  - Spinner/Loader
+- [ ] **Variables CSS pour dark mode**
+  - Configuration des couleurs light/dark
+  - Toggle de thème (optionnel pour MVP)
+
+#### 1.3 Infrastructure Technique
 - [ ] **Client HTTP (Axios)**
   - Instance Axios configurée
   - Intercepteur pour JWT (Authorization header)
@@ -52,7 +85,7 @@ Ce document trace les fonctionnalités à développer pour le frontend de PriceW
   - Zustand ou Context pour l'état global
   - Gestion du user connecté
 
-#### 1.3 Authentification
+#### 1.4 Authentification
 - [ ] **Page de connexion**
   - Formulaire email/mot de passe
   - Validation des champs
@@ -186,10 +219,11 @@ Ce document trace les fonctionnalités à développer pour le frontend de PriceW
   - Prix
   - Variation par rapport au précédent
 - [ ] **Statistiques**
+  - Prix actuel
   - Prix minimum historique
   - Prix maximum historique
   - Prix moyen
-  - Variation en pourcentage
+  - Variation en pourcentage (price_change_percentage)
   - Nombre de relevés
 
 #### 3.2 Préférences Utilisateur
@@ -197,15 +231,15 @@ Ce document trace les fonctionnalités à développer pour le frontend de PriceW
   - Section notifications
   - Section webhooks
 - [ ] **Notifications email**
-  - Toggle activer/désactiver
-  - Toggle alertes baisse de prix
-  - Toggle alertes disponibilité
-  - Toggle résumé hebdomadaire
-  - Sélecteur fréquence de notification
+  - Toggle activer/désactiver (email_notifications)
+  - Toggle alertes baisse de prix (price_drop_alerts)
+  - Toggle alertes disponibilité (availability_alerts)
+  - Toggle résumé hebdomadaire (weekly_summary)
+  - Sélecteur fréquence : instant, daily, weekly (notification_frequency)
 - [ ] **Webhooks**
-  - Toggle activer/désactiver
-  - Champ URL du webhook
-  - Sélecteur type (Slack, Discord, Custom)
+  - Toggle activer/désactiver (webhook_notifications)
+  - Champ URL du webhook (webhook_url)
+  - Sélecteur type : Slack, Discord, Custom (webhook_type)
   - Test de webhook (optionnel)
 - [ ] **Sauvegarde**
   - Bouton sauvegarder
@@ -213,65 +247,54 @@ Ce document trace les fonctionnalités à développer pour le frontend de PriceW
 
 ---
 
-### Priorité 4 - BASSE (UX/UI Polish)
+### Priorité 4 - BASSE (UX/UI Polish & Accessibilité)
 
-#### 4.1 Composants UI Réutilisables
-- [ ] **Design System de base**
-  - Button (primary, secondary, danger, sizes)
-  - Input (text, email, password, number)
-  - Select/Dropdown
-  - Checkbox/Toggle
-  - Card
-  - Badge/Tag
-  - Avatar
-- [ ] **Composants feedback**
-  - Toast/Notifications
-  - Modal/Dialog
-  - Alert/Banner
-  - Spinner/Loader
-  - Skeleton
+#### 4.1 Composants UI Avancés
+- [ ] **Composants supplémentaires**
+  - Select/Dropdown personnalisé
+  - Checkbox/Toggle animé
+  - Avatar avec fallback
   - Progress bar
+  - Alert/Banner
 - [ ] **Composants navigation**
   - Breadcrumb
   - Tabs
-  - Pagination
 
 #### 4.2 Améliorations UX
-- [ ] **Loading states**
+- [ ] **Loading states avancés**
   - Skeletons pour toutes les listes
-  - Spinners pour les actions
   - Optimistic updates
 - [ ] **Empty states**
   - Messages clairs et actions
   - Illustrations (optionnel)
-- [ ] **Error handling**
+- [ ] **Error handling avancé**
   - Error boundaries React
   - Pages d'erreur (404, 500)
-  - Messages d'erreur user-friendly
-  - Retry automatique
-- [ ] **Feedback actions**
-  - Toasts pour succès/erreur
-  - Confirmation pour actions destructives
+  - Retry automatique sur erreurs réseau
 
-#### 4.3 Responsive Design
-- [ ] **Mobile-first**
-  - Breakpoints Tailwind (sm, md, lg, xl)
-  - Navigation adaptative
-  - Cards responsive
-  - Formulaires adaptés
+#### 4.3 Responsive Design - Vérification
+- [ ] **Tests responsive complets**
+  - Vérifier tous les breakpoints (sm, md, lg, xl)
+  - Navigation mobile fluide
+  - Cards et grilles adaptatives
+  - Formulaires adaptés au mobile
 - [ ] **Touch-friendly**
-  - Boutons assez grands
-  - Espacement suffisant
+  - Boutons minimum 44x44px
+  - Espacement suffisant entre éléments cliquables
   - Swipe actions (optionnel)
 
 #### 4.4 Accessibilité (a11y)
-- [ ] **Standards WCAG**
-  - Labels ARIA appropriés
-  - Navigation clavier complète
-  - Focus visible
-  - Contraste couleurs suffisant
-  - Alt text pour images
-  - Rôles sémantiques
+- [ ] **Standards WCAG AA**
+  - Labels ARIA appropriés sur tous les composants
+  - Navigation clavier complète (Tab, Enter, Escape)
+  - Focus visible sur tous les éléments interactifs
+  - Alt text pour toutes les images
+  - Rôles sémantiques (button, link, navigation, main)
+- [ ] **Validation contraste couleurs**
+  - Vérifier primary (#2563EB) sur fond blanc
+  - Vérifier success (#16A34A) lisibilité
+  - Vérifier textes gris sur fonds clairs/sombres
+  - Utiliser un outil comme axe ou Lighthouse
 
 ---
 
@@ -299,6 +322,51 @@ Ce document trace les fonctionnalités à développer pour le frontend de PriceW
   - Installation sur mobile
   - Splash screen
   - Icônes
+
+---
+
+## Endpoints API Consommés
+
+### Authentification (`/api/v1/auth`)
+
+| Méthode | Endpoint | Description |
+|---------|----------|-------------|
+| POST | `/register` | Inscription |
+| POST | `/login` | Connexion |
+| GET | `/me` | Info utilisateur connecté |
+| POST | `/refresh` | Refresh du token |
+| POST | `/verify-email` | Vérification email |
+| POST | `/forgot-password` | Demande reset password |
+| POST | `/reset-password` | Reset du password |
+
+### Produits (`/api/v1/products`)
+
+| Méthode | Endpoint | Description |
+|---------|----------|-------------|
+| GET | `/` | Liste paginée des produits |
+| POST | `/` | Ajouter un produit |
+| GET | `/{id}` | Détail d'un produit |
+| PUT | `/{id}` | Modifier un produit |
+| DELETE | `/{id}` | Supprimer un produit |
+| POST | `/{id}/check` | Vérifier le prix |
+| GET | `/{id}/history` | Historique des prix |
+| GET | `/{id}/history/stats` | Statistiques de prix |
+
+**Query params pour GET `/products`** :
+- `page` (int, default: 1) - Numéro de page
+- `page_size` (int, default: 20, max: 100) - Items par page
+- `search` (string, optional) - Recherche par nom ou URL
+- `sort_by` (enum: name, current_price, target_price, created_at, last_checked)
+- `order` (enum: asc, desc)
+
+### Préférences (`/api/v1/users`)
+
+| Méthode | Endpoint | Description |
+|---------|----------|-------------|
+| GET | `/preferences` | Récupérer préférences |
+| POST | `/preferences` | Créer préférences |
+| PUT | `/preferences` | Modifier préférences |
+| DELETE | `/preferences` | Supprimer préférences |
 
 ---
 
@@ -374,44 +442,6 @@ Frontend/
 ├── tsconfig.json
 └── vite.config.ts
 ```
-
----
-
-## Endpoints API Consommés
-
-### Authentification (`/api/v1/auth`)
-
-| Méthode | Endpoint | Description |
-|---------|----------|-------------|
-| POST | `/register` | Inscription |
-| POST | `/login` | Connexion |
-| GET | `/me` | Info utilisateur connecté |
-| POST | `/refresh` | Refresh du token |
-| POST | `/verify-email` | Vérification email |
-| POST | `/forgot-password` | Demande reset password |
-| POST | `/reset-password` | Reset du password |
-
-### Produits (`/api/v1/products`)
-
-| Méthode | Endpoint | Description |
-|---------|----------|-------------|
-| GET | `/` | Liste paginée des produits |
-| POST | `/` | Ajouter un produit |
-| GET | `/{id}` | Détail d'un produit |
-| PUT | `/{id}` | Modifier un produit |
-| DELETE | `/{id}` | Supprimer un produit |
-| POST | `/{id}/check` | Vérifier le prix |
-| GET | `/{id}/history` | Historique des prix |
-| GET | `/{id}/history/stats` | Statistiques de prix |
-
-### Préférences (`/api/v1/users`)
-
-| Méthode | Endpoint | Description |
-|---------|----------|-------------|
-| GET | `/preferences` | Récupérer préférences |
-| POST | `/preferences` | Créer préférences |
-| PUT | `/preferences` | Modifier préférences |
-| DELETE | `/preferences` | Supprimer préférences |
 
 ---
 
@@ -493,10 +523,11 @@ interface PriceHistory {
 }
 
 interface PriceStats {
+  current_price: number;
   lowest_price: number;
   highest_price: number;
   average_price: number;
-  price_change_percent: number;
+  price_change_percentage: number | null;
   total_records: number;
 }
 ```
@@ -511,10 +542,21 @@ interface UserPreferences {
   webhook_notifications: boolean;
   webhook_url: string | null;
   webhook_type: 'slack' | 'discord' | 'custom' | null;
-  notification_frequency: string;
+  notification_frequency: 'instant' | 'daily' | 'weekly';
   price_drop_alerts: boolean;
   weekly_summary: boolean;
   availability_alerts: boolean;
+}
+
+interface UserPreferencesUpdate {
+  email_notifications?: boolean;
+  webhook_notifications?: boolean;
+  webhook_url?: string | null;
+  webhook_type?: 'slack' | 'discord' | 'custom' | null;
+  notification_frequency?: 'instant' | 'daily' | 'weekly';
+  price_drop_alerts?: boolean;
+  weekly_summary?: boolean;
+  availability_alerts?: boolean;
 }
 ```
 
@@ -610,4 +652,10 @@ npm run type-check
 
 ---
 
-**Dernière mise à jour** : 2025-11-21
+## Documentation Associée
+
+- **[DESIGN_SYSTEM.md](DESIGN_SYSTEM.md)** - Spécifications complètes du design system (couleurs, typographie, composants, Tailwind config)
+
+---
+
+**Dernière mise à jour** : 2025-11-22
