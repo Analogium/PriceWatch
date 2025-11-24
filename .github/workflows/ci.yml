@@ -1,10 +1,16 @@
-name: CI/CD Pipeline
+name: CI/CD Pipeline - Backend
 
 on:
   push:
     branches: [main, master, develop]
+    paths:
+      - 'Backend/**'
+      - '.github/workflows/ci.yml'
   pull_request:
     branches: [main, master, develop]
+    paths:
+      - 'Backend/**'
+      - '.github/workflows/ci.yml'
 
 env:
   PYTHON_VERSION: "3.12"
