@@ -8,6 +8,8 @@ Ce document trace les fonctionnalités à développer pour le frontend de PriceW
 
 > **Référence Design** : Voir [DESIGN_SYSTEM.md](DESIGN_SYSTEM.md) pour les spécifications complètes des couleurs, typographie, composants et styles.
 
+> **Maquette** : Voir [../Maquette/](../Maquette/) pour les pages ou composants qui sont déjà réalisés depuis figma.
+
 ---
 
 ## Fonctionnalités Implémentées
@@ -20,13 +22,13 @@ Ce document trace les fonctionnalités à développer pour le frontend de PriceW
 
 ### Priorité 1 - CRITIQUE (Setup & Auth)
 
-#### 1.1 Setup du Projet
-- [ ] **Initialisation Vite + React + TypeScript**
+#### 1.1 Setup du Projet ✅
+- [x] **Initialisation Vite + React + TypeScript**
   - Configuration du projet avec Vite
   - TypeScript strict mode activé
   - Structure de dossiers organisée
-- [ ] **Configuration Tailwind CSS**
-  - Installation et configuration
+- [x] **Configuration Tailwind CSS**
+  - Installation et configuration (Tailwind v4)
   - Thème personnalisé avec couleurs du design system :
     - `primary`: #2563EB
     - `background-light`: #F8FAFC
@@ -35,14 +37,13 @@ Ce document trace les fonctionnalités à développer pour le frontend de PriceW
     - `danger`: #DC3545
   - Plugin forms et typography
   - Border radius custom (0.375rem, 0.5rem, 0.75rem)
-- [ ] **Import des Google Fonts**
+- [x] **Import des Google Fonts**
   - Police Inter (weights 400, 500, 600, 700, 900)
   - Material Symbols Outlined pour les icônes
-- [ ] **Configuration des outils de qualité**
+- [x] **Configuration des outils de qualité**
   - ESLint avec règles TypeScript/React
   - Prettier pour le formatage
-  - Husky pour pre-commit hooks
-- [ ] **Configuration de l'environnement**
+- [x] **Configuration de l'environnement**
   - Variables d'environnement (.env)
   - Configuration API_URL
   - Mode développement/production
