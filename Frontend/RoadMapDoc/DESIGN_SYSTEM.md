@@ -127,9 +127,10 @@ font-family: "Inter", sans-serif;
 
 #### Primary Button
 ```css
-bg-primary text-white font-semibold rounded-lg px-4 py-2
-hover:bg-primary/90
-focus:ring-2 focus:ring-primary focus:ring-offset-2
+bg-primary-600 text-white font-semibold rounded-lg px-4 py-2
+hover:bg-primary-700
+focus:ring-2 focus:ring-primary-600 focus:ring-offset-2
+disabled:opacity-50 disabled:cursor-not-allowed
 ```
 
 #### Secondary Button
@@ -139,12 +140,16 @@ border border-gray-300 dark:border-gray-700
 text-gray-800 dark:text-gray-200
 rounded-lg px-4 py-2
 hover:bg-gray-100 dark:hover:bg-gray-700
+focus:ring-2 focus:ring-gray-300 dark:focus:ring-gray-700
+disabled:opacity-50 disabled:cursor-not-allowed
 ```
 
 #### Danger Button
 ```css
-bg-danger text-white font-semibold rounded-lg px-4 py-2
-hover:bg-danger/90
+bg-danger-600 text-white font-semibold rounded-lg px-4 py-2
+hover:bg-danger-700
+focus:ring-2 focus:ring-danger-600
+disabled:opacity-50 disabled:cursor-not-allowed
 ```
 
 #### Hauteurs
@@ -160,8 +165,9 @@ border border-gray-300 dark:border-gray-700
 bg-gray-50 dark:bg-gray-800
 text-gray-900 dark:text-gray-100
 placeholder:text-gray-400 dark:placeholder:text-gray-500
-focus:border-primary focus:ring-2 focus:ring-primary/20
+focus:border-primary-600 focus:ring-2 focus:ring-primary-600/20
 h-11 px-4 py-2
+disabled:opacity-50 disabled:cursor-not-allowed
 
 /* Avec icône gauche */
 pl-10 /* + icône en absolute left-3 */
@@ -178,7 +184,7 @@ p-4 ou p-6
 shadow-sm
 
 /* Card hover effect */
-hover:shadow-lg hover:border-primary/50
+hover:shadow-lg hover:border-primary-600/50
 transition-all duration-300
 ```
 
@@ -191,8 +197,10 @@ rounded-full px-2.5 py-0.5
 text-xs font-medium
 
 /* Variantes */
-/* Success */ bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300
-/* Primary */ bg-blue-100 dark:bg-blue-900/50 text-primary dark:text-blue-300
+/* Success */ bg-success-100 dark:bg-success-900/50 text-success-700 dark:text-success-300
+/* Primary */ bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300
+/* Warning */ bg-warning-100 dark:bg-warning-900/50 text-warning-700 dark:text-warning-300
+/* Danger */ bg-danger-100 dark:bg-danger-900/50 text-danger-700 dark:text-danger-300
 /* Neutral */ bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300
 ```
 
@@ -251,8 +259,8 @@ transition-all duration-300 /* pour hover complet (shadow, border) */
 ### Focus
 ```css
 focus:outline-none
-focus:ring-2 focus:ring-primary
-focus:ring-offset-2 focus:ring-offset-background-light dark:focus:ring-offset-background-dark
+focus:ring-2 focus:ring-primary-600
+focus:ring-offset-2
 ```
 
 ### Disabled
@@ -362,6 +370,15 @@ module.exports = {
 
 ---
 
-**Dernière mise à jour** : 2025-11-22
+**Dernière mise à jour** : 2025-11-25
+
+### Changelog
+- **2025-11-25** :
+  - Correction de toutes les classes Tailwind invalides (`bg-primary` → `bg-primary-600`, etc.)
+  - Ajout des états `disabled` pour tous les composants interactifs
+  - Ajout de la variante Warning pour les badges
+  - Correction des focus rings pour utiliser les couleurs valides
+  - Amélioration de la cohérence avec l'implémentation dans index.css
+- **2025-11-22** : Création initiale du design system
 
 > **Note** : L'implémentation de ce design system est détaillée dans [RoadMap.md](RoadMap.md) aux sections 1.1, 1.2 et 4.4.
