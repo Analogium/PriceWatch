@@ -14,7 +14,103 @@ Ce document trace les fonctionnalités à développer pour le frontend de PriceW
 
 ## Fonctionnalités Implémentées
 
-*Aucune fonctionnalité implémentée pour le moment.*
+### ✅ Setup & Infrastructure (Priorité 1)
+
+#### 1.1 Setup du Projet - COMPLET ✅
+- ✅ **Initialisation Vite + React + TypeScript**
+  - Configuration du projet avec Vite 7.2.4
+  - TypeScript 5.9.3 strict mode activé
+  - Structure de dossiers organisée selon l'architecture définie
+- ✅ **Configuration Tailwind CSS v4**
+  - Installation et configuration complète (Tailwind v4.1.17 avec plugin Vite)
+  - Thème personnalisé avec toutes les couleurs du design system :
+    - Primary (bleu) : `#2563EB` avec variantes 50-900
+    - Success (vert) : `#16A34A` avec variantes
+    - Danger (rouge) : `#DC3545` avec variantes
+    - **Error** : `#EF4444` (variante alternative)
+    - **Warning** (orange) : `#F59E0B` avec variantes 50-700
+    - Gray (neutre) : variantes 50-900
+    - Slate (textes) : 400, 500, 800
+    - Background light/dark : `#F8FAFC` / `#101722`
+  - Plugins @tailwindcss/forms et @tailwindcss/typography
+  - Border radius personnalisés (0.375rem, 0.5rem, 0.75rem, full)
+- ✅ **Import des Google Fonts**
+  - Police Inter (weights 400, 500, 600, 700, 900) avec preconnect
+  - Material Symbols Outlined pour les icônes
+  - Optimisation avec preconnect pour performance
+- ✅ **Configuration des outils de qualité**
+  - ESLint avec règles TypeScript/React
+  - Prettier pour le formatage
+  - Scripts lint, lint:fix, format, format:check
+- ✅ **Configuration de l'environnement**
+  - Variables d'environnement (.env)
+  - Configuration VITE_API_URL
+  - Configuration Docker Compose pour développement
+
+#### 1.2 Design System - Composants de Base - COMPLET ✅
+- ✅ **Composants UI fondamentaux** (`components/ui/`)
+  - Button (primary, secondary, danger) avec support isLoading, icons, sizes (sm, md, lg)
+  - Input avec support leftIcon/rightIcon, label, error, helperText
+  - Card avec hover effect et padding configurable (none, sm, md, lg)
+  - Badge avec 5 variantes (success, primary, warning, danger, neutral) et support icon/dot
+- ✅ **Composants feedback essentiels**
+  - Toast/Notification avec 4 variantes et auto-dismiss configurable
+  - ToastContainer pour afficher les notifications
+  - Hook useToast avec méthodes success, error, warning, info
+  - Modal/Dialog avec backdrop blur, tailles (sm, md, lg, xl), close on Escape/backdrop
+  - Spinner/Loader avec variants (primary, white, current) et tailles (xs-xl)
+- ✅ **Barrel exports**
+  - Tous les composants exportés depuis `@/components/ui/index.ts`
+
+#### 1.3 Infrastructure Technique - COMPLET ✅
+- ✅ **Client HTTP (Axios)**
+  - Instance Axios configurée dans `api/client.ts`
+  - Intercepteur pour JWT (Authorization header avec Bearer token)
+  - Intercepteur pour refresh token automatique sur 401
+  - Gestion globale des erreurs API avec extraction de messages
+- ✅ **Routing (React Router v7)**
+  - Configuration complète des routes dans `router.tsx`
+  - Routes protégées avec ProtectedRoute wrapper
+  - Routes publiques avec PublicRoute wrapper (redirections si authentifié)
+  - Lazy loading des pages avec React.lazy et Suspense
+  - PageLoader avec spinner (border-primary-600)
+  - Page 404 avec fallback
+  - Redirections automatiques (/ → /dashboard, non-auth → /login)
+- ✅ **State Management**
+  - AuthContext pour l'authentification complète
+  - Gestion du user connecté avec tokens (localStorage)
+  - Hooks useAuth disponible pour tous les composants
+  - React Query configuré pour cache API (TanStack Query)
+
+#### Structure API - COMPLET ✅
+- ✅ **Services API organisés**
+  - `api/auth.ts` : login, register, me, refresh, verifyEmail, forgotPassword, resetPassword
+  - `api/products.ts` : getAll (avec filtres/pagination), getById, create, update, delete, checkPrice, getHistory, getStats
+  - `api/preferences.ts` : get, create, update, delete
+  - Barrel exports dans `api/index.ts`
+
+#### Types TypeScript - COMPLET ✅
+- ✅ **Types définis et organisés**
+  - `types/auth.ts` : User, Token, LoginCredentials, RegisterData, AuthState
+  - `types/product.ts` : Product, ProductCreate, ProductUpdate, PaginatedProducts, PriceHistory, PriceStats, ProductFilters
+  - `types/preferences.ts` : UserPreferences, UserPreferencesUpdate, NotificationFrequency, WebhookType
+  - Barrel exports dans `types/index.ts`
+
+#### Utilitaires - COMPLET ✅
+- ✅ **Utils organisés**
+  - `utils/cn.ts` : Class name merger (clsx + tailwind-merge)
+  - `utils/constants.ts` : CHECK_FREQUENCIES, NOTIFICATION_FREQUENCIES, WEBHOOK_TYPES, SORT_OPTIONS, PAGE_SIZES
+  - `utils/formatters.ts` : formatPrice, formatDate, formatDateTime, formatRelativeTime, formatPercentage
+  - `utils/validators.ts` : Schémas Zod pour tous les formulaires (login, register, forgot/reset password, product CRUD)
+  - Barrel exports dans `utils/index.ts`
+
+#### Pages Structure - COMPLET ✅
+- ✅ **Pages créées (skeleton)**
+  - Auth : Login, Register, ForgotPassword, ResetPassword, VerifyEmail
+  - Dashboard : Dashboard (liste produits)
+  - Products : ProductAdd, ProductDetail, ProductEdit
+  - Settings : Settings (préférences utilisateur)
+  - Toutes les pages utilisent le design system (bg-gray-50, text-gray-900, text-gray-600)
 
 ---
 
@@ -48,43 +144,56 @@ Ce document trace les fonctionnalités à développer pour le frontend de PriceW
   - Configuration API_URL
   - Mode développement/production
 
-#### 1.2 Design System - Composants de Base
-- [ ] **Composants UI fondamentaux**
-  - Button (primary, secondary, danger)
-    - Styles : `bg-primary text-white rounded-lg h-10/h-11 px-4`
-    - États : hover, focus, disabled
-  - Input avec icônes
-    - Styles : `rounded-lg border-gray-300 bg-gray-50 h-11 px-4`
-    - Support dark mode
-  - Card de base
-    - Styles : `rounded-xl border bg-white shadow-sm p-4/p-6`
-    - Hover effect : `hover:shadow-lg hover:border-primary/50`
-  - Badge/Tag
-    - Variantes : success, primary, neutral
-    - Styles : `rounded-full px-2.5 py-0.5 text-xs`
-- [ ] **Composants feedback essentiels**
-  - Toast/Notification (succès, erreur, info)
-  - Modal/Dialog de base
-  - Spinner/Loader
-- [ ] **Variables CSS pour dark mode**
-  - Configuration des couleurs light/dark
-  - Toggle de thème (optionnel pour MVP)
+#### 1.2 Design System - Composants de Base - COMPLET ✅
+- ✅ **Composants UI fondamentaux**
+  - ✅ Button (primary, secondary, danger)
+    - Primary : `bg-primary-600 text-white rounded-lg h-10/h-11 px-4 hover:bg-primary-700 focus:ring-2 focus:ring-primary-600`
+    - Secondary : `bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 text-gray-800 dark:text-gray-200 rounded-lg px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700`
+    - Danger : `bg-danger-600 text-white rounded-lg px-4 py-2 hover:bg-danger-700`
+    - États : hover, focus, disabled (`disabled:opacity-50 disabled:cursor-not-allowed`)
+    - Support isLoading, leftIcon, rightIcon, fullWidth
+    - Tailles : sm, md, lg
+  - ✅ Input avec icônes
+    - Styles : `rounded-lg border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-100 h-11 px-4 focus:border-primary-600 focus:ring-2 focus:ring-primary-600/20`
+    - Placeholder : `placeholder:text-gray-400 dark:placeholder:text-gray-500`
+    - Support leftIcon et rightIcon
+    - Support label, error, helperText
+  - ✅ Card de base
+    - Styles : `rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm p-4/p-6`
+    - Hover effect : `hover:shadow-lg hover:border-primary-600/50 transition-all duration-300`
+    - Padding configurable : none, sm, md, lg
+  - ✅ Badge/Tag
+    - Success : `bg-success-100 dark:bg-success-900/50 text-success-700 dark:text-success-300`
+    - Primary : `bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300`
+    - Warning : `bg-warning-100 dark:bg-warning-900/50 text-warning-700 dark:text-warning-300`
+    - Danger : `bg-danger-100 dark:bg-danger-900/50 text-danger-700 dark:text-danger-300`
+    - Neutral : `bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300`
+    - Styles de base : `inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium`
+    - Support icon et dot indicator
+- ✅ **Composants feedback essentiels**
+  - ✅ Toast/Notification (succès, erreur, info, warning)
+    - ToastContainer pour afficher les notifications
+    - Hook useToast avec méthodes success, error, warning, info
+    - Auto-dismiss configurable
+  - ✅ Modal/Dialog de base avec backdrop
+    - Backdrop blur
+    - Tailles : sm, md, lg, xl
+    - Close on Escape et backdrop click configurables
+    - Gestion du scroll body
+  - ✅ Spinner/Loader
+    - Variants : primary, white, current
+    - Tailles : xs, sm, md, lg, xl
+    - Support label optionnel
+- ✅ **Variables CSS pour dark mode**
+  - Configuration des couleurs light/dark complète dans index.css
+  - Toggle de thème (à implémenter pour activer/désactiver la classe `dark`)
+- ✅ **Barrel exports**
+  - Tous les composants exportés depuis `@/components/ui`
 
-#### 1.3 Infrastructure Technique
-- [ ] **Client HTTP (Axios)**
-  - Instance Axios configurée
-  - Intercepteur pour JWT (Authorization header)
-  - Intercepteur pour refresh token automatique
-  - Gestion globale des erreurs API
-- [ ] **Routing (React Router v6)**
-  - Configuration des routes
-  - Routes protégées (PrivateRoute)
-  - Redirections automatiques
-  - Layout principal
-- [ ] **State Management**
-  - Context API pour l'authentification
-  - Zustand ou Context pour l'état global
-  - Gestion du user connecté
+#### 1.3 Infrastructure Technique ✅ (voir section Fonctionnalités Implémentées)
+- [x] **Client HTTP (Axios)** - Complet
+- [x] **Routing (React Router v7)** - Complet
+- [x] **State Management** - Complet
 
 #### 1.4 Authentification
 - [ ] **Page de connexion**
@@ -566,22 +675,24 @@ interface UserPreferencesUpdate {
 ## Dépendances Principales
 
 ### Core
-- React 18
-- TypeScript 5
-- Vite 5
+- React 19.2.0
+- TypeScript 5.9.3
+- Vite 7.2.4
 
 ### Styling
-- Tailwind CSS 3
-- @tailwindcss/forms
-- @tailwindcss/typography
+- Tailwind CSS 4.1.17
+- @tailwindcss/vite 4.1.17
+- @tailwindcss/forms 0.5.10
+- @tailwindcss/typography 0.5.19
 
 ### Routing & State
-- React Router 6
-- Zustand (ou Context API)
+- React Router 7.9.6
+- Zustand 5.0.8 (disponible)
+- Context API (AuthContext implémenté)
 
 ### HTTP & Data
-- Axios
-- React Query (ou SWR)
+- Axios 1.13.2
+- TanStack React Query 5.90.10
 
 ### UI Components
 - Headless UI (ou Radix UI)
@@ -591,12 +702,14 @@ interface UserPreferencesUpdate {
 - Recharts (ou Chart.js)
 
 ### Forms
-- React Hook Form
-- Zod (validation)
+- React Hook Form 7.66.1
+- Zod 4.1.13 (validation)
+- @hookform/resolvers 5.2.2
 
 ### Utils
-- date-fns (dates)
-- clsx (classnames)
+- date-fns 4.1.0 (dates)
+- clsx 2.1.1 (classnames)
+- tailwind-merge 3.4.0 (merge classes)
 
 ### Dev
 - ESLint
@@ -659,4 +772,19 @@ npm run type-check
 
 ---
 
-**Dernière mise à jour** : 2025-11-22
+**Dernière mise à jour** : 2025-11-25
+
+### Changelog
+- **2025-11-25** :
+  - ✅ Setup complet (Vite, React, TypeScript, Tailwind v4)
+  - ✅ Infrastructure technique (Axios, React Router v7, AuthContext)
+  - ✅ Structure API complète avec tous les endpoints
+  - ✅ Types TypeScript complets
+  - ✅ Utilitaires (formatters, validators, constants)
+  - ✅ Pages skeleton créées avec design system
+  - ✅ Design system étendu (warning, error, slate colors)
+  - ✅ Configuration Docker Compose
+  - ✅ **Composants UI de base** (Button, Input, Card, Badge, Toast, Modal, Spinner)
+  - ✅ Hook useToast pour la gestion des notifications
+  - ✅ Barrel exports pour tous les composants UI
+- **2025-11-22** : Création initiale de la roadmap
