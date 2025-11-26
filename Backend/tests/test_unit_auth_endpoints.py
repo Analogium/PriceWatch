@@ -179,11 +179,14 @@ class TestLoginEndpoint:
         mock_db.query.return_value.filter.return_value.first.return_value = mock_user
 
         mock_request = Mock(spec=Request)
-        credentials = UserLogin(email="test@example.com", password="SecurePass123!")
+        # Mock OAuth2PasswordRequestForm
+        mock_form_data = Mock()
+        mock_form_data.username = "test@example.com"
+        mock_form_data.password = "SecurePass123!"
 
         from app.api.endpoints.auth import login
 
-        result = await login(mock_request, credentials, mock_db)
+        result = await login(mock_request, mock_form_data, mock_db)
 
         assert result["access_token"] == "access_token_123"
         assert result["refresh_token"] == "refresh_token_456"
@@ -200,12 +203,15 @@ class TestLoginEndpoint:
         mock_db.query.return_value.filter.return_value.first.return_value = None
 
         mock_request = Mock(spec=Request)
-        credentials = UserLogin(email="nonexistent@example.com", password="SecurePass123!")
+        # Mock OAuth2PasswordRequestForm
+        mock_form_data = Mock()
+        mock_form_data.username = "nonexistent@example.com"
+        mock_form_data.password = "SecurePass123!"
 
         from app.api.endpoints.auth import login
 
         with pytest.raises(HTTPException) as exc_info:
-            await login(mock_request, credentials, mock_db)
+            await login(mock_request, mock_form_data, mock_db)
 
         assert exc_info.value.status_code == 401
         assert "Invalid credentials" in exc_info.value.detail
@@ -224,12 +230,15 @@ class TestLoginEndpoint:
         mock_db.query.return_value.filter.return_value.first.return_value = mock_user
 
         mock_request = Mock(spec=Request)
-        credentials = UserLogin(email="test@example.com", password="WrongPassword123!")
+        # Mock OAuth2PasswordRequestForm
+        mock_form_data = Mock()
+        mock_form_data.username = "test@example.com"
+        mock_form_data.password = "WrongPassword123!"
 
         from app.api.endpoints.auth import login
 
         with pytest.raises(HTTPException) as exc_info:
-            await login(mock_request, credentials, mock_db)
+            await login(mock_request, mock_form_data, mock_db)
 
         assert exc_info.value.status_code == 401
         assert "Invalid credentials" in exc_info.value.detail

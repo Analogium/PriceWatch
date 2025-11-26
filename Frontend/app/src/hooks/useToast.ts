@@ -28,35 +28,35 @@ export const useToast = () => {
 
       setToasts((prev) => [...prev, newToast]);
     },
-    [removeToast],
+    [removeToast]
   );
 
   const success = useCallback(
     (message: string, title?: string, duration?: number) => {
       addToast(message, { variant: 'success', title, duration });
     },
-    [addToast],
+    [addToast]
   );
 
   const error = useCallback(
     (message: string, title?: string, duration?: number) => {
       addToast(message, { variant: 'error', title, duration });
     },
-    [addToast],
+    [addToast]
   );
 
   const warning = useCallback(
     (message: string, title?: string, duration?: number) => {
       addToast(message, { variant: 'warning', title, duration });
     },
-    [addToast],
+    [addToast]
   );
 
   const info = useCallback(
     (message: string, title?: string, duration?: number) => {
       addToast(message, { variant: 'info', title, duration });
     },
-    [addToast],
+    [addToast]
   );
 
   return {

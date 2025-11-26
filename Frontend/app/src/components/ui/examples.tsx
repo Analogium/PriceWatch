@@ -6,15 +6,7 @@
  */
 
 import React, { useState } from 'react';
-import {
-  Button,
-  Input,
-  Card,
-  Badge,
-  Modal,
-  Spinner,
-  ToastContainer,
-} from '@/components/ui';
+import { Button, Input, Card, Badge, Modal, Spinner, ToastContainer } from '@/components/ui';
 import { useToast } from '@/hooks/useToast';
 
 // ============================================
@@ -46,10 +38,7 @@ export function ButtonExamples() {
 
       {/* Avec icônes */}
       <div className="flex gap-3">
-        <Button
-          variant="primary"
-          leftIcon={<span className="material-symbols-outlined">add</span>}
-        >
+        <Button variant="primary" leftIcon={<span className="material-symbols-outlined">add</span>}>
           Ajouter
         </Button>
         <Button
@@ -117,12 +106,7 @@ export function InputExamples() {
       />
 
       {/* Input avec erreur */}
-      <Input
-        label="Nom d'utilisateur"
-        type="text"
-        error="Ce champ est requis"
-        fullWidth
-      />
+      <Input label="Nom d'utilisateur" type="text" error="Ce champ est requis" fullWidth />
 
       {/* Input avec helper text */}
       <Input
@@ -144,9 +128,7 @@ export function CardExamples() {
     <div className="grid gap-6 md:grid-cols-2">
       {/* Card simple */}
       <Card>
-        <h3 className="mb-2 text-lg font-semibold text-gray-900 dark:text-gray-100">
-          Card Simple
-        </h3>
+        <h3 className="mb-2 text-lg font-semibold text-gray-900 dark:text-gray-100">Card Simple</h3>
         <p className="text-gray-600 dark:text-gray-400">
           Ceci est une card avec le padding par défaut (md)
         </p>
@@ -154,12 +136,8 @@ export function CardExamples() {
 
       {/* Card avec hover */}
       <Card hover>
-        <h3 className="mb-2 text-lg font-semibold text-gray-900 dark:text-gray-100">
-          Card Hover
-        </h3>
-        <p className="text-gray-600 dark:text-gray-400">
-          Passez la souris pour voir l'effet hover
-        </p>
+        <h3 className="mb-2 text-lg font-semibold text-gray-900 dark:text-gray-100">Card Hover</h3>
+        <p className="text-gray-600 dark:text-gray-400">Passez la souris pour voir l'effet hover</p>
       </Card>
 
       {/* Card avec padding personnalisé */}
@@ -167,9 +145,7 @@ export function CardExamples() {
         <h3 className="mb-2 text-lg font-semibold text-gray-900 dark:text-gray-100">
           Large Padding
         </h3>
-        <p className="text-gray-600 dark:text-gray-400">
-          Card avec padding large (lg)
-        </p>
+        <p className="text-gray-600 dark:text-gray-400">Card avec padding large (lg)</p>
       </Card>
 
       {/* Card produit exemple */}
@@ -248,36 +224,27 @@ export function ToastExamples() {
       <ToastContainer toasts={toasts} />
 
       <div className="flex flex-wrap gap-3">
-        <Button
-          variant="primary"
-          onClick={() => success('Produit ajouté avec succès !', 'Succès')}
-        >
+        <Button variant="primary" onClick={() => success('Produit ajouté avec succès !', 'Succès')}>
           Toast Succès
         </Button>
 
         <Button
           variant="danger"
-          onClick={() =>
-            error('Impossible de récupérer les données', 'Erreur')
-          }
+          onClick={() => error('Impossible de récupérer les données', 'Erreur')}
         >
           Toast Erreur
         </Button>
 
         <Button
           variant="secondary"
-          onClick={() =>
-            warning('Le prix a augmenté de 10%', 'Attention')
-          }
+          onClick={() => warning('Le prix a augmenté de 10%', 'Attention')}
         >
           Toast Warning
         </Button>
 
         <Button
           variant="secondary"
-          onClick={() =>
-            info('Nouvelle vérification dans 6 heures', 'Information')
-          }
+          onClick={() => info('Nouvelle vérification dans 6 heures', 'Information')}
         >
           Toast Info
         </Button>
@@ -285,9 +252,7 @@ export function ToastExamples() {
         {/* Toast avec durée personnalisée */}
         <Button
           variant="secondary"
-          onClick={() =>
-            success('Ce message disparaîtra après 10 secondes', 'Long toast', 10000)
-          }
+          onClick={() => success('Ce message disparaîtra après 10 secondes', 'Long toast', 10000)}
         >
           Toast 10s
         </Button>
@@ -310,12 +275,7 @@ export function ModalExamples() {
         Ouvrir Modal Simple
       </Button>
 
-      <Modal
-        isOpen={isOpen}
-        onClose={() => setIsOpen(false)}
-        title="Détails du produit"
-        size="md"
-      >
+      <Modal isOpen={isOpen} onClose={() => setIsOpen(false)} title="Détails du produit" size="md">
         <div className="space-y-4">
           <p className="text-gray-600 dark:text-gray-400">
             Voici les détails du produit. Cette modal peut contenir n'importe quel contenu.

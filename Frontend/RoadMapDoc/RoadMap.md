@@ -112,6 +112,23 @@ Ce document trace les fonctionnalités à développer pour le frontend de PriceW
   - Settings : Settings (préférences utilisateur)
   - Toutes les pages utilisent le design system (bg-gray-50, text-gray-900, text-gray-600)
 
+#### 1.4 Authentification - COMPLET ✅
+- ✅ **Toutes les pages d'authentification implémentées**
+  - Login : Formulaire avec validation, toggle visibilité mot de passe, design conforme maquette
+  - Register : Formulaire avec validation temps réel, indicateurs force mot de passe, toggles visibilité
+  - VerifyEmail : États loading/success/error, extraction token URL, feedback visuel
+  - ForgotPassword : Formulaire demande reset, états conditionnels
+  - ResetPassword : Validation mot de passe, indicateurs visuels, gestion token
+- ✅ **Intégration complète avec le backend**
+  - AuthContext pour gestion état authentification
+  - API calls vers endpoints FastAPI
+  - Gestion tokens (access + refresh) en localStorage
+  - Toasts pour feedback utilisateur
+- ✅ **Design system appliqué**
+  - Composants Input avec icônes Material Symbols et toggles cliquables
+  - Cards, Buttons, Spinners conformes au design system
+  - Responsive et conforme aux maquettes Figma
+
 ---
 
 ## Fonctionnalités à Implémenter (par priorité)
@@ -195,30 +212,43 @@ Ce document trace les fonctionnalités à développer pour le frontend de PriceW
 - [x] **Routing (React Router v7)** - Complet
 - [x] **State Management** - Complet
 
-#### 1.4 Authentification
-- [ ] **Page de connexion**
-  - Formulaire email/mot de passe
-  - Validation des champs
-  - Affichage des erreurs
+#### 1.4 Authentification - COMPLET ✅
+- ✅ **Page de connexion**
+  - Formulaire email/mot de passe avec React Hook Form + Zod
+  - Validation des champs en temps réel
+  - Affichage des erreurs avec composant Input
+  - Toggle de visibilité du mot de passe
+  - Icônes Material Symbols (mail, lock, visibility)
   - Lien vers inscription/mot de passe oublié
-  - Stockage sécurisé des tokens
-- [ ] **Page d'inscription**
-  - Formulaire email/mot de passe/confirmation
-  - Validation en temps réel du mot de passe
+  - Stockage sécurisé des tokens (localStorage)
+  - Design conforme à la maquette Figma
+- ✅ **Page d'inscription**
+  - Formulaire email/mot de passe/confirmation avec React Hook Form + Zod
+  - Validation en temps réel du mot de passe avec indicateurs visuels :
     - Minimum 8 caractères
     - Majuscule, minuscule, chiffre, caractère spécial
-  - Message de confirmation (vérifier email)
-- [ ] **Vérification d'email**
-  - Page de confirmation avec token URL
-  - Feedback visuel (succès/erreur)
-  - Redirection vers login
-- [ ] **Mot de passe oublié**
-  - Formulaire de demande (email)
-  - Message de confirmation
-- [ ] **Réinitialisation du mot de passe**
-  - Formulaire nouveau mot de passe
-  - Validation de la force du mot de passe
-  - Feedback succès/erreur
+  - Toggles de visibilité pour les 2 champs mot de passe
+  - Message de confirmation (vérifier email) avec toast
+  - Design conforme à la maquette Figma
+  - Redirection vers /login après inscription
+- ✅ **Vérification d'email**
+  - Page de confirmation avec token URL (query param)
+  - Feedback visuel (succès/erreur) avec icônes et couleurs
+  - États : loading (spinner), success (vert), error (rouge)
+  - Redirection vers login après succès
+  - Gestion des erreurs (token invalide/expiré)
+- ✅ **Mot de passe oublié**
+  - Formulaire de demande (email) avec validation
+  - Message de confirmation après envoi
+  - État conditionnel (formulaire/confirmation)
+  - Lien retour vers connexion
+- ✅ **Réinitialisation du mot de passe**
+  - Formulaire nouveau mot de passe avec confirmation
+  - Validation de la force du mot de passe (indicateurs visuels)
+  - Token extrait de l'URL
+  - Feedback succès/erreur avec états conditionnels
+  - Vérification du token avant affichage du formulaire
+  - Redirection vers login après succès
 
 ---
 
@@ -772,9 +802,19 @@ npm run type-check
 
 ---
 
-**Dernière mise à jour** : 2025-11-25
+**Dernière mise à jour** : 2025-11-26
 
 ### Changelog
+- **2025-11-26** :
+  - ✅ **Authentification complète (1.4)** - Toutes les pages d'authentification fonctionnelles
+    - Page de connexion avec toggle visibilité mot de passe et design conforme maquette
+    - Page d'inscription avec validation temps réel et indicateurs force mot de passe
+    - Vérification d'email avec états loading/success/error
+    - Mot de passe oublié et réinitialisation avec validation
+  - ✅ **Composant Input amélioré** - Support rightIconClickable pour toggles interactifs
+  - ✅ **Dark mode** - Configuration class-based (au lieu de media query automatique)
+  - ✅ **Backend OAuth2** - Migration vers OAuth2PasswordRequestForm standard
+  - ✅ **Tests unitaires** - 282 tests passants avec 72.80% de couverture
 - **2025-11-25** :
   - ✅ Setup complet (Vite, React, TypeScript, Tailwind v4)
   - ✅ Infrastructure technique (Axios, React Router v7, AuthContext)
