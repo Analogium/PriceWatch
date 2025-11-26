@@ -26,7 +26,6 @@ from app.schemas.user import (
     RefreshTokenRequest,
     Token,
     UserCreate,
-    UserLogin,
     UserResponse,
 )
 from app.services.email import email_service
@@ -72,11 +71,7 @@ async def register(request: Request, user_data: UserCreate, db: Session = Depend
 
 
 @router.post("/login", response_model=Token)
-async def login(
-    request: Request,
-    form_data: OAuth2PasswordRequestForm = Depends(),
-    db: Session = Depends(get_db)
-):
+async def login(request: Request, form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
     """Login and get access and refresh tokens."""
     # Rate limiting
     await rate_limiter.check_rate_limit(request)

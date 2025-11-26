@@ -1,4 +1,4 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
 /* Configure dark mode to use class strategy instead of media query */
 @variant dark (&:where(.dark, .dark *));

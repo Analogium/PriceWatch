@@ -34,17 +34,11 @@ const Spinner: React.FC<SpinnerProps> = ({
   return (
     <div className={cn('flex flex-col items-center justify-center gap-2', className)} {...props}>
       <div
-        className={cn(
-          'animate-spin rounded-full',
-          sizeStyles[size],
-          variantStyles[variant],
-        )}
+        className={cn('animate-spin rounded-full', sizeStyles[size], variantStyles[variant])}
         role="status"
         aria-label={label || 'Loading'}
       />
-      {label && (
-        <span className="text-sm text-gray-600 dark:text-gray-400">{label}</span>
-      )}
+      {label && <span className="text-sm text-gray-600 dark:text-gray-400">{label}</span>}
     </div>
   );
 };

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Link, useNavigate, useSearchParams } from 'react-router';
+import { Link, useSearchParams } from 'react-router';
 import { Button, Input, Card } from '@/components/ui';
 import { useToast } from '@/hooks/useToast';
 import { resetPasswordSchema } from '@/utils/validators';
@@ -13,7 +13,6 @@ type ResetPasswordFormData = {
 };
 
 export default function ResetPassword() {
-  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { success, error } = useToast();
   const [isLoading, setIsLoading] = useState(false);
@@ -55,11 +54,12 @@ export default function ResetPassword() {
         'Vous pouvez maintenant vous connecter avec votre nouveau mot de passe',
         'Mot de passe réinitialisé !'
       );
-    } catch (err: any) {
-      error(
-        err?.response?.data?.detail || 'Le lien de réinitialisation est invalide ou expiré',
-        'Erreur'
-      );
+    } catch (err: unknown) {
+      const message =
+        err && typeof err === 'object' && 'response' in err
+          ? (err.response as { data?: { detail?: string } })?.data?.detail
+          : undefined;
+      error(message || 'Le lien de réinitialisation est invalide ou expiré', 'Erreur');
     } finally {
       setIsLoading(false);
     }
@@ -73,16 +73,10 @@ export default function ResetPassword() {
           <Card padding="lg">
             <div className="text-center space-y-4">
               <div className="inline-flex items-center justify-center w-16 h-16 bg-danger-100 rounded-full mb-2">
-                <span className="material-symbols-outlined text-danger-600 text-3xl">
-                  error
-                </span>
+                <span className="material-symbols-outlined text-danger-600 text-3xl">error</span>
               </div>
-              <h2 className="text-xl font-semibold text-gray-900">
-                Lien invalide
-              </h2>
-              <p className="text-gray-600">
-                Le lien de réinitialisation est invalide ou a expiré.
-              </p>
+              <h2 className="text-xl font-semibold text-gray-900">Lien invalide</h2>
+              <p className="text-gray-600">Le lien de réinitialisation est invalide ou a expiré.</p>
               <div className="pt-4">
                 <Link to="/forgot-password">
                   <Button variant="primary" fullWidth>
@@ -109,12 +103,9 @@ export default function ResetPassword() {
                   check_circle
                 </span>
               </div>
-              <h2 className="text-2xl font-bold text-gray-900">
-                Mot de passe réinitialisé !
-              </h2>
+              <h2 className="text-2xl font-bold text-gray-900">Mot de passe réinitialisé !</h2>
               <p className="text-gray-600">
-                Votre mot de passe a été modifié avec succès. Vous pouvez
-                maintenant vous connecter.
+                Votre mot de passe a été modifié avec succès. Vous pouvez maintenant vous connecter.
               </p>
               <div className="pt-4">
                 <Link to="/login">
@@ -134,12 +125,8 @@ export default function ResetPassword() {
                   </span>
                   <h1 className="text-2xl font-bold text-gray-900">PriceWatch</h1>
                 </div>
-                <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                  Nouveau mot de passe
-                </h2>
-                <p className="text-gray-600 text-sm">
-                  Choisissez un mot de passe sécurisé
-                </p>
+                <h2 className="text-2xl font-bold text-gray-900 mb-2">Nouveau mot de passe</h2>
+                <p className="text-gray-600 text-sm">Choisissez un mot de passe sécurisé</p>
               </div>
 
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
@@ -151,11 +138,7 @@ export default function ResetPassword() {
                     type="password"
                     placeholder="Entrez votre nouveau mot de passe"
                     error={errors.password?.message}
-                    leftIcon={
-                      <span className="material-symbols-outlined text-xl">
-                        lock
-                      </span>
-                    }
+                    leftIcon={<span className="material-symbols-outlined text-xl">lock</span>}
                     fullWidth
                     {...register('password')}
                   />
@@ -169,11 +152,7 @@ export default function ResetPassword() {
                     type="password"
                     placeholder="Confirmez votre mot de passe"
                     error={errors.confirmPassword?.message}
-                    leftIcon={
-                      <span className="material-symbols-outlined text-xl">
-                        lock
-                      </span>
-                    }
+                    leftIcon={<span className="material-symbols-outlined text-xl">lock</span>}
                     fullWidth
                     {...register('confirmPassword')}
                   />
@@ -195,10 +174,7 @@ export default function ResetPassword() {
                         met={passwordChecks.hasLowerCase}
                         text="Une lettre minuscule"
                       />
-                      <PasswordRequirement
-                        met={passwordChecks.hasNumber}
-                        text="Un chiffre"
-                      />
+                      <PasswordRequirement met={passwordChecks.hasNumber} text="Un chiffre" />
                       <PasswordRequirement
                         met={passwordChecks.hasSpecialChar}
                         text="Un caractère spécial (!@#$%)"
@@ -224,9 +200,7 @@ export default function ResetPassword() {
                   to="/login"
                   className="inline-flex items-center gap-1 text-sm text-gray-600 hover:text-gray-900"
                 >
-                  <span className="material-symbols-outlined text-sm">
-                    arrow_back
-                  </span>
+                  <span className="material-symbols-outlined text-sm">arrow_back</span>
                   <span>Retour à la connexion</span>
                 </Link>
               </div>
@@ -243,11 +217,7 @@ function PasswordRequirement({ met, text }: { met: boolean; text: string }) {
   return (
     <div className="flex items-center gap-2.5">
       {met ? (
-        <svg
-          className="w-5 h-5 text-success-600 shrink-0"
-          fill="currentColor"
-          viewBox="0 0 20 20"
-        >
+        <svg className="w-5 h-5 text-success-600 shrink-0" fill="currentColor" viewBox="0 0 20 20">
           <path
             fillRule="evenodd"
             d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
@@ -255,25 +225,11 @@ function PasswordRequirement({ met, text }: { met: boolean; text: string }) {
           />
         </svg>
       ) : (
-        <svg
-          className="w-5 h-5 text-gray-300 shrink-0"
-          fill="none"
-          viewBox="0 0 20 20"
-        >
-          <circle
-            cx="10"
-            cy="10"
-            r="8"
-            stroke="currentColor"
-            strokeWidth="1.5"
-          />
+        <svg className="w-5 h-5 text-gray-300 shrink-0" fill="none" viewBox="0 0 20 20">
+          <circle cx="10" cy="10" r="8" stroke="currentColor" strokeWidth="1.5" />
         </svg>
       )}
-      <span
-        className={`text-sm ${met ? 'text-gray-900' : 'text-gray-600'}`}
-      >
-        {text}
-      </span>
+      <span className={`text-sm ${met ? 'text-gray-900' : 'text-gray-600'}`}>{text}</span>
     </div>
   );
 }

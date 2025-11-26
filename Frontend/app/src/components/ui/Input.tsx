@@ -29,7 +29,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
       disabled,
       ...props
     },
-    ref,
+    ref
   ) => {
     const generatedId = useId();
     const inputId = id || generatedId;
@@ -48,10 +48,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
     return (
       <div className={cn('flex flex-col gap-2', widthStyles)}>
         {label && (
-          <label
-            htmlFor={inputId}
-            className="text-sm font-medium text-gray-900 dark:text-gray-100"
-          >
+          <label htmlFor={inputId} className="text-sm font-medium text-gray-900 dark:text-gray-100">
             {label}
           </label>
         )}
@@ -66,17 +63,11 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             id={inputId}
             type={type}
             disabled={disabled}
-            className={cn(
-              baseInputStyles,
-              stateStyles,
-              iconPaddingStyles,
-              widthStyles,
-              className,
-            )}
+            className={cn(baseInputStyles, stateStyles, iconPaddingStyles, widthStyles, className)}
             {...props}
           />
-          {rightIcon && (
-            rightIconClickable ? (
+          {rightIcon &&
+            (rightIconClickable ? (
               <button
                 type="button"
                 onClick={onRightIconClick}
@@ -88,8 +79,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
               <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500">
                 {rightIcon}
               </div>
-            )
-          )}
+            ))}
         </div>
         {error && <p className="text-sm text-danger-600">{error}</p>}
         {!error && helperText && (
@@ -97,7 +87,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
         )}
       </div>
     );
-  },
+  }
 );
 
 Input.displayName = 'Input';

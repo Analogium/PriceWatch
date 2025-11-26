@@ -33,11 +33,12 @@ export default function ForgotPassword() {
         'Si cette adresse email est associée à un compte, vous recevrez un email avec les instructions',
         'Email envoyé'
       );
-    } catch (err: any) {
-      error(
-        err?.response?.data?.detail || 'Une erreur est survenue',
-        'Erreur'
-      );
+    } catch (err: unknown) {
+      const message =
+        err && typeof err === 'object' && 'response' in err
+          ? (err.response as { data?: { detail?: string } })?.data?.detail
+          : undefined;
+      error(message || 'Une erreur est survenue', 'Erreur');
     } finally {
       setIsLoading(false);
     }
@@ -55,12 +56,10 @@ export default function ForgotPassword() {
                   mark_email_read
                 </span>
               </div>
-              <h2 className="text-2xl font-bold text-gray-900">
-                Vérifiez votre boîte email
-              </h2>
+              <h2 className="text-2xl font-bold text-gray-900">Vérifiez votre boîte email</h2>
               <p className="text-gray-600">
-                Si votre adresse email est enregistrée, vous recevrez un email
-                avec les instructions pour réinitialiser votre mot de passe.
+                Si votre adresse email est enregistrée, vous recevrez un email avec les instructions
+                pour réinitialiser votre mot de passe.
               </p>
               <div className="pt-4">
                 <Link to="/login">
@@ -80,9 +79,7 @@ export default function ForgotPassword() {
                   </span>
                   <h1 className="text-2xl font-bold text-gray-900">PriceWatch</h1>
                 </div>
-                <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                  Mot de passe oublié ?
-                </h2>
+                <h2 className="text-2xl font-bold text-gray-900 mb-2">Mot de passe oublié ?</h2>
                 <p className="text-gray-600 text-sm">
                   Entrez votre email pour recevoir un lien de réinitialisation
                 </p>
@@ -97,11 +94,7 @@ export default function ForgotPassword() {
                     type="email"
                     placeholder="exemple@domaine.com"
                     error={errors.email?.message}
-                    leftIcon={
-                      <span className="material-symbols-outlined text-xl">
-                        mail
-                      </span>
-                    }
+                    leftIcon={<span className="material-symbols-outlined text-xl">mail</span>}
                     fullWidth
                     {...register('email')}
                   />
@@ -124,9 +117,7 @@ export default function ForgotPassword() {
                   to="/login"
                   className="inline-flex items-center gap-1 text-sm text-gray-600 hover:text-gray-900"
                 >
-                  <span className="material-symbols-outlined text-sm">
-                    arrow_back
-                  </span>
+                  <span className="material-symbols-outlined text-sm">arrow_back</span>
                   <span>Retour à la connexion</span>
                 </Link>
               </div>

@@ -1,8 +1,9 @@
-import { createBrowserRouter, Navigate, Outlet } from 'react-router-dom';
-import { useAuth } from './contexts/AuthContext';
+import { createBrowserRouter, Navigate } from 'react-router-dom';
+import { lazy } from 'react';
 
-// Lazy load pages for code splitting
-import { lazy, Suspense } from 'react';
+// Route components
+import ProtectedRoute from './components/routes/ProtectedRoute';
+import PublicRoute from './components/routes/PublicRoute';
 
 // Auth pages
 const Login = lazy(() => import('./pages/auth/Login'));
@@ -17,53 +18,6 @@ const ProductDetail = lazy(() => import('./pages/products/ProductDetail'));
 const ProductAdd = lazy(() => import('./pages/products/ProductAdd'));
 const ProductEdit = lazy(() => import('./pages/products/ProductEdit'));
 const Settings = lazy(() => import('./pages/settings/Settings'));
-
-// Loading component
-function PageLoader() {
-  return (
-    <div className="flex items-center justify-center min-h-screen">
-      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
-    </div>
-  );
-}
-
-// Protected route wrapper
-function ProtectedRoute() {
-  const { isAuthenticated, isLoading } = useAuth();
-
-  if (isLoading) {
-    return <PageLoader />;
-  }
-
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
-  }
-
-  return (
-    <Suspense fallback={<PageLoader />}>
-      <Outlet />
-    </Suspense>
-  );
-}
-
-// Public route wrapper (redirects to dashboard if already authenticated)
-function PublicRoute() {
-  const { isAuthenticated, isLoading } = useAuth();
-
-  if (isLoading) {
-    return <PageLoader />;
-  }
-
-  if (isAuthenticated) {
-    return <Navigate to="/dashboard" replace />;
-  }
-
-  return (
-    <Suspense fallback={<PageLoader />}>
-      <Outlet />
-    </Suspense>
-  );
-}
 
 export const router = createBrowserRouter([
   {

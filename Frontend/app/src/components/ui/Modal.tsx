@@ -70,7 +70,7 @@ const Modal: React.FC<ModalProps> = ({
         ref={modalRef}
         className={cn(
           'relative w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-2xl',
-          sizeStyles[size],
+          sizeStyles[size]
         )}
         role="dialog"
         aria-modal="true"

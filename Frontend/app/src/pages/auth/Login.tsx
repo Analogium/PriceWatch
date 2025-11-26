@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Link, useNavigate } from 'react-router';
 import { Button, Input, Card } from '@/components/ui';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/useToast';
 import { loginSchema } from '@/utils/validators';
 import type { LoginCredentials } from '@/types';
@@ -29,11 +29,12 @@ export default function Login() {
       await login(data);
       success('Connexion réussie !', 'Bienvenue sur PriceWatch');
       navigate('/dashboard');
-    } catch (err: any) {
-      error(
-        err?.response?.data?.detail || 'Email ou mot de passe incorrect',
-        'Erreur de connexion'
-      );
+    } catch (err: unknown) {
+      const message =
+        err && typeof err === 'object' && 'response' in err
+          ? (err.response as { data?: { detail?: string } })?.data?.detail
+          : undefined;
+      error(message || 'Email ou mot de passe incorrect', 'Erreur de connexion');
     } finally {
       setIsLoading(false);
     }
@@ -45,12 +46,8 @@ export default function Login() {
         <Card padding="lg" className="max-w-[480px] mx-auto">
           {/* Header */}
           <div className="text-center mb-8">
-            <h1 className="text-2xl font-bold text-primary-600 mb-6">
-              PriceWatch
-            </h1>
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">
-              Connectez-vous à votre compte
-            </h2>
+            <h1 className="text-2xl font-bold text-primary-600 mb-6">PriceWatch</h1>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">Connectez-vous à votre compte</h2>
             <p className="text-gray-600 text-sm">
               Suivez vos produits, ne manquez aucune baisse de prix.
             </p>
@@ -64,11 +61,7 @@ export default function Login() {
                 type="email"
                 placeholder="exemple@domaine.com"
                 error={errors.email?.message}
-                leftIcon={
-                  <span className="material-symbols-outlined text-xl">
-                    mail
-                  </span>
-                }
+                leftIcon={<span className="material-symbols-outlined text-xl">mail</span>}
                 fullWidth
                 {...register('email')}
               />
@@ -76,9 +69,7 @@ export default function Login() {
 
             <div>
               <div className="flex items-center justify-between mb-2">
-                <label className="text-sm font-medium text-gray-900">
-                  Mot de passe
-                </label>
+                <label className="text-sm font-medium text-gray-900">Mot de passe</label>
                 <Link
                   to="/forgot-password"
                   className="text-sm font-medium text-primary-600 hover:text-primary-700"
@@ -90,11 +81,7 @@ export default function Login() {
                 type={showPassword ? 'text' : 'password'}
                 placeholder="Entrez votre mot de passe"
                 error={errors.password?.message}
-                leftIcon={
-                  <span className="material-symbols-outlined text-xl">
-                    lock
-                  </span>
-                }
+                leftIcon={<span className="material-symbols-outlined text-xl">lock</span>}
                 rightIcon={
                   <span className="material-symbols-outlined text-xl">
                     {showPassword ? 'visibility' : 'visibility_off'}
@@ -124,9 +111,7 @@ export default function Login() {
               <div className="w-full border-t border-gray-300"></div>
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="px-4 bg-white text-gray-500">
-                Ou continuez avec
-              </span>
+              <span className="px-4 bg-white text-gray-500">Ou continuez avec</span>
             </div>
           </div>
 
@@ -171,10 +156,7 @@ export default function Login() {
           {/* Register Link */}
           <p className="text-center text-gray-600 text-sm mt-6">
             Pas encore de compte ?{' '}
-            <Link
-              to="/register"
-              className="font-semibold text-primary-600 hover:text-primary-700"
-            >
+            <Link to="/register" className="font-semibold text-primary-600 hover:text-primary-700">
               S'inscrire
             </Link>
           </p>

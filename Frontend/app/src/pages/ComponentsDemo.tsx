@@ -1,13 +1,5 @@
 import React, { useState } from 'react';
-import {
-  Button,
-  Input,
-  Card,
-  Badge,
-  Modal,
-  Spinner,
-  ToastContainer,
-} from '@/components/ui';
+import { Button, Input, Card, Badge, Modal, Spinner, ToastContainer } from '@/components/ui';
 import { useToast } from '@/hooks/useToast';
 
 const ComponentsDemo: React.FC = () => {
@@ -25,9 +17,7 @@ const ComponentsDemo: React.FC = () => {
 
         {/* Buttons */}
         <Card>
-          <h2 className="mb-4 text-2xl font-semibold text-gray-900 dark:text-gray-100">
-            Buttons
-          </h2>
+          <h2 className="mb-4 text-2xl font-semibold text-gray-900 dark:text-gray-100">Buttons</h2>
           <div className="flex flex-wrap gap-4">
             <Button variant="primary">Primary Button</Button>
             <Button variant="secondary">Secondary Button</Button>
@@ -55,9 +45,7 @@ const ComponentsDemo: React.FC = () => {
 
         {/* Inputs */}
         <Card>
-          <h2 className="mb-4 text-2xl font-semibold text-gray-900 dark:text-gray-100">
-            Inputs
-          </h2>
+          <h2 className="mb-4 text-2xl font-semibold text-gray-900 dark:text-gray-100">Inputs</h2>
           <div className="space-y-4">
             <Input label="Email" type="email" placeholder="Entrez votre email" fullWidth />
             <Input
@@ -92,9 +80,7 @@ const ComponentsDemo: React.FC = () => {
 
         {/* Badges */}
         <Card>
-          <h2 className="mb-4 text-2xl font-semibold text-gray-900 dark:text-gray-100">
-            Badges
-          </h2>
+          <h2 className="mb-4 text-2xl font-semibold text-gray-900 dark:text-gray-100">Badges</h2>
           <div className="flex flex-wrap gap-3">
             <Badge variant="success">Success</Badge>
             <Badge variant="primary">Primary</Badge>
@@ -151,10 +137,7 @@ const ComponentsDemo: React.FC = () => {
             <Button variant="danger" onClick={() => error('Une erreur est survenue')}>
               Error Toast
             </Button>
-            <Button
-              variant="secondary"
-              onClick={() => warning('Attention, vérifiez vos données')}
-            >
+            <Button variant="secondary" onClick={() => warning('Attention, vérifiez vos données')}>
               Warning Toast
             </Button>
             <Button variant="secondary" onClick={() => info('Information importante')}>
@@ -165,9 +148,7 @@ const ComponentsDemo: React.FC = () => {
 
         {/* Modal */}
         <Card>
-          <h2 className="mb-4 text-2xl font-semibold text-gray-900 dark:text-gray-100">
-            Modal
-          </h2>
+          <h2 className="mb-4 text-2xl font-semibold text-gray-900 dark:text-gray-100">Modal</h2>
           <Button variant="primary" onClick={() => setIsModalOpen(true)}>
             Ouvrir la Modal
           </Button>
@@ -180,9 +161,8 @@ const ComponentsDemo: React.FC = () => {
           >
             <div className="space-y-4">
               <p className="text-gray-600 dark:text-gray-400">
-                Ceci est le contenu de la modal. Vous pouvez fermer la modal en cliquant
-                sur le bouton X, en appuyant sur Escape, ou en cliquant en dehors de la
-                modal.
+                Ceci est le contenu de la modal. Vous pouvez fermer la modal en cliquant sur le
+                bouton X, en appuyant sur Escape, ou en cliquant en dehors de la modal.
               </p>
               <div className="flex gap-3">
                 <Button variant="primary" onClick={() => setIsModalOpen(false)}>
@@ -198,9 +178,7 @@ const ComponentsDemo: React.FC = () => {
 
         {/* Spinners */}
         <Card>
-          <h2 className="mb-4 text-2xl font-semibold text-gray-900 dark:text-gray-100">
-            Spinners
-          </h2>
+          <h2 className="mb-4 text-2xl font-semibold text-gray-900 dark:text-gray-100">Spinners</h2>
           <div className="flex flex-wrap items-center gap-8">
             <Spinner size="xs" />
             <Spinner size="sm" />

@@ -68,7 +68,7 @@ const Toast: React.FC<ToastProps> = ({
       className={cn(
         'pointer-events-auto flex w-full max-w-md gap-3 rounded-lg border p-4 shadow-lg',
         config.bgColor,
-        config.borderColor,
+        config.borderColor
       )}
       role="alert"
     >
@@ -76,16 +76,14 @@ const Toast: React.FC<ToastProps> = ({
         {config.icon}
       </span>
       <div className="flex flex-1 flex-col gap-1">
-        {title && (
-          <h3 className={cn('text-sm font-semibold', config.textColor)}>{title}</h3>
-        )}
+        {title && <h3 className={cn('text-sm font-semibold', config.textColor)}>{title}</h3>}
         <p className={cn('text-sm', config.textColor)}>{message}</p>
       </div>
       <button
         onClick={() => onClose(id)}
         className={cn(
           'material-symbols-outlined flex-shrink-0 text-xl hover:opacity-70',
-          config.iconColor,
+          config.iconColor
         )}
         aria-label="Close notification"
       >

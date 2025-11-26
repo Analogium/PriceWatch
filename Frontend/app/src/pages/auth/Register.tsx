@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Link, useNavigate } from 'react-router';
 import { Button, Input, Card } from '@/components/ui';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/useToast';
 import { registerSchema } from '@/utils/validators';
 import type { RegisterData } from '@/types';
@@ -40,16 +40,14 @@ export default function Register() {
     setIsLoading(true);
     try {
       await registerUser(data);
-      success(
-        'Un email de vérification a été envoyé à votre adresse',
-        'Inscription réussie !'
-      );
+      success('Un email de vérification a été envoyé à votre adresse', 'Inscription réussie !');
       navigate('/login');
-    } catch (err: any) {
-      error(
-        err?.response?.data?.detail || 'Une erreur est survenue lors de l\'inscription',
-        'Erreur'
-      );
+    } catch (err: unknown) {
+      const message =
+        err && typeof err === 'object' && 'response' in err
+          ? (err.response as { data?: { detail?: string } })?.data?.detail
+          : undefined;
+      error(message || "Une erreur est survenue lors de l'inscription", 'Erreur');
     } finally {
       setIsLoading(false);
     }
@@ -68,12 +66,8 @@ export default function Register() {
               </span>
               <h1 className="text-2xl font-bold text-gray-900">PriceWatch</h1>
             </div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">
-              Créez votre compte
-            </h2>
-            <p className="text-gray-600 text-sm">
-              Ne manquez plus jamais une bonne affaire.
-            </p>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">Créez votre compte</h2>
+            <p className="text-gray-600 text-sm">Ne manquez plus jamais une bonne affaire.</p>
           </div>
 
           {/* Register Form */}
@@ -86,29 +80,19 @@ export default function Register() {
                 type="email"
                 placeholder="vous@email.com"
                 error={errors.email?.message}
-                leftIcon={
-                  <span className="material-symbols-outlined text-xl">
-                    mail
-                  </span>
-                }
+                leftIcon={<span className="material-symbols-outlined text-xl">mail</span>}
                 fullWidth
                 {...register('email')}
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-900 mb-1.5">
-                Mot de passe
-              </label>
+              <label className="block text-sm font-medium text-gray-900 mb-1.5">Mot de passe</label>
               <Input
                 type={showPassword ? 'text' : 'password'}
                 placeholder="Entrez votre mot de passe"
                 error={errors.password?.message}
-                leftIcon={
-                  <span className="material-symbols-outlined text-xl">
-                    lock
-                  </span>
-                }
+                leftIcon={<span className="material-symbols-outlined text-xl">lock</span>}
                 rightIcon={
                   <span className="material-symbols-outlined text-xl">
                     {showPassword ? 'visibility' : 'visibility_off'}
@@ -129,11 +113,7 @@ export default function Register() {
                 type={showConfirmPassword ? 'text' : 'password'}
                 placeholder="Confirmez votre mot de passe"
                 error={errors.confirmPassword?.message}
-                leftIcon={
-                  <span className="material-symbols-outlined text-xl">
-                    lock
-                  </span>
-                }
+                leftIcon={<span className="material-symbols-outlined text-xl">lock</span>}
                 rightIcon={
                   <span className="material-symbols-outlined text-xl">
                     {showConfirmPassword ? 'visibility' : 'visibility_off'}
@@ -162,10 +142,7 @@ export default function Register() {
                     met={passwordChecks.hasLowerCase}
                     text="Une lettre minuscule"
                   />
-                  <PasswordRequirement
-                    met={passwordChecks.hasNumber}
-                    text="Un chiffre"
-                  />
+                  <PasswordRequirement met={passwordChecks.hasNumber} text="Un chiffre" />
                   <PasswordRequirement
                     met={passwordChecks.hasSpecialChar}
                     text="Un caractère spécial (!@#$%)"
@@ -188,10 +165,7 @@ export default function Register() {
           {/* Login Link */}
           <p className="text-center text-gray-600 text-sm mt-6">
             Déjà un compte ?{' '}
-            <Link
-              to="/login"
-              className="font-semibold text-primary-600 hover:text-primary-700"
-            >
+            <Link to="/login" className="font-semibold text-primary-600 hover:text-primary-700">
               Se connecter
             </Link>
           </p>
@@ -206,11 +180,7 @@ function PasswordRequirement({ met, text }: { met: boolean; text: string }) {
   return (
     <div className="flex items-center gap-2.5">
       {met ? (
-        <svg
-          className="w-5 h-5 text-success-600 shrink-0"
-          fill="currentColor"
-          viewBox="0 0 20 20"
-        >
+        <svg className="w-5 h-5 text-success-600 shrink-0" fill="currentColor" viewBox="0 0 20 20">
           <path
             fillRule="evenodd"
             d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
@@ -218,25 +188,11 @@ function PasswordRequirement({ met, text }: { met: boolean; text: string }) {
           />
         </svg>
       ) : (
-        <svg
-          className="w-5 h-5 text-gray-300 shrink-0"
-          fill="none"
-          viewBox="0 0 20 20"
-        >
-          <circle
-            cx="10"
-            cy="10"
-            r="8"
-            stroke="currentColor"
-            strokeWidth="1.5"
-          />
+        <svg className="w-5 h-5 text-gray-300 shrink-0" fill="none" viewBox="0 0 20 20">
+          <circle cx="10" cy="10" r="8" stroke="currentColor" strokeWidth="1.5" />
         </svg>
       )}
-      <span
-        className={`text-sm ${met ? 'text-gray-900' : 'text-gray-600'}`}
-      >
-        {text}
-      </span>
+      <span className={`text-sm ${met ? 'text-gray-900' : 'text-gray-600'}`}>{text}</span>
     </div>
   );
 }
