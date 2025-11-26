@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
+from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 
 from app.api.dependencies import get_current_user
@@ -71,18 +72,22 @@ async def register(request: Request, user_data: UserCreate, db: Session = Depend
 
 
 @router.post("/login", response_model=Token)
-async def login(request: Request, user_credentials: UserLogin, db: Session = Depends(get_db)):
+async def login(
+    request: Request,
+    form_data: OAuth2PasswordRequestForm = Depends(),
+    db: Session = Depends(get_db)
+):
     """Login and get access and refresh tokens."""
     # Rate limiting
     await rate_limiter.check_rate_limit(request)
 
-    # Find user
-    user = db.query(User).filter(User.email == user_credentials.email).first()
+    # Find user (OAuth2PasswordRequestForm uses 'username' field, but we store email)
+    user = db.query(User).filter(User.email == form_data.username).first()
     if not user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
 
     # Verify password
-    if not verify_password(user_credentials.password, user.password_hash):
+    if not verify_password(form_data.password, user.password_hash):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
 
     # Create access and refresh tokens
