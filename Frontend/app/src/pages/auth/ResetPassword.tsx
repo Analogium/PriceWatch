@@ -144,23 +144,37 @@ export default function ResetPassword() {
 
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
                 <div>
+                  <label className="block text-sm font-medium text-gray-900 mb-1.5">
+                    Nouveau mot de passe
+                  </label>
                   <Input
-                    label="Nouveau mot de passe"
                     type="password"
                     placeholder="Entrez votre nouveau mot de passe"
                     error={errors.password?.message}
-                    leftIcon="lock"
+                    leftIcon={
+                      <span className="material-symbols-outlined text-xl">
+                        lock
+                      </span>
+                    }
+                    fullWidth
                     {...register('password')}
                   />
                 </div>
 
                 <div>
+                  <label className="block text-sm font-medium text-gray-900 mb-1.5">
+                    Confirmer le mot de passe
+                  </label>
                   <Input
-                    label="Confirmer le mot de passe"
                     type="password"
                     placeholder="Confirmez votre mot de passe"
                     error={errors.confirmPassword?.message}
-                    leftIcon="lock"
+                    leftIcon={
+                      <span className="material-symbols-outlined text-xl">
+                        lock
+                      </span>
+                    }
+                    fullWidth
                     {...register('confirmPassword')}
                   />
                 </div>

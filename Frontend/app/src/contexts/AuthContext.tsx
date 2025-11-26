@@ -54,7 +54,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const register = async (data: RegisterData) => {
-    await authApi.register(data);
+    // Backend doesn't need confirmPassword, only email and password
+    const { confirmPassword, ...registerData } = data;
+    await authApi.register(registerData);
   };
 
   const logout = () => {

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Link, useNavigate } from 'react-router';
-import { Button, Input, Card, Badge } from '@/components/ui';
+import { Button, Input, Card } from '@/components/ui';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/useToast';
 import { registerSchema } from '@/utils/validators';
@@ -13,6 +13,8 @@ export default function Register() {
   const { register: registerUser } = useAuth();
   const { success, error } = useToast();
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const {
     register,
@@ -77,34 +79,69 @@ export default function Register() {
           {/* Register Form */}
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
             <div>
+              <label className="block text-sm font-medium text-gray-900 mb-1.5">
+                Adresse e-mail
+              </label>
               <Input
-                label="Adresse e-mail"
                 type="email"
                 placeholder="vous@email.com"
                 error={errors.email?.message}
-                leftIcon="mail"
+                leftIcon={
+                  <span className="material-symbols-outlined text-xl">
+                    mail
+                  </span>
+                }
+                fullWidth
                 {...register('email')}
               />
             </div>
 
             <div>
+              <label className="block text-sm font-medium text-gray-900 mb-1.5">
+                Mot de passe
+              </label>
               <Input
-                label="Mot de passe"
-                type="password"
+                type={showPassword ? 'text' : 'password'}
                 placeholder="Entrez votre mot de passe"
                 error={errors.password?.message}
-                leftIcon="lock"
+                leftIcon={
+                  <span className="material-symbols-outlined text-xl">
+                    lock
+                  </span>
+                }
+                rightIcon={
+                  <span className="material-symbols-outlined text-xl">
+                    {showPassword ? 'visibility' : 'visibility_off'}
+                  </span>
+                }
+                rightIconClickable
+                onRightIconClick={() => setShowPassword(!showPassword)}
+                fullWidth
                 {...register('password')}
               />
             </div>
 
             <div>
+              <label className="block text-sm font-medium text-gray-900 mb-1.5">
+                Confirmer le mot de passe
+              </label>
               <Input
-                label="Confirmer le mot de passe"
-                type="password"
+                type={showConfirmPassword ? 'text' : 'password'}
                 placeholder="Confirmez votre mot de passe"
                 error={errors.confirmPassword?.message}
-                leftIcon="lock"
+                leftIcon={
+                  <span className="material-symbols-outlined text-xl">
+                    lock
+                  </span>
+                }
+                rightIcon={
+                  <span className="material-symbols-outlined text-xl">
+                    {showConfirmPassword ? 'visibility' : 'visibility_off'}
+                  </span>
+                }
+                rightIconClickable
+                onRightIconClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                fullWidth
                 {...register('confirmPassword')}
               />
             </div>

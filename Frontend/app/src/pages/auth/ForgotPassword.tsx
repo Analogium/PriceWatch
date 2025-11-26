@@ -90,12 +90,19 @@ export default function ForgotPassword() {
 
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
                 <div>
+                  <label className="block text-sm font-medium text-gray-900 mb-1.5">
+                    Adresse e-mail
+                  </label>
                   <Input
-                    label="Adresse e-mail"
                     type="email"
                     placeholder="exemple@domaine.com"
                     error={errors.email?.message}
-                    leftIcon="mail"
+                    leftIcon={
+                      <span className="material-symbols-outlined text-xl">
+                        mail
+                      </span>
+                    }
+                    fullWidth
                     {...register('email')}
                   />
                 </div>
