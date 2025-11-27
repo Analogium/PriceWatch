@@ -129,6 +129,25 @@ Ce document trace les fonctionnalités à développer pour le frontend de PriceW
   - Cards, Buttons, Spinners conformes au design system
   - Responsive et conforme aux maquettes Figma
 
+#### 2.1 Layout & Navigation - COMPLET ✅
+- ✅ **Composants layout créés** (`components/layout/`)
+  - Header : Navigation principale avec logo, menu utilisateur, dropdown, menu mobile
+  - Footer : Logo, copyright dynamique, liens (À propos, Support, Confidentialité)
+  - Layout : Structure responsive flex column avec header/main/footer
+- ✅ **Intégration complète**
+  - ProtectedRoute wrapper avec Layout automatique
+  - Toutes les pages protégées (Dashboard, Products, Settings) utilisent le Layout
+  - Sticky header avec backdrop blur et z-index 50
+  - Container responsive (mx-auto px-4 py-6/py-8)
+- ✅ **Navigation**
+  - Desktop : Navigation horizontale avec états actifs (primary-50/primary-700)
+  - Mobile : Menu hamburger avec menu déroulant
+  - Avatar utilisateur avec initiale de l'email
+  - Dropdown menu avec déconnexion
+- ✅ **Qualité du code**
+  - ESLint, Prettier, TypeScript checks passés
+  - Barrel exports dans `components/layout/index.ts`
+
 ---
 
 ## Fonctionnalités à Implémenter (par priorité)
@@ -254,20 +273,25 @@ Ce document trace les fonctionnalités à développer pour le frontend de PriceW
 
 ### Priorité 2 - HAUTE (Core Features)
 
-#### 2.1 Layout & Navigation
-- [ ] **Header/Navbar**
-  - Logo PriceWatch
-  - Navigation principale
-  - Menu utilisateur (profil, déconnexion)
-  - Indicateur de connexion
-- [ ] **Layout principal**
-  - Structure responsive
-  - Container principal
-  - Footer (optionnel)
-- [ ] **Navigation mobile**
-  - Menu hamburger
-  - Sidebar ou drawer
-  - Navigation adaptative
+#### 2.1 Layout & Navigation - COMPLET ✅
+- ✅ **Header/Navbar**
+  - Logo PriceWatch cliquable (redirection vers dashboard)
+  - Navigation principale (Tableau de bord, Ajouter un produit, Paramètres)
+  - Menu utilisateur avec dropdown (email, avatar, déconnexion)
+  - Avatar avec initiale de l'email
+  - États actifs avec surlignage primary-50/primary-700
+  - Sticky header avec backdrop blur
+- ✅ **Layout principal**
+  - Structure responsive flex column (header, main, footer)
+  - Container mx-auto avec padding responsive (px-4, py-6/py-8)
+  - Footer avec logo, copyright dynamique et liens
+  - Option showFooter configurable
+  - Fond bg-gray-50 appliqué globalement
+- ✅ **Navigation mobile**
+  - Menu hamburger fonctionnel
+  - Navigation adaptative avec menu déroulant
+  - Info utilisateur et déconnexion dans le menu mobile
+  - Transitions et états hover
 
 #### 2.2 Dashboard - Liste des Produits
 - [ ] **Affichage des produits**
@@ -802,9 +826,23 @@ npm run type-check
 
 ---
 
-**Dernière mise à jour** : 2025-11-26
+**Dernière mise à jour** : 2025-11-27
 
 ### Changelog
+- **2025-11-27** :
+  - ✅ **Layout & Navigation (2.1)** - Structure complète de l'application
+    - Header/Navbar : Logo cliquable, navigation principale, menu utilisateur avec dropdown
+    - Footer : Logo, copyright dynamique, liens utiles
+    - Layout responsive : Structure flex column, container responsive, sticky header avec backdrop blur
+    - Navigation mobile : Menu hamburger fonctionnel avec menu déroulant
+    - Avatar utilisateur avec initiale de l'email
+    - États actifs (primary-50/primary-700) et transitions
+    - Intégration automatique dans toutes les pages protégées via ProtectedRoute
+  - ✅ **Qualité frontend** - Scripts de linting et vérifications complètes
+    - Script run_linting.sh créé (ESLint, Prettier, TypeScript)
+    - Tous les checks de qualité passent (0 erreur)
+    - Composants routes séparés (PageLoader, ProtectedRoute, PublicRoute)
+    - Hook useAuth extrait dans fichier séparé
 - **2025-11-26** :
   - ✅ **Authentification complète (1.4)** - Toutes les pages d'authentification fonctionnelles
     - Page de connexion avec toggle visibilité mot de passe et design conforme maquette
