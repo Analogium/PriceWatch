@@ -148,6 +148,43 @@ Ce document trace les fonctionnalités à développer pour le frontend de PriceW
   - ESLint, Prettier, TypeScript checks passés
   - Barrel exports dans `components/layout/index.ts`
 
+#### 2.2 Dashboard - Liste des Produits - COMPLET ✅
+- ✅ **Composants produits créés** (`components/products/`)
+  - ProductCard : Card avec image, nom, prix, actions (détails, refresh, suppression)
+  - EmptyState : États vides (aucun produit, recherche vide)
+  - LoadingState : Skeleton loading avec 6 cards animées
+  - SearchBar : Champ de recherche avec debounce 300ms et bouton clear
+  - SortSelect : Sélecteur tri avec toggle ordre (asc/desc)
+  - Pagination : Navigation pages avec numéros, prev/next, métadonnées
+- ✅ **Affichage des produits**
+  - Grille responsive (grid-cols-1 md:grid-cols-2 lg:grid-cols-3)
+  - Cards produit avec image, nom, prix actuel/cible, indicateurs visuels
+  - Badge "Prix atteint!" si current_price <= target_price
+  - Badge "Indisponible" si is_available = false
+  - Formatage prix (Intl.NumberFormat EUR), dates (formatDate, formatDateTime)
+  - Fréquence de vérification affichée (6h, 12h, 24h)
+  - Actions : Détails (lien), Vérifier prix (refresh), Supprimer (avec confirmation)
+- ✅ **Fonctionnalités complètes**
+  - Pagination : Navigation entre pages avec page_size=12
+  - Recherche : Debounce 300ms, reset page à 1 lors de la recherche
+  - Tri : 5 options (nom, prix actuel, prix cible, date création, dernière vérif) + ordre asc/desc
+  - États vides et loading : EmptyState si aucun produit, LoadingState pendant chargement
+  - Gestion erreurs : Toast error avec extraction message API
+- ✅ **Intégration API**
+  - productsApi.getAll avec filtres (page, page_size, search, sort_by, order)
+  - productsApi.delete avec confirmation + refresh liste
+  - productsApi.checkPrice avec mise à jour optimiste dans la liste
+  - Toast feedback pour toutes les actions (succès, erreur, info)
+- ✅ **UX/UI**
+  - Header responsive avec bouton "Ajouter un produit"
+  - Filtres cachés si aucun produit
+  - Smooth scroll to top lors du changement de page
+  - Toasts informatifs lors des actions (vérification prix, suppression)
+- ✅ **Qualité du code**
+  - ESLint, Prettier, TypeScript checks passés
+  - Barrel exports dans `components/products/index.ts`
+  - Type safety complet avec types Product, SortBy, SortOrder, PaginatedProducts
+
 ---
 
 ## Fonctionnalités à Implémenter (par priorité)
@@ -293,32 +330,37 @@ Ce document trace les fonctionnalités à développer pour le frontend de PriceW
   - Info utilisateur et déconnexion dans le menu mobile
   - Transitions et états hover
 
-#### 2.2 Dashboard - Liste des Produits
-- [ ] **Affichage des produits**
-  - Liste/grille des produits suivis
+#### 2.2 Dashboard - Liste des Produits - COMPLET ✅
+- ✅ **Affichage des produits**
+  - Grille responsive des produits suivis (grid-cols-1 md:2 lg:3)
   - Card produit avec :
-    - Image du produit
-    - Nom du produit
-    - Prix actuel vs prix cible
-    - Indicateur visuel (atteint/non atteint)
-    - Date dernière vérification
-    - Badge indisponible si applicable
-- [ ] **Pagination**
-  - Navigation entre pages
-  - Sélection du nombre d'items par page
-  - Affichage des métadonnées (total, pages)
-- [ ] **Recherche**
-  - Champ de recherche
-  - Recherche par nom ou URL
-  - Debounce pour performance
-- [ ] **Tri**
-  - Sélecteur de tri (dropdown)
+    - Image du produit (ou placeholder)
+    - Nom du produit (line-clamp-2)
+    - Prix actuel vs prix cible (formatage EUR)
+    - Indicateur visuel (badge vert si prix atteint, rouge si indisponible)
+    - Date dernière vérification (formatDate)
+    - Fréquence de vérification (6h/12h/24h)
+    - Actions : Détails, Vérifier prix, Supprimer
+- ✅ **Pagination**
+  - Navigation entre pages avec numéros (max 7 pages visibles)
+  - Affichage des métadonnées (page X sur Y)
+  - Boutons prev/next avec disabled states
+  - Smooth scroll to top lors du changement
+- ✅ **Recherche**
+  - Champ de recherche avec icône
+  - Recherche par nom ou URL (backend)
+  - Debounce 300ms pour performance
+  - Bouton clear pour réinitialiser
+- ✅ **Tri**
+  - Sélecteur de tri (select)
   - Options : nom, prix actuel, prix cible, date création, dernière vérif
-  - Ordre ascendant/descendant
-- [ ] **États vides et loading**
-  - Skeleton loading pendant chargement
-  - Empty state si aucun produit
-  - Message d'erreur si échec
+  - Toggle ordre ascendant/descendant (icône flèche)
+  - Reset page à 1 lors du changement
+- ✅ **États vides et loading**
+  - Skeleton loading pendant chargement (6 cards animées)
+  - Empty state si aucun produit (avec CTA "Ajouter produit")
+  - Empty state pour recherche vide (avec bouton "Effacer")
+  - Toast error si échec chargement
 
 #### 2.3 Ajout d'un Produit
 - [ ] **Formulaire d'ajout**
@@ -826,9 +868,26 @@ npm run type-check
 
 ---
 
-**Dernière mise à jour** : 2025-11-27
+**Dernière mise à jour** : 2025-11-28
 
 ### Changelog
+- **2025-11-28** :
+  - ✅ **Dashboard - Liste des Produits (2.2)** - Page dashboard complète et fonctionnelle
+    - Composants products : ProductCard, EmptyState, LoadingState, SearchBar, SortSelect, Pagination
+    - Grille responsive avec cards produits complètes (image, nom, prix, badges, actions)
+    - Pagination avec navigation intelligente (max 7 pages visibles, prev/next)
+    - Recherche avec debounce 300ms et bouton clear
+    - Tri avec 5 options (nom, prix actuel, prix cible, date création, dernière vérif) + toggle ordre
+    - États vides (aucun produit, recherche vide) et loading (skeleton 6 cards)
+    - Intégration API complète (getAll, delete, checkPrice)
+    - Actions : Détails (navigation), Vérifier prix (refresh), Supprimer (confirmation)
+    - Toasts feedback pour toutes les actions
+    - Formatage prix (EUR) et dates (fr-FR)
+    - Badges "Prix atteint!" (vert) et "Indisponible" (rouge)
+    - Header responsive avec bouton "Ajouter un produit"
+    - Smooth scroll to top lors du changement de page
+    - Type safety complet avec types Product, SortBy, SortOrder, PaginatedProducts
+    - Qualité : ESLint, Prettier, TypeScript checks passés (0 erreur)
 - **2025-11-27** :
   - ✅ **Layout & Navigation (2.1)** - Structure complète de l'application
     - Header/Navbar : Logo cliquable, navigation principale, menu utilisateur avec dropdown
