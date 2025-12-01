@@ -41,15 +41,30 @@ export const resetPasswordSchema = z
   });
 
 export const productCreateSchema = z.object({
-  url: z.string().url('URL invalide'),
-  target_price: z.number().positive('Le prix cible doit être positif'),
-  check_frequency: z.enum(['6', '12', '24']).optional(),
+  url: z.string().url('URL invalide').min(1, "L'URL est requise"),
+  target_price: z
+    .number({ invalid_type_error: 'Le prix doit être un nombre' })
+    .positive('Le prix cible doit être positif')
+    .min(0.01, 'Le prix cible doit être au moins 0.01€'),
+  check_frequency: z.preprocess(
+    (val) => Number(val),
+    z
+      .number({ invalid_type_error: 'Veuillez sélectionner une fréquence' })
+      .refine((val) => [6, 12, 24].includes(val), {
+        message: 'La fréquence doit être 6, 12 ou 24 heures',
+      })
+      .default(24)
+  ),
 });
 
 export const productUpdateSchema = z.object({
   name: z.string().min(1, 'Le nom est requis').optional(),
-  target_price: z.number().positive('Le prix cible doit être positif').optional(),
-  check_frequency: z.enum(['6', '12', '24']).optional(),
+  target_price: z
+    .number({ invalid_type_error: 'Le prix doit être un nombre' })
+    .positive('Le prix cible doit être positif')
+    .min(0.01, 'Le prix cible doit être au moins 0.01€')
+    .optional(),
+  check_frequency: z.union([z.literal(6), z.literal(12), z.literal(24)]).optional(),
 });
 
 export type LoginFormData = z.infer<typeof loginSchema>;

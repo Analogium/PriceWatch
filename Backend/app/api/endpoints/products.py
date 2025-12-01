@@ -110,6 +110,7 @@ def create_product(
         image=scraped_data.image,
         current_price=scraped_data.price,
         target_price=product_data.target_price,
+        check_frequency=product_data.check_frequency,
         last_checked=datetime.utcnow(),
     )
 

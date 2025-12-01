@@ -185,6 +185,51 @@ Ce document trace les fonctionnalités à développer pour le frontend de PriceW
   - Barrel exports dans `components/products/index.ts`
   - Type safety complet avec types Product, SortBy, SortOrder, PaginatedProducts
 
+#### 2.3 Ajout d'un Produit - COMPLET ✅
+- ✅ **ProductForm component créé** (`components/products/ProductForm.tsx`)
+  - Formulaire avec React Hook Form + Zod validation
+  - Champ URL avec validation (type url, required)
+  - Champ prix cible avec validation (number, min 0.01€, positive)
+  - Sélecteur fréquence de vérification (radio buttons : 6h, 12h, 24h)
+  - Icônes Material Symbols (link, euro, schedule)
+  - Messages d'aide sous chaque champ
+  - Gestion des erreurs de validation avec affichage inline
+  - Bouton submit avec état loading
+- ✅ **Page ProductAdd complète** (`pages/products/ProductAdd.tsx`)
+  - Header avec titre et description
+  - Intégration du formulaire ProductForm
+  - États de chargement pendant le scraping
+  - Affichage du produit créé avec aperçu visuel
+  - Card de feedback success avec icône check_circle
+  - Aperçu produit : image, nom, prix actuel, prix cible, fréquence
+  - Formatage prix (Intl.NumberFormat EUR)
+  - Redirection automatique vers dashboard après 2 secondes
+  - Message informatif pendant le scraping (spinner + texte)
+  - Bouton retour vers le dashboard (disabled pendant loading)
+- ✅ **Validation des données**
+  - Schéma Zod productCreateSchema avec validations strictes
+  - URL : format url valide + min 1 caractère
+  - Prix cible : number, positive, min 0.01€
+  - Fréquence : union de literals (6, 12, 24) avec default 24
+  - Messages d'erreur en français
+- ✅ **Intégration API**
+  - productsApi.create avec données du formulaire
+  - Gestion des erreurs avec extraction message backend
+  - Toast success/error avec messages appropriés
+  - Loading state pendant l'appel API
+- ✅ **UX/UI**
+  - Layout max-w-2xl centré pour le formulaire
+  - Card pour contenir le formulaire
+  - États visuels clairs (loading, success, error)
+  - Feedback immédiat avec toasts et cards colorées
+  - Bouton retour toujours accessible (sauf pendant loading)
+  - Radio buttons stylisés avec hover effects
+- ✅ **Qualité du code**
+  - ESLint, Prettier, TypeScript checks passés (0 erreur)
+  - ProductForm exporté dans barrel export `components/products/index.ts`
+  - Type safety complet avec ProductCreateFormData, Product
+  - Validators mis à jour avec validations strictes
+
 ---
 
 ## Fonctionnalités à Implémenter (par priorité)
@@ -362,13 +407,13 @@ Ce document trace les fonctionnalités à développer pour le frontend de PriceW
   - Empty state pour recherche vide (avec bouton "Effacer")
   - Toast error si échec chargement
 
-#### 2.3 Ajout d'un Produit
-- [ ] **Formulaire d'ajout**
+#### 2.3 Ajout d'un Produit - COMPLET ✅
+- [x] **Formulaire d'ajout**
   - Champ URL du produit
   - Champ prix cible
   - Sélecteur fréquence de vérification (6h, 12h, 24h)
   - Bouton de soumission
-- [ ] **Feedback utilisateur**
+- [x] **Feedback utilisateur**
   - Loading pendant le scraping
   - Affichage du produit créé (nom, image, prix extrait)
   - Message d'erreur si URL invalide ou scraping échoué
@@ -868,9 +913,22 @@ npm run type-check
 
 ---
 
-**Dernière mise à jour** : 2025-11-28
+**Dernière mise à jour** : 2025-12-01
 
 ### Changelog
+- **2025-12-01** :
+  - ✅ **Ajout d'un Produit (2.3)** - Formulaire d'ajout de produit complet et fonctionnel
+    - Composant ProductForm : Formulaire avec React Hook Form + Zod (URL, prix cible, fréquence)
+    - Page ProductAdd : États loading/success/error, aperçu du produit créé, redirection automatique
+    - Validation stricte : URL valide, prix positif min 0.01€, fréquence 6/12/24h
+    - Radio buttons stylisés pour la fréquence avec hover effects
+    - Feedback visuel complet : card success avec aperçu produit (image, nom, prix, fréquence)
+    - Message informatif pendant le scraping avec spinner
+    - Intégration API productsApi.create avec gestion erreurs
+    - Toast notifications success/error
+    - Formatage prix (EUR) et affichage des infos scrapées
+    - Bouton retour vers dashboard (disabled pendant loading)
+    - Qualité : ESLint, Prettier, TypeScript checks passés (0 erreur)
 - **2025-11-28** :
   - ✅ **Dashboard - Liste des Produits (2.2)** - Page dashboard complète et fonctionnelle
     - Composants products : ProductCard, EmptyState, LoadingState, SearchBar, SortSelect, Pagination
