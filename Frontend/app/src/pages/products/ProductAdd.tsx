@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { productsApi } from '@/api/products';
 import { ProductForm } from '@/components/products';
 import { Card, Button } from '@/components/ui';
-import { useToast } from '@/hooks/useToast';
+import { useToast } from '@/contexts/ToastContext';
 import type { ProductCreateFormData } from '@/utils/validators';
 import type { Product } from '@/types';
 

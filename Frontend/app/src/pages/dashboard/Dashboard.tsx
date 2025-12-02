@@ -10,7 +10,7 @@ import {
   Pagination,
 } from '@/components/products';
 import type { Product, SortBy, SortOrder, PaginatedProducts } from '@/types';
-import { useToast } from '@/hooks/useToast';
+import { useToast } from '@/contexts/ToastContext';
 
 export default function Dashboard() {
   const { success, error, info } = useToast();
