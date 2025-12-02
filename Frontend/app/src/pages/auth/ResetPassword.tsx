@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Link, useSearchParams } from 'react-router';
 import { Button, Input, Card } from '@/components/ui';
-import { useToast } from '@/hooks/useToast';
+import { useToast } from '@/contexts/ToastContext';
 import { resetPasswordSchema } from '@/utils/validators';
 import { authApi } from '@/api';
 

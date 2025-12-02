@@ -7,7 +7,7 @@
 
 import React, { useState } from 'react';
 import { Button, Input, Card, Badge, Modal, Spinner, ToastContainer } from '@/components/ui';
-import { useToast } from '@/hooks/useToast';
+import { useToast } from '@/contexts/ToastContext';
 
 // ============================================
 // EXEMPLE 1 : BUTTONS

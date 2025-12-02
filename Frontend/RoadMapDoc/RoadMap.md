@@ -230,6 +230,48 @@ Ce document trace les fonctionnalités à développer pour le frontend de PriceW
   - Type safety complet avec ProductCreateFormData, Product
   - Validators mis à jour avec validations strictes
 
+#### 2.4 Détail d'un Produit - COMPLET ✅
+- ✅ **Page ProductDetail complète** (`pages/products/ProductDetail.tsx`)
+  - Layout max-w-4xl avec back button vers dashboard
+  - Chargement des données produit via productsApi.getById
+  - Loading state avec skeleton animé
+  - Gestion des erreurs avec redirection vers dashboard
+- ✅ **Vue détaillée du produit**
+  - Image grande taille (w-64 h-64 md responsive) ou placeholder
+  - Nom complet du produit (titre h1)
+  - Badge de statut dynamique :
+    - Indisponible (danger) : produit non disponible
+    - Prix cible atteint (success) : current_price <= target_price
+    - En surveillance (neutral) : en cours de suivi
+  - Prix actuel (grand, bold) et prix cible (primary)
+  - Lien externe vers le site marchand (open_in_new icon, nouvelle fenêtre)
+- ✅ **Informations complémentaires** (grid 2 colonnes responsive)
+  - Fréquence de vérification (schedule icon) : "Toutes les X heures"
+  - Dernière vérification (update icon) : date relative + tooltip date complète
+  - Date de création (calendar_today icon) : date formatée
+  - Indisponible depuis (error icon, danger color) : affiché si unavailable_since existe
+- ✅ **Actions sur le produit** (3 boutons)
+  - "Vérifier le prix maintenant" (refresh icon, primary) : appel productsApi.checkPrice
+  - "Modifier" (edit icon, secondary) : navigation vers /products/:id/edit
+  - "Supprimer" (delete icon, danger) : ouverture modal de confirmation
+- ✅ **Modal de confirmation de suppression**
+  - Titre "Confirmer la suppression"
+  - Message d'avertissement sur l'irréversibilité
+  - Affichage du nom du produit à supprimer (card grise)
+  - Boutons Annuler (secondary) et Supprimer (danger, loading)
+  - Appel productsApi.delete puis redirection vers dashboard
+  - Toast success après suppression
+- ✅ **États et feedback**
+  - Loading states pour chaque action (checking price, deleting)
+  - Toast notifications (success/error) pour chaque action
+  - Skeleton loading pendant chargement initial
+  - Désactivation des boutons pendant les actions
+- ✅ **Qualité du code**
+  - ESLint, Prettier, TypeScript checks passés (0 erreur)
+  - Type safety complet avec Product, useParams, useNavigate
+  - Formatters utilisés : formatPrice, formatDateTime, formatRelativeTime
+  - Composants UI réutilisés : Card, Button, Badge, Modal
+
 ---
 
 ## Fonctionnalités à Implémenter (par priorité)
@@ -419,8 +461,8 @@ Ce document trace les fonctionnalités à développer pour le frontend de PriceW
   - Message d'erreur si URL invalide ou scraping échoué
   - Redirection vers dashboard après succès
 
-#### 2.4 Détail d'un Produit
-- [ ] **Vue détaillée**
+#### 2.4 Détail d'un Produit - COMPLET ✅
+- [x] **Vue détaillée**
   - Image grande taille
   - Nom complet du produit
   - Prix actuel et prix cible
@@ -428,7 +470,7 @@ Ce document trace les fonctionnalités à développer pour le frontend de PriceW
   - Dernière vérification
   - Statut de disponibilité
   - Lien vers le site marchand (nouvelle fenêtre)
-- [ ] **Actions sur le produit**
+- [x] **Actions sur le produit**
   - Bouton "Vérifier le prix maintenant"
   - Bouton "Modifier"
   - Bouton "Supprimer" (avec confirmation)
@@ -913,9 +955,25 @@ npm run type-check
 
 ---
 
-**Dernière mise à jour** : 2025-12-01
+**Dernière mise à jour** : 2025-12-02
 
 ### Changelog
+- **2025-12-02** :
+  - ✅ **Détail d'un Produit (2.4)** - Page détaillée complète et fonctionnelle
+    - Page ProductDetail : Layout max-w-4xl, back button vers dashboard, skeleton loading
+    - Vue détaillée : Image grande taille (ou placeholder), nom complet, badge statut dynamique
+    - Badges : Indisponible (danger), Prix cible atteint (success), En surveillance (neutral)
+    - Affichage prix : Prix actuel (grand, bold) et prix cible (primary, xl)
+    - Lien externe vers site marchand (open_in_new icon, nouvelle fenêtre)
+    - Infos complémentaires en grid responsive : fréquence, dernière vérif, date création, indisponibilité
+    - Actions : Vérifier prix (refresh, primary), Modifier (edit, secondary), Supprimer (delete, danger)
+    - Modal de confirmation suppression : Titre, message avertissement, nom produit, boutons Annuler/Supprimer
+    - États loading pour chaque action (checking price, deleting)
+    - Toast notifications pour toutes les actions (success/error)
+    - Intégration API : getById, checkPrice, delete avec redirection dashboard
+    - Formatters : formatPrice, formatDateTime, formatRelativeTime
+    - Gestion erreurs : Toast + redirection dashboard si produit introuvable
+    - Qualité : ESLint, Prettier, TypeScript checks passés (0 erreur)
 - **2025-12-01** :
   - ✅ **Ajout d'un Produit (2.3)** - Formulaire d'ajout de produit complet et fonctionnel
     - Composant ProductForm : Formulaire avec React Hook Form + Zod (URL, prix cible, fréquence)

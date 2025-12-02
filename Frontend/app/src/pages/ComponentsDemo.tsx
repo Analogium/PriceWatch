@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Button, Input, Card, Badge, Modal, Spinner, ToastContainer } from '@/components/ui';
-import { useToast } from '@/hooks/useToast';
+import { useToast } from '@/contexts/ToastContext';
 
 const ComponentsDemo: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
