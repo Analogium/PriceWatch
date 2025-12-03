@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router';
 import { useAuth } from '@/hooks/useAuth';
+import { usePriceCheck } from '@/contexts/PriceCheckContext';
 import { Button } from '@/components/ui';
 
 export function Header() {
   const { user, logout } = useAuth();
+  const { checkingProducts } = usePriceCheck();
   const location = useLocation();
   const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -69,6 +71,17 @@ export function Header() {
 
           {/* Desktop User Menu */}
           <div className="hidden md:flex items-center gap-3">
+            {/* Price check indicator */}
+            {checkingProducts.length > 0 && (
+              <div className="flex items-center gap-2 px-3 py-2 bg-primary-50 text-primary-700 rounded-lg border border-primary-200">
+                <span className="material-symbols-outlined text-lg animate-spin">refresh</span>
+                <span className="text-sm font-medium">
+                  {checkingProducts.length} vérification{checkingProducts.length > 1 ? 's' : ''} en
+                  cours
+                </span>
+              </div>
+            )}
+
             {user && (
               <div className="relative">
                 <button

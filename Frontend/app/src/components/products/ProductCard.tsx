@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { usePriceCheck } from '@/contexts/PriceCheckContext';
 import type { Product } from '@/types';
 
 interface ProductCardProps {
@@ -8,6 +9,7 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product, onDelete, onCheckPrice }: ProductCardProps) {
+  const { isChecking } = usePriceCheck();
   const isPriceBelowTarget = product.current_price <= product.target_price;
   const priceColor = isPriceBelowTarget ? 'text-green-600' : 'text-gray-900';
 
@@ -48,6 +50,12 @@ export function ProductCard({ product, onDelete, onCheckPrice }: ProductCardProp
         ) : (
           <div className="w-full h-full flex items-center justify-center">
             <span className="material-symbols-outlined text-gray-400 text-6xl">image</span>
+          </div>
+        )}
+        {isChecking(product.id) && (
+          <div className="absolute top-2 left-2 bg-primary-100 text-primary-800 text-xs font-medium px-2 py-1 rounded flex items-center gap-1 animate-pulse">
+            <span className="material-symbols-outlined text-sm">refresh</span>
+            Vérification...
           </div>
         )}
         {!product.is_available && (
@@ -108,10 +116,15 @@ export function ProductCard({ product, onDelete, onCheckPrice }: ProductCardProp
           </Link>
           <button
             onClick={() => onCheckPrice?.(product.id)}
-            className="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+            disabled={isChecking(product.id)}
+            className="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             title="Vérifier le prix maintenant"
           >
-            <span className="material-symbols-outlined text-gray-700">refresh</span>
+            <span
+              className={`material-symbols-outlined text-gray-700 ${isChecking(product.id) ? 'animate-spin' : ''}`}
+            >
+              refresh
+            </span>
           </button>
           <button
             onClick={() => onDelete?.(product.id)}
