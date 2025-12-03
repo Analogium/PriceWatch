@@ -272,6 +272,43 @@ Ce document trace les fonctionnalités à développer pour le frontend de PriceW
   - Formatters utilisés : formatPrice, formatDateTime, formatRelativeTime
   - Composants UI réutilisés : Card, Button, Badge, Modal
 
+#### 2.5 Modification d'un Produit - COMPLET ✅
+- ✅ **Page ProductEdit complète** (`pages/products/ProductEdit.tsx`)
+  - Layout max-w-2xl avec back button vers la page détail du produit
+  - Chargement des données produit via productsApi.getById
+  - Formulaire pré-rempli avec les données du produit (name, target_price, check_frequency)
+  - Loading state avec skeleton animé pendant le chargement
+  - Gestion des erreurs avec redirection vers dashboard
+- ✅ **Formulaire de modification**
+  - React Hook Form + Zod validation avec productUpdateSchema
+  - Champ nom du produit (text input, shopping_bag icon)
+  - Champ prix cible (number input, euro icon, min 0.01€, step 0.01)
+  - Radio buttons pour la fréquence de vérification (6h, 12h, 24h)
+  - Validation Zod : nom optionnel, prix positif min 0.01€, fréquence 6/12/24
+  - Messages d'aide sous chaque champ
+  - Gestion des erreurs de validation inline
+- ✅ **Actions et navigation**
+  - Bouton "Annuler" (secondary) : retour vers /products/:id
+  - Bouton "Sauvegarder" (primary, save icon) : soumission du formulaire
+  - État isSubmitting pour désactiver les boutons pendant la requête
+  - Navigation automatique vers la page détail après succès
+- ✅ **Intégration API**
+  - productsApi.update avec les données du formulaire
+  - Toast success "Produit modifié avec succès !" après mise à jour
+  - Toast error "Impossible de modifier le produit" en cas d'échec
+  - Mise à jour de l'état local du produit après succès
+- ✅ **UX/UI**
+  - Card englobant le formulaire
+  - Header avec titre et description
+  - Radio buttons stylisés avec hover effects (border-primary-500, bg-primary-50)
+  - Skeleton loading responsive pendant le chargement initial
+  - Désactivation de tous les champs pendant la soumission
+- ✅ **Qualité du code**
+  - ESLint, Prettier, TypeScript checks passés (0 erreur)
+  - Type safety complet avec ProductUpdateFormData, Product
+  - Reset du formulaire avec les données du produit (reset method)
+  - Composants UI réutilisés : Card, Button, Input
+
 ---
 
 ## Fonctionnalités à Implémenter (par priorité)
@@ -475,13 +512,13 @@ Ce document trace les fonctionnalités à développer pour le frontend de PriceW
   - Bouton "Modifier"
   - Bouton "Supprimer" (avec confirmation)
 
-#### 2.5 Modification d'un Produit
-- [ ] **Formulaire de modification**
+#### 2.5 Modification d'un Produit - COMPLET ✅
+- [x] **Formulaire de modification**
   - Champ nom (pré-rempli)
   - Champ prix cible (pré-rempli)
   - Sélecteur fréquence (pré-rempli)
   - Boutons Sauvegarder/Annuler
-- [ ] **Feedback**
+- [x] **Feedback**
   - Toast de confirmation
   - Mise à jour en temps réel dans la liste
 
@@ -955,9 +992,22 @@ npm run type-check
 
 ---
 
-**Dernière mise à jour** : 2025-12-02
+**Dernière mise à jour** : 2025-12-03
 
 ### Changelog
+- **2025-12-03** :
+  - ✅ **Modification d'un Produit (2.5)** - Page d'édition complète et fonctionnelle
+    - Page ProductEdit : Layout max-w-2xl, back button vers page détail, skeleton loading
+    - Formulaire pré-rempli avec données du produit (name, target_price, check_frequency)
+    - React Hook Form + Zod validation avec productUpdateSchema
+    - Champs : Nom du produit (text input, shopping_bag icon), Prix cible (number, euro icon), Fréquence (radio buttons 6h/12h/24h)
+    - Validation Zod : nom optionnel min 1 caractère, prix positif min 0.01€, fréquence 6/12/24
+    - Actions : Bouton Annuler (secondary, retour vers détail) et Sauvegarder (primary, save icon)
+    - Intégration API : productsApi.update avec toast success/error
+    - Navigation automatique vers page détail après succès
+    - États : isLoading (skeleton), isSubmitting (désactive tous les champs)
+    - UX/UI : Card englobant formulaire, radio buttons stylisés avec hover effects
+    - Qualité : ESLint, Prettier, TypeScript checks passés (0 erreur)
 - **2025-12-02** :
   - ✅ **Détail d'un Produit (2.4)** - Page détaillée complète et fonctionnelle
     - Page ProductDetail : Layout max-w-4xl, back button vers dashboard, skeleton loading

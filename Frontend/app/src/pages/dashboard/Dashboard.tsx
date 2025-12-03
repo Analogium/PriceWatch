@@ -11,9 +11,11 @@ import {
 } from '@/components/products';
 import type { Product, SortBy, SortOrder, PaginatedProducts } from '@/types';
 import { useToast } from '@/contexts/ToastContext';
+import { usePriceCheck } from '@/contexts/PriceCheckContext';
 
 export default function Dashboard() {
   const { success, error, info } = useToast();
+  const { startChecking, finishChecking } = usePriceCheck();
   const [data, setData] = useState<PaginatedProducts | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -87,8 +89,15 @@ export default function Dashboard() {
   };
 
   const handleCheckPrice = async (id: number) => {
+    // Find the product to get its full data
+    const product = data?.items.find((p) => p.id === id);
+    if (!product) return;
+
+    // Start checking and show info toast
+    startChecking(product);
+    info('Vérification du prix en cours...', undefined, 10000);
+
     try {
-      info('Vérification du prix en cours...');
       const updatedProduct = await productsApi.checkPrice(id);
 
       // Update the product in the list
@@ -106,6 +115,8 @@ export default function Dashboard() {
           ? (err.response as { data?: { detail?: string } })?.data?.detail
           : undefined;
       error(message || 'Erreur lors de la vérification du prix');
+    } finally {
+      finishChecking(id);
     }
   };
 

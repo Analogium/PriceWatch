@@ -3,17 +3,18 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { productsApi } from '@/api/products';
 import { Card, Button, Badge, Modal } from '@/components/ui';
 import { useToast } from '@/contexts/ToastContext';
+import { usePriceCheck } from '@/contexts/PriceCheckContext';
 import { formatPrice, formatDateTime, formatRelativeTime } from '@/utils/formatters';
 import type { Product } from '@/types';
 
 export default function ProductDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { success, error } = useToast();
+  const { success, error, info } = useToast();
+  const { isChecking, startChecking, finishChecking } = usePriceCheck();
 
   const [product, setProduct] = useState<Product | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [isCheckingPrice, setIsCheckingPrice] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
@@ -41,15 +42,18 @@ export default function ProductDetail() {
   const handleCheckPrice = async () => {
     if (!product) return;
 
+    // Start checking and show info toast
+    startChecking(product);
+    info('Vérification du prix en cours...', undefined, 10000);
+
     try {
-      setIsCheckingPrice(true);
       const updatedProduct = await productsApi.checkPrice(product.id);
       setProduct(updatedProduct);
       success('Prix vérifié avec succès !');
     } catch {
       error('Impossible de vérifier le prix');
     } finally {
-      setIsCheckingPrice(false);
+      finishChecking(product.id);
     }
   };
 
@@ -231,7 +235,7 @@ export default function ProductDetail() {
           <div className="flex flex-col sm:flex-row gap-3">
             <Button
               onClick={handleCheckPrice}
-              isLoading={isCheckingPrice}
+              isLoading={product ? isChecking(product.id) : false}
               leftIcon={<span className="material-symbols-outlined">refresh</span>}
             >
               Vérifier le prix maintenant
