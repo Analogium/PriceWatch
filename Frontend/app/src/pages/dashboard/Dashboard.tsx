@@ -9,6 +9,7 @@ import {
   SortSelect,
   Pagination,
 } from '@/components/products';
+import { Button, Modal } from '@/components/ui';
 import type { Product, SortBy, SortOrder, PaginatedProducts } from '@/types';
 import { useToast } from '@/contexts/ToastContext';
 import { usePriceCheck } from '@/contexts/PriceCheckContext';
@@ -22,6 +23,9 @@ export default function Dashboard() {
   const [sortBy, setSortBy] = useState<SortBy>('created_at');
   const [order, setOrder] = useState<SortOrder>('desc');
   const [page, setPage] = useState(1);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [productToDelete, setProductToDelete] = useState<Product | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const fetchProducts = useCallback(async () => {
     try {
@@ -70,14 +74,25 @@ export default function Dashboard() {
     setPage(1);
   };
 
-  const handleDelete = async (id: number) => {
-    if (!confirm('Êtes-vous sûr de vouloir supprimer ce produit ?')) {
-      return;
-    }
+  const handleDelete = (id: number) => {
+    // Find the product to delete
+    const product = data?.items.find((p) => p.id === id);
+    if (!product) return;
+
+    // Show delete confirmation modal
+    setProductToDelete(product);
+    setShowDeleteModal(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!productToDelete) return;
 
     try {
-      await productsApi.delete(id);
+      setIsDeleting(true);
+      await productsApi.delete(productToDelete.id);
       success('Produit supprimé avec succès');
+      setShowDeleteModal(false);
+      setProductToDelete(null);
       fetchProducts(); // Refresh list
     } catch (err: unknown) {
       const message =
@@ -85,7 +100,14 @@ export default function Dashboard() {
           ? (err.response as { data?: { detail?: string } })?.data?.detail
           : undefined;
       error(message || 'Erreur lors de la suppression du produit');
+    } finally {
+      setIsDeleting(false);
     }
+  };
+
+  const cancelDelete = () => {
+    setShowDeleteModal(false);
+    setProductToDelete(null);
   };
 
   const handleCheckPrice = async (id: number) => {
@@ -172,6 +194,41 @@ export default function Dashboard() {
           <Pagination metadata={data.metadata} onPageChange={handlePageChange} />
         </>
       )}
+
+      {/* Delete confirmation modal */}
+      <Modal
+        isOpen={showDeleteModal}
+        onClose={cancelDelete}
+        title="Confirmer la suppression"
+        size="sm"
+      >
+        <div className="space-y-4">
+          <p className="text-gray-700">
+            Êtes-vous sûr de vouloir supprimer ce produit ? Cette action est irréversible.
+          </p>
+
+          {productToDelete && (
+            <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+              <p className="text-sm font-medium text-gray-900 mb-1">Produit à supprimer :</p>
+              <p className="text-sm text-gray-600 line-clamp-2">{productToDelete.name}</p>
+            </div>
+          )}
+
+          <div className="flex gap-3 justify-end">
+            <Button variant="secondary" onClick={cancelDelete} disabled={isDeleting}>
+              Annuler
+            </Button>
+            <Button
+              variant="danger"
+              onClick={confirmDelete}
+              isLoading={isDeleting}
+              leftIcon={<span className="material-symbols-outlined">delete</span>}
+            >
+              Supprimer
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }

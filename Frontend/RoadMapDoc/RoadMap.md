@@ -309,6 +309,39 @@ Ce document trace les fonctionnalités à développer pour le frontend de PriceW
   - Reset du formulaire avec les données du produit (reset method)
   - Composants UI réutilisés : Card, Button, Input
 
+#### 2.6 Suppression d'un Produit - COMPLET ✅
+- ✅ **Modal de confirmation dans Dashboard** (`pages/dashboard/Dashboard.tsx`)
+  - Modal de confirmation élégant avec composant Modal UI
+  - Remplacement du confirm() natif par une vraie modal
+  - Affichage du nom du produit à supprimer
+  - Message d'avertissement : "Cette action est irréversible"
+  - Card d'information avec le nom du produit
+- ✅ **Gestion de l'état**
+  - État showDeleteModal pour afficher/masquer la modal
+  - État productToDelete pour stocker le produit à supprimer
+  - État isDeleting pour le loading pendant la suppression
+  - Fonctions handleDelete (ouvre modal), confirmDelete (supprime), cancelDelete (annule)
+- ✅ **Actions dans la modal**
+  - Bouton "Annuler" (secondary) : ferme la modal sans supprimer
+  - Bouton "Supprimer" (danger, delete icon) : supprime le produit
+  - isLoading sur le bouton pendant la requête
+  - Désactivation du bouton Annuler pendant la suppression
+- ✅ **Intégration API**
+  - productsApi.delete avec gestion des erreurs
+  - Toast success "Produit supprimé avec succès" après suppression
+  - Toast error avec message détaillé en cas d'échec
+  - Refresh automatique de la liste après suppression (fetchProducts)
+- ✅ **UX/UI cohérente**
+  - Modal identique à celle de ProductDetail pour la cohérence
+  - Taille sm pour la modal (compact)
+  - Card grise pour mettre en évidence le produit à supprimer
+  - line-clamp-2 pour limiter l'affichage des noms longs
+- ✅ **Qualité du code**
+  - ESLint, Prettier, TypeScript checks passés (0 erreur)
+  - Type safety complet avec Product type
+  - Composants UI réutilisés : Modal, Button
+  - Cohérence UX entre Dashboard et ProductDetail
+
 ---
 
 ## Fonctionnalités à Implémenter (par priorité)
@@ -522,12 +555,11 @@ Ce document trace les fonctionnalités à développer pour le frontend de PriceW
   - Toast de confirmation
   - Mise à jour en temps réel dans la liste
 
-#### 2.6 Suppression d'un Produit
-- [ ] **Modal de confirmation**
+#### 2.6 Suppression d'un Produit - COMPLET ✅
+- [x] **Modal de confirmation**
   - Message de confirmation
-  - Nom du produit à supprimer
   - Boutons Confirmer/Annuler
-- [ ] **Feedback**
+- [x] **Feedback**
   - Toast de confirmation
   - Suppression de la liste sans rechargement
 
@@ -992,9 +1024,21 @@ npm run type-check
 
 ---
 
-**Dernière mise à jour** : 2025-12-03
+**Dernière mise à jour** : 2025-12-08
 
 ### Changelog
+- **2025-12-08** :
+  - ✅ **Suppression d'un Produit (2.6)** - Modal de confirmation dans Dashboard
+    - Modal de confirmation élégant avec composant Modal UI (remplacement du confirm() natif)
+    - États : showDeleteModal, productToDelete, isDeleting
+    - Affichage du nom du produit à supprimer dans une card d'information
+    - Message d'avertissement : "Cette action est irréversible"
+    - Boutons : Annuler (secondary, ferme modal) et Supprimer (danger, delete icon, isLoading)
+    - Désactivation du bouton Annuler pendant la suppression
+    - Intégration API : productsApi.delete avec toast success/error
+    - Refresh automatique de la liste après suppression (fetchProducts)
+    - UX/UI cohérente avec ProductDetail (modal identique, taille sm, card grise)
+    - Qualité : ESLint, Prettier, TypeScript checks passés (0 erreur)
 - **2025-12-03** :
   - ✅ **Modification d'un Produit (2.5)** - Page d'édition complète et fonctionnelle
     - Page ProductEdit : Layout max-w-2xl, back button vers page détail, skeleton loading
