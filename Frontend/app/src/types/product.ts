@@ -39,6 +39,7 @@ export interface PaginatedProducts {
   metadata: PaginationMetadata;
 }
 
+// Price history interface for tracking product price changes over time
 export interface PriceHistory {
   id: number;
   product_id: number;
@@ -46,6 +47,7 @@ export interface PriceHistory {
   recorded_at: string;
 }
 
+// Price statistics interface for displaying aggregated price data
 export interface PriceStats {
   current_price: number;
   lowest_price: number;

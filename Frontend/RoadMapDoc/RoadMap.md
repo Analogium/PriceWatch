@@ -342,6 +342,62 @@ Ce document trace les fonctionnalités à développer pour le frontend de PriceW
   - Composants UI réutilisés : Modal, Button
   - Cohérence UX entre Dashboard et ProductDetail
 
+#### 3.1 Historique des Prix - COMPLET ✅
+- ✅ **Installation de Recharts** (v2.x)
+  - Bibliothèque de graphiques pour React
+  - 78 packages installés sans vulnérabilités
+- ✅ **Composant PriceChart** (`components/products/PriceChart.tsx`)
+  - Graphique en ligne avec Recharts (LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ReferenceLine)
+  - Filtres de période : 7 jours, 30 jours, 90 jours, Tout (boutons sélectionnables)
+  - Ligne du prix cible en référence (vert, pointillés, label "Prix cible: X€")
+  - Ligne du prix actuel (bleu, strokeWidth 2, dots avec r=4)
+  - Custom tooltip avec date et prix formatés (card blanche avec border)
+  - Empty state si aucune donnée disponible (icône show_chart, message)
+  - Légende en bas du graphique (Prix actuel - bleu, Prix cible - vert pointillé)
+  - Responsive avec ResponsiveContainer (height 320px)
+- ✅ **Composant PriceHistoryList** (`components/products/PriceHistoryList.tsx`)
+  - Liste chronologique des prix en tableau
+  - Colonnes : Date et heure, Prix, Variation
+  - Calcul de variation entre relevés consécutifs (pourcentage)
+  - Icônes trending_up (rouge), trending_down (vert), trending_flat (gris)
+  - Formatage avec formatDateTime et formatPercentage
+  - Hover effect sur les lignes (bg-gray-50 dark:bg-gray-800/50)
+  - Empty state si aucun historique (icône history, message)
+  - Header avec nombre de relevés enregistrés
+- ✅ **Composant PriceStats** (`components/products/PriceStats.tsx`)
+  - 6 statistiques affichées en cards :
+    - Prix actuel (primary, icône price_check)
+    - Prix minimum (success, icône arrow_downward, "Meilleur prix observé")
+    - Prix maximum (danger, icône arrow_upward, "Prix le plus élevé")
+    - Prix moyen (default, icône show_chart)
+    - Variation globale (icône trending_*, couleur dynamique selon variation)
+    - Nombre de relevés (default, icône data_usage)
+  - Cards colorées selon le variant (primary, success, danger, default)
+  - Grid responsive (1 col mobile, 2 cols md, 3 cols lg)
+  - Icônes Material Symbols dans des carrés colorés
+  - Formatage avec formatPrice et formatPercentage
+- ✅ **Intégration dans ProductDetail** (`pages/products/ProductDetail.tsx`)
+  - Chargement parallèle de l'historique et des stats (Promise.all)
+  - États : priceHistory, priceStats, isLoadingHistory
+  - Affichage après le card principal du produit (mt-8, space-y-6)
+  - Section conditionnelle si !isLoadingHistory && priceStats
+  - Skeleton loading pendant le chargement (3 divs animées)
+  - Refresh automatique après vérification du prix (handleCheckPrice)
+  - Imports : PriceChart, PriceHistoryList, PriceStats, PriceHistory, PriceStats types
+- ✅ **Intégration API**
+  - productsApi.getHistory(id) : récupère l'historique des prix
+  - productsApi.getStats(id) : récupère les statistiques
+  - Appels parallèles avec Promise.all pour performance
+  - Gestion des erreurs avec toast "Impossible de charger l'historique des prix"
+  - Reload après vérification du prix pour mettre à jour le graphique
+- ✅ **Barrel exports**
+  - PriceChart, PriceHistoryList, PriceStats exportés dans `components/products/index.ts`
+- ✅ **Qualité du code**
+  - ESLint, Prettier, TypeScript checks passés (0 erreur)
+  - Type safety complet avec PriceHistory, PriceStats types
+  - Composants UI réutilisés : Button (pour les filtres de période)
+  - CustomTooltip déplacé en dehors du composant pour éviter React hooks issues
+
 ---
 
 ## Fonctionnalités à Implémenter (par priorité)
@@ -567,26 +623,26 @@ Ce document trace les fonctionnalités à développer pour le frontend de PriceW
 
 ### Priorité 3 - MOYENNE (Historique & Préférences)
 
-#### 3.1 Historique des Prix
-- [ ] **Graphique d'évolution**
-  - Graphique en ligne (Chart.js ou Recharts)
-  - Axe X : dates
-  - Axe Y : prix
-  - Ligne du prix cible (référence)
-  - Tooltip avec détails
+#### 3.1 Historique des Prix - COMPLET ✅
+- [x] **Graphique d'évolution**
+  - Graphique en ligne (Recharts)
+  - Axe X : dates formatées
+  - Axe Y : prix en euros
+  - Ligne du prix cible (référence verte pointillée)
+  - Tooltip avec détails (date + prix)
   - Période configurable (7j, 30j, 90j, tout)
-- [ ] **Liste chronologique**
+- [x] **Liste chronologique**
   - Tableau des prix enregistrés
-  - Date et heure
-  - Prix
-  - Variation par rapport au précédent
-- [ ] **Statistiques**
-  - Prix actuel
-  - Prix minimum historique
-  - Prix maximum historique
-  - Prix moyen
-  - Variation en pourcentage (price_change_percentage)
-  - Nombre de relevés
+  - Date et heure (formatDateTime)
+  - Prix (formatPrice)
+  - Variation par rapport au précédent (pourcentage avec icônes)
+- [x] **Statistiques**
+  - Prix actuel (card primary)
+  - Prix minimum historique (card success)
+  - Prix maximum historique (card danger)
+  - Prix moyen (card default)
+  - Variation en pourcentage (price_change_percentage avec icône dynamique)
+  - Nombre de relevés (card default)
 
 #### 3.2 Préférences Utilisateur
 - [ ] **Page des paramètres**
@@ -1024,9 +1080,19 @@ npm run type-check
 
 ---
 
-**Dernière mise à jour** : 2025-12-08
+**Dernière mise à jour** : 2025-12-09
 
 ### Changelog
+- **2025-12-09** :
+  - ✅ **Historique des Prix (3.1)** - Graphique, liste chronologique et statistiques
+    - Installation de Recharts (v2.x, 78 packages, 0 vulnérabilités)
+    - Composant PriceChart : Graphique en ligne avec filtres de période (7j, 30j, 90j, tout), ligne du prix cible en référence (vert, pointillés), custom tooltip, empty state, légende, responsive
+    - Composant PriceHistoryList : Tableau chronologique (Date/heure, Prix, Variation %), calcul de variation entre relevés consécutifs, icônes trending_*, hover effect, empty state
+    - Composant PriceStats : 6 cards statistiques (Prix actuel, min, max, moyen, variation globale, nombre de relevés), grid responsive (1/2/3 cols), cards colorées par variant, icônes Material Symbols
+    - Intégration dans ProductDetail : Chargement parallèle (Promise.all), états (priceHistory, priceStats, isLoadingHistory), skeleton loading, refresh automatique après vérification prix
+    - Intégration API : productsApi.getHistory et getStats, appels parallèles, gestion erreurs avec toast
+    - Barrel exports : PriceChart, PriceHistoryList, PriceStats dans `components/products/index.ts`
+    - Qualité : ESLint, Prettier, TypeScript checks passés (0 erreur), type safety complet, CustomTooltip déplacé hors du composant pour éviter React hooks issues
 - **2025-12-08** :
   - ✅ **Suppression d'un Produit (2.6)** - Modal de confirmation dans Dashboard
     - Modal de confirmation élégant avec composant Modal UI (remplacement du confirm() natif)
