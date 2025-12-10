@@ -5,3 +5,6 @@ export { SearchBar } from './SearchBar';
 export { SortSelect } from './SortSelect';
 export { Pagination } from './Pagination';
 export { ProductForm } from './ProductForm';
+export { PriceChart } from './PriceChart';
+export { PriceHistoryList } from './PriceHistoryList';
+export { PriceStats } from './PriceStats';

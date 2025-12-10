@@ -2,10 +2,12 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { productsApi } from '@/api/products';
 import { Card, Button, Badge, Modal } from '@/components/ui';
+import { PriceChart, PriceHistoryList, PriceStats } from '@/components/products';
 import { useToast } from '@/contexts/ToastContext';
 import { usePriceCheck } from '@/contexts/PriceCheckContext';
 import { formatPrice, formatDateTime, formatRelativeTime } from '@/utils/formatters';
 import type { Product } from '@/types';
+import type { PriceHistory, PriceStats as PriceStatsType } from '@/types/product';
 
 export default function ProductDetail() {
   const { id } = useParams<{ id: string }>();
@@ -17,6 +19,9 @@ export default function ProductDetail() {
   const [isLoading, setIsLoading] = useState(true);
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [priceHistory, setPriceHistory] = useState<PriceHistory[]>([]);
+  const [priceStats, setPriceStats] = useState<PriceStatsType | null>(null);
+  const [isLoadingHistory, setIsLoadingHistory] = useState(false);
 
   // Load product data
   useEffect(() => {
@@ -38,6 +43,29 @@ export default function ProductDetail() {
     fetchProduct();
   }, [id, navigate, error]);
 
+  // Load price history and stats
+  useEffect(() => {
+    const fetchPriceData = async () => {
+      if (!id) return;
+
+      try {
+        setIsLoadingHistory(true);
+        const [history, stats] = await Promise.all([
+          productsApi.getHistory(Number(id)),
+          productsApi.getStats(Number(id)),
+        ]);
+        setPriceHistory(history);
+        setPriceStats(stats);
+      } catch {
+        error("Impossible de charger l'historique des prix");
+      } finally {
+        setIsLoadingHistory(false);
+      }
+    };
+
+    fetchPriceData();
+  }, [id, error]);
+
   // Check price now
   const handleCheckPrice = async () => {
     if (!product) return;
@@ -50,6 +78,14 @@ export default function ProductDetail() {
       const updatedProduct = await productsApi.checkPrice(product.id);
       setProduct(updatedProduct);
       success('Prix vérifié avec succès !');
+
+      // Reload price history and stats
+      const [history, stats] = await Promise.all([
+        productsApi.getHistory(product.id),
+        productsApi.getStats(product.id),
+      ]);
+      setPriceHistory(history);
+      setPriceStats(stats);
     } catch {
       error('Impossible de vérifier le prix');
     } finally {
@@ -259,6 +295,28 @@ export default function ProductDetail() {
           </div>
         </div>
       </Card>
+
+      {/* Price History Section */}
+      {!isLoadingHistory && priceStats && (
+        <div className="mt-8 space-y-6">
+          {/* Statistics */}
+          <PriceStats stats={priceStats} />
+
+          {/* Chart */}
+          <PriceChart priceHistory={priceHistory} targetPrice={product.target_price} />
+
+          {/* History List */}
+          <PriceHistoryList priceHistory={priceHistory} />
+        </div>
+      )}
+
+      {isLoadingHistory && (
+        <div className="mt-8 space-y-6">
+          <div className="animate-pulse bg-gray-200 rounded-xl h-64"></div>
+          <div className="animate-pulse bg-gray-200 rounded-xl h-80"></div>
+          <div className="animate-pulse bg-gray-200 rounded-xl h-96"></div>
+        </div>
+      )}
 
       {/* Delete confirmation modal */}
       <Modal
