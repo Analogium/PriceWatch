@@ -19,3 +19,9 @@ export type { ModalProps } from './Modal';
 
 export { default as Spinner } from './Spinner';
 export type { SpinnerProps, SpinnerSize, SpinnerVariant } from './Spinner';
+
+export { Toggle } from './Toggle';
+export type { ToggleProps } from './Toggle';
+
+export { default as Select } from './Select';
+export type { SelectProps, SelectOption } from './Select';
