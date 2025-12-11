@@ -28,7 +28,13 @@ const PERIOD_LABELS: Record<PeriodFilter, string> = {
 };
 
 // Custom tooltip component (must be outside of PriceChart to avoid React hooks issues)
-const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: Array<{ payload: { date: string; price: number } }> }) => {
+const CustomTooltip = ({
+  active,
+  payload,
+}: {
+  active?: boolean;
+  payload?: Array<{ payload: { date: string; price: number } }>;
+}) => {
   if (active && payload && payload.length) {
     const data = payload[0].payload;
     return (

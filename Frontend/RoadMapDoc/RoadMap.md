@@ -398,6 +398,58 @@ Ce document trace les fonctionnalités à développer pour le frontend de PriceW
   - Composants UI réutilisés : Button (pour les filtres de période)
   - CustomTooltip déplacé en dehors du composant pour éviter React hooks issues
 
+#### 3.2 Préférences Utilisateur - COMPLET ✅
+- ✅ **Nouveaux composants UI** (`components/ui/`)
+  - Toggle : Switch animé avec label et description, états checked/disabled, focus ring, transition smooth
+  - Select : Dropdown avec icône left, label, error, helperText, placeholder, options typées
+  - Barrel exports mis à jour dans `components/ui/index.ts`
+- ✅ **Page Settings complète** (`pages/settings/Settings.tsx`)
+  - Layout max-w-4xl avec titre et description
+  - React Hook Form + Controller pour gestion du formulaire
+  - Chargement initial des préférences depuis l'API
+  - Loading state avec Spinner pendant le chargement
+  - Sauvegarde avec détection automatique (create si nouveau, update si existant)
+- ✅ **Section Notifications Email**
+  - Toggle principal : Activer les notifications par email
+  - Toggles conditionnels (visibles si email_notifications = true) :
+    - Alertes de baisse de prix (price_drop_alerts)
+    - Alertes de disponibilité (availability_alerts)
+    - Résumé hebdomadaire (weekly_summary)
+  - Select fréquence des notifications : Instantanée, Quotidienne, Hebdomadaire
+  - Icône mail pour la section
+  - Border left sur les options conditionnelles (pl-14, border-l-2)
+- ✅ **Section Webhooks**
+  - Toggle principal : Activer les notifications webhook
+  - Champs conditionnels (visibles si webhook_notifications = true) :
+    - Select type de webhook : Slack, Discord, Custom (avec placeholder)
+    - Input URL du webhook (type url, leftIcon link)
+  - Icône webhook pour la section
+  - Border left sur les options conditionnelles
+- ✅ **Actions du formulaire**
+  - Bouton Annuler (secondary) : reset du formulaire aux valeurs initiales
+  - Bouton Sauvegarder (primary, icône save) : soumission avec isLoading
+  - Désactivation des boutons si !isDirty ou isSaving
+  - Detection automatique des changements (isDirty)
+- ✅ **Intégration API**
+  - preferencesApi.get() : chargement des préférences (avec fallback si inexistant)
+  - preferencesApi.create() : création si aucune préférence existante
+  - preferencesApi.update() : mise à jour si préférences existantes
+  - Toast success "Préférences créées/mises à jour avec succès !"
+  - Toast error "Impossible de sauvegarder les préférences"
+  - Toast info si erreur au chargement (utilisation des valeurs par défaut)
+- ✅ **UX/UI**
+  - Cards pour chaque section (Notifications Email, Webhooks)
+  - Icônes Material Symbols pour chaque section et champ
+  - Affichage conditionnel des options (watch('email_notifications') et watch('webhook_notifications'))
+  - Transitions smooth pour l'affichage/masquage des options
+  - Boutons alignés à droite (flex justify-end gap-3)
+  - Reset automatique du formulaire après sauvegarde réussie
+- ✅ **Qualité du code**
+  - ESLint, Prettier, TypeScript checks passés (0 erreur)
+  - Type safety complet avec UserPreferences, UserPreferencesUpdate, NotificationFrequency, WebhookType
+  - Composants UI réutilisés : Card, Button, Toggle, Select, Input, Spinner
+  - Utilisation des constantes NOTIFICATION_FREQUENCIES et WEBHOOK_TYPES
+
 ---
 
 ## Fonctionnalités à Implémenter (par priorité)
@@ -644,22 +696,21 @@ Ce document trace les fonctionnalités à développer pour le frontend de PriceW
   - Variation en pourcentage (price_change_percentage avec icône dynamique)
   - Nombre de relevés (card default)
 
-#### 3.2 Préférences Utilisateur
-- [ ] **Page des paramètres**
+#### 3.2 Préférences Utilisateur - COMPLET ✅
+- [x] **Page des paramètres**
   - Section notifications
   - Section webhooks
-- [ ] **Notifications email**
+- [x] **Notifications email**
   - Toggle activer/désactiver (email_notifications)
   - Toggle alertes baisse de prix (price_drop_alerts)
   - Toggle alertes disponibilité (availability_alerts)
   - Toggle résumé hebdomadaire (weekly_summary)
   - Sélecteur fréquence : instant, daily, weekly (notification_frequency)
-- [ ] **Webhooks**
+- [x] **Webhooks**
   - Toggle activer/désactiver (webhook_notifications)
   - Champ URL du webhook (webhook_url)
   - Sélecteur type : Slack, Discord, Custom (webhook_type)
-  - Test de webhook (optionnel)
-- [ ] **Sauvegarde**
+- [x] **Sauvegarde**
   - Bouton sauvegarder
   - Feedback de confirmation
 
@@ -1080,9 +1131,20 @@ npm run type-check
 
 ---
 
-**Dernière mise à jour** : 2025-12-09
+**Dernière mise à jour** : 2025-12-11
 
 ### Changelog
+- **2025-12-11** :
+  - ✅ **Préférences Utilisateur (3.2)** - Page Settings complète avec notifications et webhooks
+    - Nouveaux composants UI : Toggle (switch animé) et Select (dropdown)
+    - Page Settings avec React Hook Form + Controller
+    - Section Notifications Email : Toggle principal + 3 toggles conditionnels (price_drop_alerts, availability_alerts, weekly_summary) + Select fréquence
+    - Section Webhooks : Toggle principal + Select type (Slack/Discord/Custom) + Input URL
+    - Actions : Bouton Annuler (reset) et Sauvegarder (isLoading, isDirty detection)
+    - Intégration API : get, create, update avec détection automatique
+    - Toast feedback : success (créé/mis à jour), error (échec sauvegarde), info (chargement par défaut)
+    - UX/UI : Cards pour chaque section, icônes Material Symbols, affichage conditionnel, border left pour options imbriquées
+    - Qualité : ESLint, Prettier, TypeScript checks passés (0 erreur), type safety complet
 - **2025-12-09** :
   - ✅ **Historique des Prix (3.1)** - Graphique, liste chronologique et statistiques
     - Installation de Recharts (v2.x, 78 packages, 0 vulnérabilités)
