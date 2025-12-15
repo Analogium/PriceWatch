@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { productsApi } from '@/api/products';
 import { ProductForm } from '@/components/products';
-import { Card, Button } from '@/components/ui';
+import { Card, Button, Breadcrumb } from '@/components/ui';
 import { useToast } from '@/contexts/ToastContext';
 import type { ProductCreateFormData } from '@/utils/validators';
 import type { Product } from '@/types';
@@ -58,6 +58,16 @@ export default function ProductAdd() {
 
   return (
     <div className="max-w-2xl mx-auto">
+      {/* Breadcrumb navigation */}
+      <div className="mb-6">
+        <Breadcrumb
+          items={[
+            { label: 'Tableau de bord', href: '/dashboard', icon: 'home' },
+            { label: 'Ajouter un produit', icon: 'add_shopping_cart' },
+          ]}
+        />
+      </div>
+
       {/* Header */}
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-900 mb-2">Ajouter un produit</h1>

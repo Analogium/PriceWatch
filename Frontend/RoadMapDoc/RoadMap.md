@@ -450,6 +450,65 @@ Ce document trace les fonctionnalités à développer pour le frontend de PriceW
   - Composants UI réutilisés : Card, Button, Toggle, Select, Input, Spinner
   - Utilisation des constantes NOTIFICATION_FREQUENCIES et WEBHOOK_TYPES
 
+#### 4.1 Composants UI Avancés - COMPLET ✅
+- ✅ **Composant Avatar** (`components/ui/Avatar.tsx`)
+  - Support image avec fallback automatique en cas d'erreur (onError handler)
+  - Fallback personnalisé (initiales, texte)
+  - Fallback par défaut (icône Material Symbols "person")
+  - Tailles : xs (6), sm (8), md (10), lg (12), xl (16), 2xl (24)
+  - Variants : circle (rounded-full), square (rounded-lg)
+  - Couleurs : bg-primary-100 dark:bg-primary-900/50, text-primary-700 dark:text-primary-300
+  - États : imageError state pour gérer les erreurs de chargement
+  - Accessible avec aria-label
+- ✅ **Composant Progress** (`components/ui/Progress.tsx`)
+  - Barre de progression avec variants (primary, success, warning, danger)
+  - Calcul automatique du pourcentage (value/max * 100)
+  - Tailles : sm (h-1), md (h-2), lg (h-3)
+  - Support label optionnel avec affichage du pourcentage
+  - Animation smooth avec transition-all duration-300
+  - Accessible avec role="progressbar", aria-valuenow, aria-valuemin, aria-valuemax
+  - Background : bg-gray-200 dark:bg-gray-700
+- ✅ **Composant Alert/Banner** (`components/ui/Alert.tsx`)
+  - 4 variants : info (primary), success (green), warning (orange), danger (red)
+  - Icônes Material Symbols par défaut (info, check_circle, warning, error)
+  - Support icône personnalisée via prop icon
+  - Support titre optionnel avec prop title
+  - Bouton close optionnel avec callback onClose
+  - Couleurs variant-based pour container, icon, title, text, closeButton
+  - Layout flex avec gap-3, icône flex-shrink-0
+  - Accessible avec role="alert" et aria-label sur bouton close
+  - Focus ring sur bouton close (focus:ring-2 focus:ring-offset-2)
+- ✅ **Composant Breadcrumb** (`components/ui/Breadcrumb.tsx`)
+  - Navigation fil d'Ariane avec items array
+  - Support icônes Material Symbols pour chaque item
+  - Separator personnalisable (default: chevron_right)
+  - Lien React Router pour navigation (Link component)
+  - Item actif (dernier) avec aria-current="page"
+  - Hover states sur les liens (hover:text-primary-600)
+  - Couleurs : gray-600 pour les liens, gray-900 pour l'item actif
+  - Accessible avec nav aria-label="Fil d'Ariane"
+  - Responsive avec flex-wrap
+- ✅ **Composant Tabs** (`components/ui/Tabs.tsx`)
+  - Gestion d'état avec useState pour activeTab
+  - Navigation clavier complète (ArrowLeft, ArrowRight, Home, End)
+  - Skip automatique des tabs disabled lors de la navigation clavier
+  - 2 variants : underline (border-b-2), pills (rounded-lg bg-primary-600)
+  - Support icônes Material Symbols pour chaque tab
+  - Support tabs disabled avec opacity-50 cursor-not-allowed
+  - Callback onChange pour synchronisation externe
+  - TabRefs avec useRef<Map> pour gérer le focus programmatique
+  - Accessible avec role="tablist", role="tab", role="tabpanel", aria-selected, aria-controls
+  - Focus management (tabIndex 0 pour actif, -1 pour inactifs)
+  - Focus ring (focus:ring-2 focus:ring-primary-600)
+- ✅ **Barrel exports mis à jour**
+  - Avatar, Progress, Alert, Breadcrumb, Tabs exportés dans `components/ui/index.ts`
+  - Types exportés : AvatarProps, ProgressProps, AlertProps, BreadcrumbProps, BreadcrumbItem, TabsProps, TabItem
+- ✅ **Qualité du code**
+  - ESLint, Prettier, TypeScript checks passés (0 erreur)
+  - Type safety complet avec interfaces TypeScript strictes
+  - Accessibilité WCAG AA : rôles ARIA, labels, keyboard navigation
+  - Dark mode support complet pour tous les composants
+
 ---
 
 ## Fonctionnalités à Implémenter (par priorité)
@@ -718,16 +777,16 @@ Ce document trace les fonctionnalités à développer pour le frontend de PriceW
 
 ### Priorité 4 - BASSE (UX/UI Polish & Accessibilité)
 
-#### 4.1 Composants UI Avancés
-- [ ] **Composants supplémentaires**
-  - Select/Dropdown personnalisé
-  - Checkbox/Toggle animé
-  - Avatar avec fallback
-  - Progress bar
-  - Alert/Banner
-- [ ] **Composants navigation**
-  - Breadcrumb
-  - Tabs
+#### 4.1 Composants UI Avancés - COMPLET ✅
+- [x] **Composants supplémentaires**
+  - [x] Select/Dropdown personnalisé (déjà implémenté en 3.2)
+  - [x] Checkbox/Toggle animé (déjà implémenté en 3.2)
+  - [x] Avatar avec fallback (tailles xs-2xl, variants circle/square, fallback image/text/icon)
+  - [x] Progress bar (variants primary/success/warning/danger, tailles sm/md/lg, label optionnel)
+  - [x] Alert/Banner (4 variants, icônes, titre, bouton close, accessible)
+- [x] **Composants navigation**
+  - [x] Breadcrumb (fil d'Ariane avec icônes, separator personnalisable, React Router Link)
+  - [x] Tabs (navigation clavier complète, 2 variants underline/pills, icônes, disabled state)
 
 #### 4.2 Améliorations UX
 - [ ] **Loading states avancés**
@@ -1131,9 +1190,18 @@ npm run type-check
 
 ---
 
-**Dernière mise à jour** : 2025-12-11
+**Dernière mise à jour** : 2025-12-15
 
 ### Changelog
+- **2025-12-15** :
+  - ✅ **Composants UI Avancés (4.1)** - 5 nouveaux composants pour enrichir la bibliothèque UI
+    - Composant Avatar : Support image avec fallback automatique (onError), fallback personnalisé (initiales), fallback par défaut (icône person), 6 tailles (xs-2xl), 2 variants (circle/square), couleurs primary, accessible
+    - Composant Progress : Barre de progression, 4 variants (primary/success/warning/danger), 3 tailles (sm/md/lg), calcul automatique pourcentage, label optionnel, animation smooth, accessible avec rôles ARIA
+    - Composant Alert/Banner : 4 variants (info/success/warning/danger), icônes Material Symbols par défaut, icône personnalisable, titre optionnel, bouton close optionnel, couleurs variant-based, accessible avec role="alert"
+    - Composant Breadcrumb : Navigation fil d'Ariane, support icônes, separator personnalisable (chevron_right), React Router Link, item actif avec aria-current="page", hover states, responsive avec flex-wrap
+    - Composant Tabs : Navigation clavier complète (Arrow keys, Home, End), skip automatique des tabs disabled, 2 variants (underline/pills), support icônes, callback onChange, TabRefs avec Map, accessible avec rôles ARIA, focus management
+    - Barrel exports mis à jour avec tous les nouveaux composants et types
+    - Qualité : ESLint, Prettier, TypeScript checks passés (0 erreur), type safety complet, accessibilité WCAG AA, dark mode support complet
 - **2025-12-11** :
   - ✅ **Préférences Utilisateur (3.2)** - Page Settings complète avec notifications et webhooks
     - Nouveaux composants UI : Toggle (switch animé) et Select (dropdown)

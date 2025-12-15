@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { productUpdateSchema, type ProductUpdateFormData } from '@/utils/validators';
 import { productsApi } from '@/api';
-import { Input, Button, Card } from '@/components/ui';
+import { Input, Button, Card, Breadcrumb } from '@/components/ui';
 import { useToast } from '@/contexts/ToastContext';
 import type { Product } from '@/types';
 
@@ -93,15 +93,19 @@ export default function ProductEdit() {
 
   return (
     <div className="max-w-2xl mx-auto">
+      {/* Breadcrumb navigation */}
+      <div className="mb-6">
+        <Breadcrumb
+          items={[
+            { label: 'Tableau de bord', href: '/dashboard', icon: 'home' },
+            { label: product.name, href: `/products/${product.id}`, icon: 'shopping_bag' },
+            { label: 'Modifier', icon: 'edit' },
+          ]}
+        />
+      </div>
+
       {/* Header */}
       <div className="mb-6">
-        <Link
-          to={`/products/${product.id}`}
-          className="inline-flex items-center gap-2 text-primary-600 hover:text-primary-700 mb-4"
-        >
-          <span className="material-symbols-outlined">arrow_back</span>
-          <span>Retour au produit</span>
-        </Link>
         <h1 className="text-2xl font-bold text-gray-900">Modifier le produit</h1>
         <p className="text-gray-600 mt-2">Modifiez les informations de votre produit</p>
       </div>
