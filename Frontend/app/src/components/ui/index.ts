@@ -25,3 +25,18 @@ export type { ToggleProps } from './Toggle';
 
 export { default as Select } from './Select';
 export type { SelectProps, SelectOption } from './Select';
+
+export { default as Avatar } from './Avatar';
+export type { AvatarProps } from './Avatar';
+
+export { default as Progress } from './Progress';
+export type { ProgressProps } from './Progress';
+
+export { default as Alert } from './Alert';
+export type { AlertProps } from './Alert';
+
+export { default as Breadcrumb } from './Breadcrumb';
+export type { BreadcrumbProps, BreadcrumbItem } from './Breadcrumb';
+
+export { default as Tabs } from './Tabs';
+export type { TabsProps, TabItem } from './Tabs';

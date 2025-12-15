@@ -9,7 +9,7 @@ import {
   SortSelect,
   Pagination,
 } from '@/components/products';
-import { Button, Modal } from '@/components/ui';
+import { Button, Modal, Alert } from '@/components/ui';
 import type { Product, SortBy, SortOrder, PaginatedProducts } from '@/types';
 import { useToast } from '@/contexts/ToastContext';
 import { usePriceCheck } from '@/contexts/PriceCheckContext';
@@ -173,7 +173,15 @@ export default function Dashboard() {
 
       {/* Empty State */}
       {!isLoading && data && data.items.length === 0 && (
-        <EmptyState hasSearch={!!search} onClearSearch={handleClearSearch} />
+        <>
+          {!search && (
+            <Alert variant="info" title="Aucun produit suivi" className="mb-6">
+              Vous ne suivez aucun produit pour le moment. Commencez par ajouter un produit à
+              surveiller en cliquant sur le bouton ci-dessus.
+            </Alert>
+          )}
+          <EmptyState hasSearch={!!search} onClearSearch={handleClearSearch} />
+        </>
       )}
 
       {/* Products Grid */}

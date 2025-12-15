@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { productsApi } from '@/api/products';
-import { Card, Button, Badge, Modal } from '@/components/ui';
+import { Card, Button, Badge, Modal, Breadcrumb, Tabs } from '@/components/ui';
 import { PriceChart, PriceHistoryList, PriceStats } from '@/components/products';
 import { useToast } from '@/contexts/ToastContext';
 import { usePriceCheck } from '@/contexts/PriceCheckContext';
@@ -134,15 +134,14 @@ export default function ProductDetail() {
 
   return (
     <div className="max-w-4xl mx-auto">
-      {/* Back button */}
+      {/* Breadcrumb navigation */}
       <div className="mb-6">
-        <Link
-          to="/dashboard"
-          className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
-        >
-          <span className="material-symbols-outlined text-xl">arrow_back</span>
-          <span>Retour au tableau de bord</span>
-        </Link>
+        <Breadcrumb
+          items={[
+            { label: 'Tableau de bord', href: '/dashboard', icon: 'home' },
+            { label: product.name, icon: 'shopping_bag' },
+          ]}
+        />
       </div>
 
       {/* Main content */}
@@ -296,17 +295,35 @@ export default function ProductDetail() {
         </div>
       </Card>
 
-      {/* Price History Section */}
+      {/* Price History Section with Tabs */}
       {!isLoadingHistory && priceStats && (
-        <div className="mt-8 space-y-6">
-          {/* Statistics */}
-          <PriceStats stats={priceStats} />
-
-          {/* Chart */}
-          <PriceChart priceHistory={priceHistory} targetPrice={product.target_price} />
-
-          {/* History List */}
-          <PriceHistoryList priceHistory={priceHistory} />
+        <div className="mt-8">
+          <Tabs
+            items={[
+              {
+                id: 'stats',
+                label: 'Statistiques',
+                icon: 'bar_chart',
+                content: <PriceStats stats={priceStats} />,
+              },
+              {
+                id: 'chart',
+                label: 'Graphique',
+                icon: 'show_chart',
+                content: (
+                  <PriceChart priceHistory={priceHistory} targetPrice={product.target_price} />
+                ),
+              },
+              {
+                id: 'history',
+                label: 'Historique',
+                icon: 'history',
+                content: <PriceHistoryList priceHistory={priceHistory} />,
+              },
+            ]}
+            defaultTab="stats"
+            variant="underline"
+          />
         </div>
       )}
 

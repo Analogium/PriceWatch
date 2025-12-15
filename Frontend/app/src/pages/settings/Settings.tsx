@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useForm, Controller } from 'react-hook-form';
-import { Card, Button, Toggle, Select, Input, Spinner } from '@/components/ui';
+import { Card, Button, Toggle, Select, Input, Spinner, Breadcrumb } from '@/components/ui';
 import { preferencesApi } from '@/api';
 import type {
   UserPreferences,
@@ -113,6 +113,14 @@ export default function Settings() {
   if (isLoading) {
     return (
       <div className="max-w-4xl mx-auto">
+        <div className="mb-6">
+          <Breadcrumb
+            items={[
+              { label: 'Tableau de bord', href: '/dashboard', icon: 'home' },
+              { label: 'Paramètres', icon: 'settings' },
+            ]}
+          />
+        </div>
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Paramètres</h1>
           <p className="text-gray-600 dark:text-gray-400 mt-2">
@@ -128,6 +136,14 @@ export default function Settings() {
 
   return (
     <div className="max-w-4xl mx-auto">
+      <div className="mb-6">
+        <Breadcrumb
+          items={[
+            { label: 'Tableau de bord', href: '/dashboard', icon: 'home' },
+            { label: 'Paramètres', icon: 'settings' },
+          ]}
+        />
+      </div>
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Paramètres</h1>
         <p className="text-gray-600 dark:text-gray-400 mt-2">

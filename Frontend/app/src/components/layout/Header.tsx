@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router';
 import { useAuth } from '@/hooks/useAuth';
 import { usePriceCheck } from '@/contexts/PriceCheckContext';
-import { Button } from '@/components/ui';
+import { Button, Avatar } from '@/components/ui';
 
 export function Header() {
   const { user, logout } = useAuth();
@@ -89,11 +89,12 @@ export function Header() {
                   className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors"
                   aria-label="Menu utilisateur"
                 >
-                  <div className="w-8 h-8 rounded-full bg-primary-100 flex items-center justify-center">
-                    <span className="text-primary-700 text-sm font-semibold">
-                      {user.email.charAt(0).toUpperCase()}
-                    </span>
-                  </div>
+                  <Avatar
+                    fallback={user.email.charAt(0).toUpperCase()}
+                    size="sm"
+                    variant="circle"
+                    alt={user.email}
+                  />
                   <span className="text-sm text-gray-700">{user.email}</span>
                   <span className="material-symbols-outlined text-gray-500 text-lg">
                     {isUserMenuOpen ? 'expand_less' : 'expand_more'}
