@@ -341,9 +341,10 @@ class PriceScraper:
             price_fraction = soup.find("span", {"class": "a-price-fraction"})
 
             if price_whole:
-                price_str = price_whole.text.strip().replace(",", ".").replace(" ", "")
+                price_str = price_whole.text.strip().replace(",", "").replace(" ", "")
                 if price_fraction:
-                    price_str += price_fraction.text.strip()
+                    fraction_str = price_fraction.text.strip().replace(",", "").replace(" ", "")
+                    price_str = price_str.rstrip(".") + "." + fraction_str
                 price = float(re.sub(r"[^\d.]", "", price_str))
 
             # Image
@@ -370,8 +371,21 @@ class PriceScraper:
             # Price
             price_elem = soup.find("span", {"class": "f-priceBox-price"})
             if price_elem:
-                price_str = price_elem.text.strip().replace("€", "").replace(",", ".").replace(" ", "")
-                price = float(re.sub(r"[^\d.]", "", price_str))
+                price_str = price_elem.text.strip().replace("€", "").replace(" ", "")
+                # Extract integer and decimal parts separately
+                match = re.search(r"(\d+)[.,](\d+)", price_str)
+                if match:
+                    integer_part = match.group(1)
+                    decimal_part = match.group(2)
+                    price = float(f"{integer_part}.{decimal_part}")
+                else:
+                    # Try without decimals
+                    match = re.search(r"(\d+)", price_str)
+                    if match:
+                        price = float(match.group(1))
+                    else:
+                        logger.warning("Failed to extract price from Fnac page")
+                        return None
             else:
                 logger.warning("Failed to extract price from Fnac page")
                 return None
@@ -396,8 +410,21 @@ class PriceScraper:
             # Price
             price_elem = soup.find("span", {"class": "product_price"})
             if price_elem:
-                price_str = price_elem.text.strip().replace("€", "").replace(",", ".").replace(" ", "")
-                price = float(re.sub(r"[^\d.]", "", price_str))
+                price_str = price_elem.text.strip().replace("€", "").replace(" ", "")
+                # Extract integer and decimal parts separately
+                match = re.search(r"(\d+)[.,](\d+)", price_str)
+                if match:
+                    integer_part = match.group(1)
+                    decimal_part = match.group(2)
+                    price = float(f"{integer_part}.{decimal_part}")
+                else:
+                    # Try without decimals
+                    match = re.search(r"(\d+)", price_str)
+                    if match:
+                        price = float(match.group(1))
+                    else:
+                        logger.warning("Failed to extract price from Darty page")
+                        return None
             else:
                 logger.warning("Failed to extract price from Darty page")
                 return None
@@ -469,8 +496,20 @@ class PriceScraper:
                 price_str = price_elem.text.strip()
 
             if price_str:
-                price_str = price_str.replace("€", "").replace(",", ".").replace(" ", "")
-                price = float(re.sub(r"[^\d.]", "", price_str))
+                price_str = price_str.replace("€", "").replace(" ", "")
+                # Extract integer and decimal parts separately
+                match = re.search(r"(\d+)[.,](\d+)", price_str)
+                if match:
+                    integer_part = match.group(1)
+                    decimal_part = match.group(2)
+                    price = float(f"{integer_part}.{decimal_part}")
+                else:
+                    # Try without decimals
+                    match = re.search(r"(\d+)", price_str)
+                    if match:
+                        price = float(match.group(1))
+                    else:
+                        price = None
 
             if price is None:
                 logger.warning("Failed to extract price from Cdiscount page")
@@ -512,8 +551,20 @@ class PriceScraper:
                 price_str = price_elem.text.strip()
 
             if price_str:
-                price_str = price_str.replace("€", "").replace(",", ".").replace(" ", "")
-                price = float(re.sub(r"[^\d.]", "", price_str))
+                price_str = price_str.replace("€", "").replace(" ", "")
+                # Extract integer and decimal parts separately
+                match = re.search(r"(\d+)[.,](\d+)", price_str)
+                if match:
+                    integer_part = match.group(1)
+                    decimal_part = match.group(2)
+                    price = float(f"{integer_part}.{decimal_part}")
+                else:
+                    # Try without decimals
+                    match = re.search(r"(\d+)", price_str)
+                    if match:
+                        price = float(match.group(1))
+                    else:
+                        price = None
 
             if price is None:
                 logger.warning("Failed to extract price from Boulanger page")
@@ -555,8 +606,20 @@ class PriceScraper:
                 price_str = price_elem.text.strip()
 
             if price_str:
-                price_str = price_str.replace("€", "").replace(",", ".").replace(" ", "")
-                price = float(re.sub(r"[^\d.]", "", price_str))
+                price_str = price_str.replace("€", "").replace(" ", "")
+                # Extract integer and decimal parts separately
+                match = re.search(r"(\d+)[.,](\d+)", price_str)
+                if match:
+                    integer_part = match.group(1)
+                    decimal_part = match.group(2)
+                    price = float(f"{integer_part}.{decimal_part}")
+                else:
+                    # Try without decimals
+                    match = re.search(r"(\d+)", price_str)
+                    if match:
+                        price = float(match.group(1))
+                    else:
+                        price = None
 
             if price is None:
                 logger.warning("Failed to extract price from E.Leclerc page")
