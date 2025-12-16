@@ -165,12 +165,12 @@ class PlaywrightScraper:
             name = await title_elem.inner_text() if title_elem else "Unknown Product"
             name = name.strip()
 
-            # Extract price - multiple selectors
+            # Extract price - multiple selectors (try offscreen first as it's most reliable)
             price = None
             price_selectors = [
-                ".a-price-whole",
+                ".a-price .a-offscreen",  # Most reliable - contains full price with decimals
                 'span[class*="price-whole"]',
-                ".a-price .a-offscreen",
+                ".a-price-whole",
                 'span[class*="price"]',
             ]
 
@@ -179,13 +179,21 @@ class PlaywrightScraper:
                     price_elem = await page.query_selector(selector)
                     if price_elem:
                         price_text = await price_elem.inner_text()
-                        # Clean price text
-                        price_text = price_text.replace("€", "").replace(",", ".").replace(" ", "").strip()
-                        # Extract number
-                        match = re.search(r"(\d+[.,]?\d*)", price_text)
+                        # Clean price text - preserve comma or dot as decimal separator
+                        price_text = price_text.replace("€", "").replace(" ", "").replace("\n", "").strip()
+                        # Extract number with decimals
+                        match = re.search(r"(\d+)[.,](\d+)", price_text)
                         if match:
-                            price = float(match.group(1).replace(",", "."))
+                            integer_part = match.group(1)
+                            decimal_part = match.group(2)
+                            price = float(f"{integer_part}.{decimal_part}")
                             break
+                        else:
+                            # Try without decimals
+                            match = re.search(r"(\d+)", price_text)
+                            if match:
+                                price = float(match.group(1))
+                                break
                 except Exception:
                     continue
 
@@ -243,12 +251,21 @@ class PlaywrightScraper:
                     price_elem = await page.query_selector(selector)
                     if price_elem:
                         price_text = await price_elem.inner_text()
-                        # Clean and extract price
-                        price_text = price_text.replace("€", "").replace(",", ".").replace(" ", "").strip()
-                        match = re.search(r"(\d+[.,]?\d*)", price_text)
+                        # Clean and extract price - preserve comma or dot as decimal separator
+                        price_text = price_text.replace("€", "").replace(" ", "").replace("\n", "").strip()
+                        # Extract number with decimals
+                        match = re.search(r"(\d+)[.,](\d+)", price_text)
                         if match:
-                            price = float(match.group(1).replace(",", "."))
+                            integer_part = match.group(1)
+                            decimal_part = match.group(2)
+                            price = float(f"{integer_part}.{decimal_part}")
                             break
+                        else:
+                            # Try without decimals
+                            match = re.search(r"(\d+)", price_text)
+                            if match:
+                                price = float(match.group(1))
+                                break
                 except Exception:
                     continue
 
@@ -341,11 +358,20 @@ class PlaywrightScraper:
                                 break
                         else:
                             price_text = await price_elem.inner_text()
-                            price_text = price_text.replace("€", "").replace(",", ".").replace(" ", "").strip()
-                            match = re.search(r"(\d+[.,]?\d*)", price_text)
+                            price_text = price_text.replace("€", "").replace(" ", "").replace("\n", "").strip()
+                            # Extract number with decimals
+                            match = re.search(r"(\d+)[.,](\d+)", price_text)
                             if match:
-                                price = float(match.group(1).replace(",", "."))
+                                integer_part = match.group(1)
+                                decimal_part = match.group(2)
+                                price = float(f"{integer_part}.{decimal_part}")
                                 break
+                            else:
+                                # Try without decimals
+                                match = re.search(r"(\d+)", price_text)
+                                if match:
+                                    price = float(match.group(1))
+                                    break
                 except Exception:
                     continue
 
