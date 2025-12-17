@@ -27,7 +27,22 @@ apiClient.interceptors.request.use(
 apiClient.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
-    const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
+    const originalRequest = error.config as InternalAxiosRequestConfig & {
+      _retry?: boolean;
+      _retryCount?: number;
+    };
+
+    // Handle network errors with automatic retry (max 3 attempts)
+    const isNetworkError = !error.response && error.code !== 'ECONNABORTED';
+    if (isNetworkError && (!originalRequest._retryCount || originalRequest._retryCount < 3)) {
+      originalRequest._retryCount = (originalRequest._retryCount || 0) + 1;
+
+      // Exponential backoff: 1s, 2s, 4s
+      const delay = Math.pow(2, originalRequest._retryCount - 1) * 1000;
+
+      await new Promise((resolve) => setTimeout(resolve, delay));
+      return apiClient(originalRequest);
+    }
 
     // Handle 401 Unauthorized - attempt token refresh
     if (error.response?.status === 401 && !originalRequest._retry) {

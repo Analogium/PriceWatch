@@ -85,21 +85,42 @@ export default function Dashboard() {
   };
 
   const confirmDelete = async () => {
-    if (!productToDelete) return;
+    if (!productToDelete || !data) return;
 
     try {
       setIsDeleting(true);
-      await productsApi.delete(productToDelete.id);
-      success('Produit supprimé avec succès');
+
+      // Optimistic update: remove product from list immediately
+      const updatedItems = data.items.filter((p) => p.id !== productToDelete.id);
+      setData({
+        ...data,
+        items: updatedItems,
+        metadata: {
+          ...data.metadata,
+          total_items: data.metadata.total_items - 1,
+        },
+      });
+
+      // Close modal immediately for better UX
       setShowDeleteModal(false);
       setProductToDelete(null);
-      fetchProducts(); // Refresh list
+
+      // Perform actual delete
+      await productsApi.delete(productToDelete.id);
+      success('Produit supprimé avec succès');
+
+      // Refresh list to get accurate data
+      fetchProducts();
     } catch (err: unknown) {
+      // If delete fails, revert optimistic update
       const message =
         err && typeof err === 'object' && 'response' in err
           ? (err.response as { data?: { detail?: string } })?.data?.detail
           : undefined;
       error(message || 'Erreur lors de la suppression du produit');
+
+      // Revert by fetching fresh data
+      fetchProducts();
     } finally {
       setIsDeleting(false);
     }

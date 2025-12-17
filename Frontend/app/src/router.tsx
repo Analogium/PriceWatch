@@ -19,6 +19,9 @@ const ProductAdd = lazy(() => import('./pages/products/ProductAdd'));
 const ProductEdit = lazy(() => import('./pages/products/ProductEdit'));
 const Settings = lazy(() => import('./pages/settings/Settings'));
 
+// Error pages
+const NotFound = lazy(() => import('./pages/errors/NotFound'));
+
 export const router = createBrowserRouter([
   {
     path: '/',
@@ -79,14 +82,7 @@ export const router = createBrowserRouter([
   // 404
   {
     path: '*',
-    element: (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <h1 className="text-4xl font-bold text-gray-900">404</h1>
-          <p className="mt-2 text-gray-600">Page non trouvée</p>
-        </div>
-      </div>
-    ),
+    element: <NotFound />,
   },
 ]);
 

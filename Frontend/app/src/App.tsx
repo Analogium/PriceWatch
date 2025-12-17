@@ -3,6 +3,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from './contexts/AuthContext';
 import { ToastProvider } from './contexts/ToastContext';
 import { PriceCheckProvider } from './contexts/PriceCheckContext';
+import { ErrorBoundary } from './components/common';
 import { router } from './router';
 import './index.css';
 
@@ -18,15 +19,17 @@ const queryClient = new QueryClient({
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <ToastProvider>
-          <PriceCheckProvider>
-            <RouterProvider router={router} />
-          </PriceCheckProvider>
-        </ToastProvider>
-      </AuthProvider>
-    </QueryClientProvider>
+    <ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>
+          <ToastProvider>
+            <PriceCheckProvider>
+              <RouterProvider router={router} />
+            </PriceCheckProvider>
+          </ToastProvider>
+        </AuthProvider>
+      </QueryClientProvider>
+    </ErrorBoundary>
   );
 }
 
