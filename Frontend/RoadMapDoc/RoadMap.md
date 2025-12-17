@@ -509,6 +509,44 @@ Ce document trace les fonctionnalités à développer pour le frontend de PriceW
   - Accessibilité WCAG AA : rôles ARIA, labels, keyboard navigation
   - Dark mode support complet pour tous les composants
 
+#### 4.2 Améliorations UX - COMPLET ✅
+- ✅ **Loading states avancés**
+  - Skeletons déjà implémentés pour Dashboard (LoadingState component avec 6 cards animées)
+  - Skeletons dans ProductDetail et ProductEdit pour chargement initial
+  - Spinner dans Settings pendant chargement des préférences
+  - Tous les états de chargement couverts dans l'application
+- ✅ **Optimistic updates**
+  - Dashboard : Suppression optimiste (produit retiré de la liste immédiatement avant l'API)
+  - Dashboard : Modal fermée immédiatement pour meilleure réactivité
+  - Revert automatique en cas d'erreur API (refresh des données)
+  - Dashboard : Mise à jour optimiste lors de la vérification de prix (mise à jour du produit dans la liste)
+- ✅ **Empty states**
+  - Dashboard : Alert info "Aucun produit suivi" avec message guidant vers l'action
+  - Dashboard : EmptyState avec icône inventory_2, titre, description et CTA "Ajouter mon premier produit"
+  - Dashboard : EmptyState pour recherche vide (icône search_off, bouton "Effacer la recherche")
+  - Messages clairs et actions disponibles pour tous les états vides
+- ✅ **Error handling avancé**
+  - ErrorBoundary component (React class component avec getDerivedStateFromError et componentDidCatch)
+  - ErrorBoundary avec fallback par défaut : icône error, titre, description, boutons "Réessayer" et "Retour au tableau de bord"
+  - ErrorBoundary affiche le message d'erreur en développement (NODE_ENV === 'development')
+  - Barrel export dans `components/common/index.ts`
+- ✅ **Pages d'erreur**
+  - NotFound (404) : Icône search_off, code 404, titre "Page introuvable", description, boutons "Retour" et "Tableau de bord", lien "Contactez le support"
+  - ServerError (500) : Icône error, code 500, titre "Erreur serveur", description, boutons "Recharger" et "Tableau de bord", lien vers status.pricewatch.com
+  - Barrel export dans `pages/errors/index.ts`
+  - NotFound intégré dans le router (route '*')
+- ✅ **Retry automatique sur erreurs réseau**
+  - Axios interceptor avec retry automatique (max 3 tentatives)
+  - Exponential backoff : 1s, 2s, 4s entre chaque tentative
+  - Détection des erreurs réseau (pas de réponse et code !== 'ECONNABORTED')
+  - _retryCount property sur originalRequest pour tracking
+  - Retry transparent pour l'utilisateur
+- ✅ **Qualité du code**
+  - ESLint, Prettier, TypeScript checks passés (0 erreur)
+  - Type safety complet avec interfaces TypeScript strictes
+  - ErrorBoundary avec proper error types
+  - Error pages avec design cohérent (Material Symbols icons, Tailwind CSS, dark mode)
+
 ---
 
 ## Fonctionnalités à Implémenter (par priorité)
@@ -788,17 +826,17 @@ Ce document trace les fonctionnalités à développer pour le frontend de PriceW
   - [x] Breadcrumb (fil d'Ariane avec icônes, separator personnalisable, React Router Link)
   - [x] Tabs (navigation clavier complète, 2 variants underline/pills, icônes, disabled state)
 
-#### 4.2 Améliorations UX
-- [ ] **Loading states avancés**
-  - Skeletons pour toutes les listes
-  - Optimistic updates
-- [ ] **Empty states**
-  - Messages clairs et actions
-  - Illustrations (optionnel)
-- [ ] **Error handling avancé**
-  - Error boundaries React
-  - Pages d'erreur (404, 500)
-  - Retry automatique sur erreurs réseau
+#### 4.2 Améliorations UX - COMPLET ✅
+- [x] **Loading states avancés**
+  - [x] Skeletons pour toutes les listes (Dashboard, ProductDetail, ProductEdit, Settings)
+  - [x] Optimistic updates (Dashboard delete, price check)
+- [x] **Empty states**
+  - [x] Messages clairs et actions (Dashboard Alert + EmptyState avec CTAs)
+  - [x] États pour recherche vide
+- [x] **Error handling avancé**
+  - [x] Error boundaries React (ErrorBoundary component)
+  - [x] Pages d'erreur (404, 500)
+  - [x] Retry automatique sur erreurs réseau (Axios interceptor avec exponential backoff)
 
 #### 4.3 Responsive Design - Vérification
 - [ ] **Tests responsive complets**
@@ -1190,9 +1228,20 @@ npm run type-check
 
 ---
 
-**Dernière mise à jour** : 2025-12-15
+**Dernière mise à jour** : 2025-12-17
 
 ### Changelog
+- **2025-12-17** :
+  - ✅ **Améliorations UX (4.2)** - Error handling avancé, optimistic updates et amélioration des états
+    - ErrorBoundary component : React class component avec getDerivedStateFromError et componentDidCatch, fallback UI avec icône error/titre/description/boutons (Réessayer, Retour dashboard), affichage du message d'erreur en dev, barrel export dans `components/common/index.ts`
+    - Page NotFound (404) : Icône search_off, code 404, titre "Page introuvable", description, boutons "Retour" et "Tableau de bord", lien "Contactez le support", intégré dans le router (route '*')
+    - Page ServerError (500) : Icône error, code 500, titre "Erreur serveur", description, boutons "Recharger" et "Tableau de bord", lien vers status page
+    - Retry automatique sur erreurs réseau : Axios interceptor avec max 3 tentatives, exponential backoff (1s, 2s, 4s), détection des erreurs réseau (pas de réponse et code !== 'ECONNABORTED'), _retryCount tracking, retry transparent
+    - Optimistic updates Dashboard : Suppression optimiste (produit retiré immédiatement de la liste), modal fermée immédiatement, revert automatique en cas d'erreur (refresh données), déjà implémenté pour price check
+    - Loading states : Skeletons déjà présents (Dashboard LoadingState 6 cards, ProductDetail/Edit skeleton, Settings spinner), tous les états de chargement couverts
+    - Empty states : Dashboard Alert info + EmptyState avec CTAs, état recherche vide avec bouton "Effacer", messages clairs et actions
+    - Barrel exports : `components/common/index.ts` pour ErrorBoundary, `pages/errors/index.ts` pour NotFound/ServerError
+    - Qualité : ESLint, Prettier, TypeScript checks passés (0 erreur), type safety complet, design cohérent (Material Symbols, Tailwind, dark mode)
 - **2025-12-15** :
   - ✅ **Composants UI Avancés (4.1)** - 5 nouveaux composants pour enrichir la bibliothèque UI
     - Composant Avatar : Support image avec fallback automatique (onError), fallback personnalisé (initiales), fallback par défaut (icône person), 6 tailles (xs-2xl), 2 variants (circle/square), couleurs primary, accessible
