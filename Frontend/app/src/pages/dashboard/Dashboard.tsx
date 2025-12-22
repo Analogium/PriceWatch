@@ -1,6 +1,5 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { productsApi } from '@/api/products';
 import {
   ProductCard,
   EmptyState,
@@ -10,48 +9,46 @@ import {
   Pagination,
 } from '@/components/products';
 import { Button, Modal, Alert } from '@/components/ui';
-import type { Product, SortBy, SortOrder, PaginatedProducts } from '@/types';
+import type { Product, SortBy, SortOrder } from '@/types';
 import { useToast } from '@/contexts/ToastContext';
 import { usePriceCheck } from '@/contexts/PriceCheckContext';
+import { useProducts, useDeleteProduct, useCheckPrice } from '@/hooks/useProducts';
 
 export default function Dashboard() {
   const { success, error, info } = useToast();
   const { startChecking, finishChecking } = usePriceCheck();
-  const [data, setData] = useState<PaginatedProducts | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [sortBy, setSortBy] = useState<SortBy>('created_at');
   const [order, setOrder] = useState<SortOrder>('desc');
   const [page, setPage] = useState(1);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [productToDelete, setProductToDelete] = useState<Product | null>(null);
-  const [isDeleting, setIsDeleting] = useState(false);
 
-  const fetchProducts = useCallback(async () => {
-    try {
-      setIsLoading(true);
-      const result = await productsApi.getAll({
-        page,
-        page_size: 12,
-        search: search || undefined,
-        sort_by: sortBy,
-        order,
-      });
-      setData(result);
-    } catch (err: unknown) {
-      const message =
-        err && typeof err === 'object' && 'response' in err
-          ? (err.response as { data?: { detail?: string } })?.data?.detail
-          : undefined;
-      error(message || 'Erreur lors du chargement des produits');
-    } finally {
-      setIsLoading(false);
-    }
-  }, [page, search, sortBy, order, error]);
+  // Memoize filters to prevent unnecessary re-fetches
+  const filters = useMemo(
+    () => ({
+      page,
+      page_size: 12,
+      search: search || undefined,
+      sort_by: sortBy,
+      order,
+    }),
+    [page, search, sortBy, order]
+  );
 
-  useEffect(() => {
-    fetchProducts();
-  }, [fetchProducts]);
+  // Use React Query hooks
+  const { data, isLoading, error: queryError } = useProducts(filters);
+  const deleteMutation = useDeleteProduct();
+  const checkPriceMutation = useCheckPrice();
+
+  // Show error toast if query fails
+  if (queryError) {
+    const message =
+      queryError && typeof queryError === 'object' && 'response' in queryError
+        ? (queryError.response as { data?: { detail?: string } })?.data?.detail
+        : undefined;
+    error(message || 'Erreur lors du chargement des produits');
+  }
 
   const handleSearchChange = (value: string) => {
     setSearch(value);
@@ -74,94 +71,70 @@ export default function Dashboard() {
     setPage(1);
   };
 
-  const handleDelete = (id: number) => {
-    // Find the product to delete
-    const product = data?.items.find((p) => p.id === id);
-    if (!product) return;
+  const handleDelete = useCallback(
+    (id: number) => {
+      // Find the product to delete
+      const product = data?.items.find((p) => p.id === id);
+      if (!product) return;
 
-    // Show delete confirmation modal
-    setProductToDelete(product);
-    setShowDeleteModal(true);
-  };
+      // Show delete confirmation modal
+      setProductToDelete(product);
+      setShowDeleteModal(true);
+    },
+    [data]
+  );
 
-  const confirmDelete = async () => {
-    if (!productToDelete || !data) return;
+  const confirmDelete = useCallback(async () => {
+    if (!productToDelete) return;
 
     try {
-      setIsDeleting(true);
-
-      // Optimistic update: remove product from list immediately
-      const updatedItems = data.items.filter((p) => p.id !== productToDelete.id);
-      setData({
-        ...data,
-        items: updatedItems,
-        metadata: {
-          ...data.metadata,
-          total_items: data.metadata.total_items - 1,
-        },
-      });
-
       // Close modal immediately for better UX
       setShowDeleteModal(false);
+      const productId = productToDelete.id;
       setProductToDelete(null);
 
-      // Perform actual delete
-      await productsApi.delete(productToDelete.id);
+      // Perform delete with React Query mutation
+      await deleteMutation.mutateAsync(productId);
       success('Produit supprimé avec succès');
-
-      // Refresh list to get accurate data
-      fetchProducts();
     } catch (err: unknown) {
-      // If delete fails, revert optimistic update
       const message =
         err && typeof err === 'object' && 'response' in err
           ? (err.response as { data?: { detail?: string } })?.data?.detail
           : undefined;
       error(message || 'Erreur lors de la suppression du produit');
-
-      // Revert by fetching fresh data
-      fetchProducts();
-    } finally {
-      setIsDeleting(false);
     }
-  };
+  }, [productToDelete, deleteMutation, success, error]);
 
-  const cancelDelete = () => {
+  const cancelDelete = useCallback(() => {
     setShowDeleteModal(false);
     setProductToDelete(null);
-  };
+  }, []);
 
-  const handleCheckPrice = async (id: number) => {
-    // Find the product to get its full data
-    const product = data?.items.find((p) => p.id === id);
-    if (!product) return;
+  const handleCheckPrice = useCallback(
+    async (id: number) => {
+      // Find the product to get its full data
+      const product = data?.items.find((p) => p.id === id);
+      if (!product) return;
 
-    // Start checking and show info toast
-    startChecking(product);
-    info('Vérification du prix en cours...', undefined, 10000);
+      // Start checking and show info toast
+      startChecking(product);
+      info('Vérification du prix en cours...', undefined, 10000);
 
-    try {
-      const updatedProduct = await productsApi.checkPrice(id);
-
-      // Update the product in the list
-      if (data) {
-        setData({
-          ...data,
-          items: data.items.map((p) => (p.id === id ? updatedProduct : p)),
-        });
+      try {
+        await checkPriceMutation.mutateAsync(id);
+        success('Prix vérifié avec succès');
+      } catch (err: unknown) {
+        const message =
+          err && typeof err === 'object' && 'response' in err
+            ? (err.response as { data?: { detail?: string } })?.data?.detail
+            : undefined;
+        error(message || 'Erreur lors de la vérification du prix');
+      } finally {
+        finishChecking(id);
       }
-
-      success('Prix vérifié avec succès');
-    } catch (err: unknown) {
-      const message =
-        err && typeof err === 'object' && 'response' in err
-          ? (err.response as { data?: { detail?: string } })?.data?.detail
-          : undefined;
-      error(message || 'Erreur lors de la vérification du prix');
-    } finally {
-      finishChecking(id);
-    }
-  };
+    },
+    [data, startChecking, finishChecking, checkPriceMutation, success, error, info]
+  );
 
   return (
     <div>
@@ -190,7 +163,7 @@ export default function Dashboard() {
       )}
 
       {/* Loading State */}
-      {isLoading && !data && <LoadingState />}
+      {isLoading && <LoadingState />}
 
       {/* Empty State */}
       {!isLoading && data && data.items.length === 0 && (
@@ -244,13 +217,17 @@ export default function Dashboard() {
           )}
 
           <div className="flex gap-3 justify-end">
-            <Button variant="secondary" onClick={cancelDelete} disabled={isDeleting}>
+            <Button
+              variant="secondary"
+              onClick={cancelDelete}
+              disabled={deleteMutation.isPending}
+            >
               Annuler
             </Button>
             <Button
               variant="danger"
               onClick={confirmDelete}
-              isLoading={isDeleting}
+              isLoading={deleteMutation.isPending}
               leftIcon={<span className="material-symbols-outlined">delete</span>}
             >
               Supprimer
