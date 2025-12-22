@@ -6,12 +6,6 @@ export const CHECK_FREQUENCIES = [
   { value: 24, label: 'Toutes les 24 heures' },
 ] as const;
 
-export const NOTIFICATION_FREQUENCIES = [
-  { value: 'instant', label: 'Instantanée' },
-  { value: 'daily', label: 'Quotidienne' },
-  { value: 'weekly', label: 'Hebdomadaire' },
-] as const;
-
 export const WEBHOOK_TYPES = [
   { value: 'slack', label: 'Slack' },
   { value: 'discord', label: 'Discord' },

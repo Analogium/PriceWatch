@@ -5,10 +5,9 @@ import { preferencesApi } from '@/api';
 import type {
   UserPreferences,
   UserPreferencesUpdate,
-  NotificationFrequency,
   WebhookType,
 } from '@/types';
-import { NOTIFICATION_FREQUENCIES, WEBHOOK_TYPES } from '@/utils';
+import { WEBHOOK_TYPES } from '@/utils';
 import { useToast } from '@/contexts/ToastContext';
 
 type PreferencesFormData = Omit<UserPreferences, 'id' | 'user_id'>;
@@ -31,10 +30,8 @@ export default function Settings() {
       webhook_notifications: false,
       webhook_url: null,
       webhook_type: null,
-      notification_frequency: 'instant',
       price_drop_alerts: false,
       weekly_summary: false,
-      availability_alerts: false,
     },
   });
 
@@ -51,10 +48,8 @@ export default function Settings() {
         webhook_notifications: data.webhook_notifications,
         webhook_url: data.webhook_url,
         webhook_type: data.webhook_type,
-        notification_frequency: data.notification_frequency,
         price_drop_alerts: data.price_drop_alerts,
         weekly_summary: data.weekly_summary,
-        availability_alerts: data.availability_alerts,
       });
     } catch {
       info('Impossible de charger les préférences. Utilisation des valeurs par défaut.');
@@ -77,10 +72,8 @@ export default function Settings() {
         webhook_notifications: data.webhook_notifications,
         webhook_url: data.webhook_url || null,
         webhook_type: data.webhook_type || null,
-        notification_frequency: data.notification_frequency,
         price_drop_alerts: data.price_drop_alerts,
         weekly_summary: data.weekly_summary,
-        availability_alerts: data.availability_alerts,
       };
 
       let updatedPreferences: UserPreferences;
@@ -98,10 +91,8 @@ export default function Settings() {
         webhook_notifications: updatedPreferences.webhook_notifications,
         webhook_url: updatedPreferences.webhook_url,
         webhook_type: updatedPreferences.webhook_type,
-        notification_frequency: updatedPreferences.notification_frequency,
         price_drop_alerts: updatedPreferences.price_drop_alerts,
         weekly_summary: updatedPreferences.weekly_summary,
-        availability_alerts: updatedPreferences.availability_alerts,
       });
     } catch {
       error('Impossible de sauvegarder les préférences');
@@ -198,20 +189,6 @@ export default function Settings() {
                 />
 
                 <Controller
-                  name="availability_alerts"
-                  control={control}
-                  render={({ field }) => (
-                    <Toggle
-                      id="availability_alerts"
-                      checked={field.value}
-                      onChange={field.onChange}
-                      label="Alertes de disponibilité"
-                      description="Recevoir un email quand un produit devient disponible ou indisponible"
-                    />
-                  )}
-                />
-
-                <Controller
                   name="weekly_summary"
                   control={control}
                   render={({ field }) => (
@@ -221,22 +198,6 @@ export default function Settings() {
                       onChange={field.onChange}
                       label="Résumé hebdomadaire"
                       description="Recevoir un résumé hebdomadaire de vos produits suivis"
-                    />
-                  )}
-                />
-
-                <Controller
-                  name="notification_frequency"
-                  control={control}
-                  render={({ field }) => (
-                    <Select
-                      id="notification_frequency"
-                      label="Fréquence des notifications"
-                      helperText="Choisissez à quelle fréquence recevoir les notifications"
-                      leftIcon="schedule"
-                      options={NOTIFICATION_FREQUENCIES}
-                      value={field.value}
-                      onChange={(e) => field.onChange(e.target.value as NotificationFrequency)}
                     />
                   )}
                 />

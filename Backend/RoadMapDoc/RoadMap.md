@@ -260,8 +260,6 @@ Ce document trace l'état d'avancement du backend de PriceWatch, ce qui a été 
   - [x] Validation de l'URL de webhook (http/https requis)
   - [x] Gestion des erreurs webhook sans bloquer l'envoi d'email
   - [x] Tests unitaires pour les 3 formats de webhook
-- [ ] **Résumé hebdomadaire** (email récapitulatif des baisses de prix)
-  - Tâche Celery hebdomadaire
 
 #### 🔄 Optimisation des Tâches Planifiées
 - [x] **Configuration de fréquence par produit** (toutes les 6h, 12h, 24h) ✨ **NEW**
@@ -346,22 +344,18 @@ Ce document trace l'état d'avancement du backend de PriceWatch, ce qui a été 
 
 ### 🎯 Version 2.0 - Long terme (Priorité BASSE)
 
-#### 💳 Monétisation & Plans
-- [ ] **Modèle `Subscription`** (plan, statut, date d'expiration)
-- [ ] **Limitation par plan** :
-  - Free : 5 produits, vérif quotidienne
-  - Pro : 50 produits, vérif toutes les 6h
-  - Business : 500 produits, vérif personnalisée
-- [ ] **Intégration Stripe** pour paiements
-- [ ] **Webhook Stripe** pour mise à jour automatique du statut
-- [ ] **Rate limiting par utilisateur** selon le plan
-
 #### 🕷️ Scraping Avancé
 - [ ] **Gestion des CAPTCHAs** (délégation à service tiers)
 - [ ] **Proxies rotatifs** pour éviter les blocages IP
 - [ ] **User-Agent rotation**
 - [ ] **Cache des résultats de scraping** (éviter rescraper trop souvent)
 - [ ] **Circuit breaker** pour éviter de surcharger les sites
+
+#### Notifications par mail (préférences utilisateur)
+- [ ] **Notifications par mail** (email récapitulatif des baisses de prix)
+  - Tâche Celery hebdomadaire
+  - Tâche Celery quotidienne
+  - Tâche Celery instantanée
 
 #### 🔎 Fonctionnalités Avancées
 - [ ] **Comparaison de prix** entre plusieurs sites pour un même produit
@@ -383,6 +377,16 @@ Ce document trace l'état d'avancement du backend de PriceWatch, ce qui a été 
 - [ ] **Déploiement production** (AWS, GCP, DigitalOcean)
 - [ ] **Load balancing** pour haute disponibilité
 - [ ] **Versioning API** (v2, v3...)
+
+#### 💳 Monétisation & Plans
+- [ ] **Modèle `Subscription`** (plan, statut, date d'expiration)
+- [ ] **Limitation par plan** :
+  - Free : 5 produits, vérif quotidienne
+  - Pro : 50 produits, vérif toutes les 6h
+  - Business : 500 produits, vérif personnalisée
+- [ ] **Intégration Stripe** pour paiements
+- [ ] **Webhook Stripe** pour mise à jour automatique du statut
+- [ ] **Rate limiting par utilisateur** selon le plan
 
 ---
 
