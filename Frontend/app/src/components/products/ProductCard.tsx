@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { Link } from 'react-router-dom';
 import { usePriceCheck } from '@/contexts/PriceCheckContext';
 import type { Product } from '@/types';
@@ -8,7 +9,7 @@ interface ProductCardProps {
   onCheckPrice?: (id: number) => void;
 }
 
-export function ProductCard({ product, onDelete, onCheckPrice }: ProductCardProps) {
+export const ProductCard = memo(function ProductCard({ product, onDelete, onCheckPrice }: ProductCardProps) {
   const { isChecking } = usePriceCheck();
   const isPriceBelowTarget = product.current_price <= product.target_price;
   const priceColor = isPriceBelowTarget ? 'text-green-600' : 'text-gray-900';
@@ -137,4 +138,4 @@ export function ProductCard({ product, onDelete, onCheckPrice }: ProductCardProp
       </div>
     </div>
   );
-}
+});

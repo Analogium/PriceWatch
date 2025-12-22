@@ -1,5 +1,5 @@
 /* eslint-disable react-refresh/only-export-components */
-import { createContext, useContext, useState, useCallback, type ReactNode } from 'react';
+import { createContext, useContext, useState, useCallback, useMemo, type ReactNode } from 'react';
 import type { Product } from '@/types';
 
 interface PriceCheckItem {
@@ -48,13 +48,12 @@ export const PriceCheckProvider = ({ children }: { children: ReactNode }) => {
     setCheckingProducts((prev) => prev.filter((item) => item.productId !== productId));
   }, []);
 
-  return (
-    <PriceCheckContext.Provider
-      value={{ checkingProducts, isChecking, startChecking, finishChecking }}
-    >
-      {children}
-    </PriceCheckContext.Provider>
+  const value = useMemo(
+    () => ({ checkingProducts, isChecking, startChecking, finishChecking }),
+    [checkingProducts, isChecking, startChecking, finishChecking]
   );
+
+  return <PriceCheckContext.Provider value={value}>{children}</PriceCheckContext.Provider>;
 };
 
 export const usePriceCheck = () => {
