@@ -14,12 +14,7 @@ from unittest.mock import MagicMock, Mock, patch
 import pytest
 from redis import Redis
 
-from app.services.scraper_advanced import (
-    CircuitBreaker,
-    ProxyRotator,
-    ScraperCache,
-    UserAgentRotator,
-)
+from app.services.scraper_advanced import CircuitBreaker, ProxyRotator, ScraperCache, UserAgentRotator
 
 
 class TestUserAgentRotator:

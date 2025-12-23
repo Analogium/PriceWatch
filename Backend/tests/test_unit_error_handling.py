@@ -23,11 +23,15 @@ class TestRetryLogic:
         scraper = PriceScraper(max_retries=3, retry_delay=1, use_cache=False, use_circuit_breaker=False)
 
         # Mock session.get to raise timeout, then succeed
-        with patch.object(scraper.session, 'get', side_effect=[
+        with patch.object(
+            scraper.session,
+            "get",
+            side_effect=[
                 requests.exceptions.Timeout("Timeout 1"),
                 requests.exceptions.Timeout("Timeout 2"),
                 self._create_mock_response(200, self._create_amazon_html()),
-            ]) as mock_get:
+            ],
+        ) as mock_get:
 
             result = scraper.scrape_product("https://amazon.fr/product")
 
@@ -47,7 +51,7 @@ class TestRetryLogic:
         scraper = PriceScraper(max_retries=3, retry_delay=1, use_cache=False, use_circuit_breaker=False)
 
         # All attempts timeout
-        with patch.object(scraper.session, 'get', side_effect=requests.exceptions.Timeout("Timeout")) as mock_get:
+        with patch.object(scraper.session, "get", side_effect=requests.exceptions.Timeout("Timeout")) as mock_get:
             result = scraper.scrape_product("https://amazon.fr/product")
 
             # Should have made 3 attempts
@@ -65,7 +69,7 @@ class TestRetryLogic:
         mock_response.status_code = 404
         mock_response.raise_for_status.side_effect = requests.exceptions.HTTPError(response=mock_response)
 
-        with patch.object(scraper.session, 'get', return_value=mock_response) as mock_get:
+        with patch.object(scraper.session, "get", return_value=mock_response) as mock_get:
             with pytest.raises(ProductUnavailableError):
                 scraper.scrape_product("https://amazon.fr/product")
 
@@ -83,11 +87,15 @@ class TestRetryLogic:
 
         scraper = PriceScraper(max_retries=3, retry_delay=2, use_cache=False, use_circuit_breaker=False)
 
-        with patch.object(scraper.session, 'get', side_effect=[
+        with patch.object(
+            scraper.session,
+            "get",
+            side_effect=[
                 requests.exceptions.Timeout("Timeout 1"),
                 requests.exceptions.Timeout("Timeout 2"),
                 self._create_mock_response(200, self._create_amazon_html()),
-            ]):
+            ],
+        ):
 
             result = scraper.scrape_product("https://amazon.fr/product")
 
@@ -268,7 +276,7 @@ class TestLoggingIntegration:
         mock_headers.return_value = {"User-Agent": "Mozilla/5.0"}
         scraper = PriceScraper(max_retries=2, use_cache=False, use_circuit_breaker=False)
 
-        with patch.object(scraper.session, 'get', side_effect=requests.exceptions.Timeout("Timeout")):
+        with patch.object(scraper.session, "get", side_effect=requests.exceptions.Timeout("Timeout")):
             result = scraper.scrape_product("https://amazon.fr/product")
 
             # Check that warning logs were called for retries

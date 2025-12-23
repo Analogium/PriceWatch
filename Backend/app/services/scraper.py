@@ -10,12 +10,7 @@ from bs4 import BeautifulSoup
 from app.core.config import settings
 from app.core.logging_config import get_logger
 from app.schemas.product import ProductScrapedData
-from app.services.scraper_advanced import (
-    CircuitBreaker,
-    ProxyRotator,
-    ScraperCache,
-    UserAgentRotator,
-)
+from app.services.scraper_advanced import CircuitBreaker, ProxyRotator, ScraperCache, UserAgentRotator
 
 logger = get_logger(__name__)
 
@@ -105,9 +100,7 @@ class PriceScraper:
         self.cache = ScraperCache(default_ttl=cache_ttl) if self.use_cache else None
 
         self.use_circuit_breaker = (
-            use_circuit_breaker
-            if use_circuit_breaker is not None
-            else settings.SCRAPER_CIRCUIT_BREAKER_ENABLED
+            use_circuit_breaker if use_circuit_breaker is not None else settings.SCRAPER_CIRCUIT_BREAKER_ENABLED
         )
         self.circuit_breaker = (
             CircuitBreaker(
@@ -145,18 +138,17 @@ class PriceScraper:
         site = SiteDetector.detect_site(url) or "unknown"
 
         # Check cache first (unless bypassed)
-        if self.use_cache and not bypass_cache:
+        if self.use_cache and self.cache is not None and not bypass_cache:
             cached_data = self.cache.get(url)
             if cached_data:
                 logger.info(f"Returning cached result for {url}")
                 return ProductScrapedData(**cached_data)
 
         # Check circuit breaker
-        if self.use_circuit_breaker and not self.circuit_breaker.is_available(site):
-            logger.error(
-                f"Circuit breaker OPEN for '{site}' - skipping scrape for {url}"
-            )
-            return None
+        if self.use_circuit_breaker and self.circuit_breaker is not None:
+            if not self.circuit_breaker.is_available(site):
+                logger.error(f"Circuit breaker OPEN for '{site}' - skipping scrape for {url}")
+                return None
 
         last_exception = None
 
@@ -210,11 +202,11 @@ class PriceScraper:
                     logger.info(f"Successfully scraped {url}: {result.name} - €{result.price}")
 
                     # Record success for circuit breaker
-                    if self.use_circuit_breaker:
+                    if self.use_circuit_breaker and self.circuit_breaker is not None:
                         self.circuit_breaker.record_success(site)
 
                     # Cache the result
-                    if self.use_cache:
+                    if self.use_cache and self.cache is not None:
                         self.cache.set(url, result.model_dump())
 
                     return result
@@ -224,7 +216,7 @@ class PriceScraper:
                     last_exception = Exception(f"Failed to extract data from {url}")
 
                     # Record failure for circuit breaker
-                    if self.use_circuit_breaker:
+                    if self.use_circuit_breaker and self.circuit_breaker is not None:
                         self.circuit_breaker.record_failure(site)
 
                     continue
@@ -237,7 +229,7 @@ class PriceScraper:
                 last_exception = e
                 logger.warning(f"Timeout on attempt {attempt} for {url}: {str(e)}")
                 # Record failure for circuit breaker
-                if self.use_circuit_breaker:
+                if self.use_circuit_breaker and self.circuit_breaker is not None:
                     self.circuit_breaker.record_failure(site)
 
             except requests.exceptions.HTTPError as e:
@@ -259,14 +251,14 @@ class PriceScraper:
                         time.sleep(wait_time)
 
                 # Record failure for circuit breaker
-                if self.use_circuit_breaker:
+                if self.use_circuit_breaker and self.circuit_breaker is not None:
                     self.circuit_breaker.record_failure(site)
 
             except Exception as e:
                 last_exception = e
                 logger.warning(f"Error on attempt {attempt} for {url}: {str(e)}")
                 # Record failure for circuit breaker
-                if self.use_circuit_breaker:
+                if self.use_circuit_breaker and self.circuit_breaker is not None:
                     self.circuit_breaker.record_failure(site)
 
             # Wait before retry (exponential backoff)

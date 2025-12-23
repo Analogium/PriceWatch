@@ -5,10 +5,8 @@ Advanced scraping utilities: User-Agent rotation, caching, circuit breaker, and 
 import hashlib
 import json
 import random
-import time
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional
-from urllib.parse import urlparse
 
 from redis import Redis
 
@@ -107,9 +105,12 @@ class ScraperCache:
             redis_client: Redis client instance (if None, will create from settings)
             default_ttl: Default cache TTL in seconds (default: 1 hour)
         """
-        self.redis_client = redis_client or Redis.from_url(
-            settings.REDIS_URL, decode_responses=True
-        )
+        if redis_client is not None:
+            self.redis_client: Redis = redis_client
+        else:
+            self.redis_client = Redis.from_url(  # type: ignore[assignment,no-redef]
+                settings.REDIS_URL, decode_responses=True
+            )
         self.default_ttl = default_ttl
         self.key_prefix = "scraper_cache:"
         logger.info(f"ScraperCache initialized with TTL={default_ttl}s")
@@ -144,7 +145,8 @@ class ScraperCache:
 
             if cached_data:
                 logger.info(f"Cache HIT for URL: {url[:60]}...")
-                return json.loads(cached_data)
+                # Redis decode_responses=True ensures cached_data is str
+                return json.loads(str(cached_data))
             else:
                 logger.debug(f"Cache MISS for URL: {url[:60]}...")
                 return None
@@ -153,9 +155,7 @@ class ScraperCache:
             logger.error(f"Error reading from cache: {str(e)}")
             return None
 
-    def set(
-        self, url: str, data: Dict[str, Any], ttl: Optional[int] = None
-    ) -> bool:
+    def set(self, url: str, data: Dict[str, Any], ttl: Optional[int] = None) -> bool:
         """
         Cache scraping result for a URL.
 
@@ -177,9 +177,7 @@ class ScraperCache:
                 "cached_at": datetime.utcnow().isoformat(),
             }
 
-            self.redis_client.setex(
-                cache_key, ttl, json.dumps(data_with_meta)
-            )
+            self.redis_client.setex(cache_key, ttl, json.dumps(data_with_meta))
             logger.info(f"Cached result for URL (TTL={ttl}s): {url[:60]}...")
             return True
 
@@ -219,9 +217,10 @@ class ScraperCache:
             pattern = f"{self.key_prefix}*"
             keys = list(self.redis_client.scan_iter(match=pattern))
             if keys:
-                deleted = self.redis_client.delete(*keys)
-                logger.info(f"Cleared {deleted} cache entries")
-                return deleted
+                deleted = self.redis_client.delete(*keys)  # type: ignore[arg-type]
+                deleted_count = int(deleted)  # type: ignore[arg-type]
+                logger.info(f"Cleared {deleted_count} cache entries")
+                return deleted_count
             return 0
 
         except Exception as e:
@@ -259,9 +258,12 @@ class CircuitBreaker:
             recovery_timeout: Seconds to wait before attempting recovery
             success_threshold: Consecutive successes needed to close circuit from half-open
         """
-        self.redis_client = redis_client or Redis.from_url(
-            settings.REDIS_URL, decode_responses=True
-        )
+        if redis_client is not None:
+            self.redis_client: Redis = redis_client
+        else:
+            self.redis_client = Redis.from_url(  # type: ignore[assignment,no-redef]
+                settings.REDIS_URL, decode_responses=True
+            )
         self.failure_threshold = failure_threshold
         self.recovery_timeout = recovery_timeout
         self.success_threshold = success_threshold
@@ -299,7 +301,7 @@ class CircuitBreaker:
         """
         try:
             state = self.redis_client.get(self._get_state_key(site))
-            return state or self.STATE_CLOSED
+            return str(state) if state else self.STATE_CLOSED
         except Exception as e:
             logger.error(f"Error getting circuit state: {str(e)}")
             return self.STATE_CLOSED
@@ -322,29 +324,19 @@ class CircuitBreaker:
         if state == self.STATE_OPEN:
             # Check if recovery timeout has passed
             try:
-                last_failure_ts = self.redis_client.get(
-                    self._get_last_failure_key(site)
-                )
+                last_failure_ts = self.redis_client.get(self._get_last_failure_key(site))
                 if last_failure_ts:
-                    last_failure = datetime.fromisoformat(last_failure_ts)
-                    if datetime.utcnow() >= last_failure + timedelta(
-                        seconds=self.recovery_timeout
-                    ):
+                    last_failure = datetime.fromisoformat(str(last_failure_ts))
+                    if datetime.utcnow() >= last_failure + timedelta(seconds=self.recovery_timeout):
                         # Move to half-open state
-                        logger.info(
-                            f"Circuit for '{site}' moving to HALF_OPEN state (recovery attempt)"
-                        )
-                        self.redis_client.set(
-                            self._get_state_key(site), self.STATE_HALF_OPEN
-                        )
+                        logger.info(f"Circuit for '{site}' moving to HALF_OPEN state (recovery attempt)")
+                        self.redis_client.set(self._get_state_key(site), self.STATE_HALF_OPEN)
                         self.redis_client.set(self._get_success_key(site), 0)
                         return True
             except Exception as e:
                 logger.error(f"Error checking recovery timeout: {str(e)}")
 
-            logger.warning(
-                f"Circuit OPEN for '{site}' - requests blocked (recovery in {self.recovery_timeout}s)"
-            )
+            logger.warning(f"Circuit OPEN for '{site}' - requests blocked (recovery in {self.recovery_timeout}s)")
             return False
 
         # HALF_OPEN state - allow limited requests
@@ -362,17 +354,13 @@ class CircuitBreaker:
 
             if state == self.STATE_HALF_OPEN:
                 # Increment success counter
-                successes = self.redis_client.incr(self._get_success_key(site))
-                logger.info(
-                    f"Circuit HALF_OPEN for '{site}': {successes}/{self.success_threshold} successes"
-                )
+                successes = int(self.redis_client.incr(self._get_success_key(site)))  # type: ignore[arg-type]
+                logger.info(f"Circuit HALF_OPEN for '{site}': {successes}/{self.success_threshold} successes")
 
                 if successes >= self.success_threshold:
                     # Close circuit - service recovered
                     logger.info(f"Circuit CLOSED for '{site}' - service recovered")
-                    self.redis_client.set(
-                        self._get_state_key(site), self.STATE_CLOSED
-                    )
+                    self.redis_client.set(self._get_state_key(site), self.STATE_CLOSED)
                     self.redis_client.delete(self._get_failure_key(site))
                     self.redis_client.delete(self._get_success_key(site))
                     self.redis_client.delete(self._get_last_failure_key(site))
@@ -395,15 +383,13 @@ class CircuitBreaker:
             state = self.get_state(site)
 
             # Increment failure counter
-            failures = self.redis_client.incr(self._get_failure_key(site))
+            failures = int(self.redis_client.incr(self._get_failure_key(site)))  # type: ignore[arg-type]
             self.redis_client.set(
                 self._get_last_failure_key(site),
                 datetime.utcnow().isoformat(),
             )
 
-            logger.warning(
-                f"Circuit failure for '{site}': {failures}/{self.failure_threshold}"
-            )
+            logger.warning(f"Circuit failure for '{site}': {failures}/{self.failure_threshold}")
 
             if state == self.STATE_HALF_OPEN:
                 # Immediate open on failure during recovery
@@ -413,9 +399,7 @@ class CircuitBreaker:
 
             elif failures >= self.failure_threshold:
                 # Open circuit
-                logger.warning(
-                    f"Circuit OPEN for '{site}' - threshold reached ({failures} failures)"
-                )
+                logger.warning(f"Circuit OPEN for '{site}' - threshold reached ({failures} failures)")
                 self.redis_client.set(self._get_state_key(site), self.STATE_OPEN)
 
         except Exception as e:
