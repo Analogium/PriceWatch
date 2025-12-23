@@ -7,8 +7,10 @@ from urllib.parse import urlparse
 import requests
 from bs4 import BeautifulSoup
 
+from app.core.config import settings
 from app.core.logging_config import get_logger
 from app.schemas.product import ProductScrapedData
+from app.services.scraper_advanced import CircuitBreaker, ProxyRotator, ScraperCache, UserAgentRotator
 
 logger = get_logger(__name__)
 
@@ -68,40 +70,63 @@ class SiteDetector:
 class PriceScraper:
     """Service for scraping product information from e-commerce websites."""
 
-    def __init__(self, max_retries: int = 3, retry_delay: int = 2):
+    def __init__(
+        self,
+        max_retries: int = 3,
+        retry_delay: int = 2,
+        use_cache: Optional[bool] = None,
+        cache_ttl: Optional[int] = None,
+        use_circuit_breaker: Optional[bool] = None,
+        use_proxy: Optional[bool] = None,
+    ):
         """
-        Initialize scraper with retry logic.
+        Initialize scraper with retry logic and advanced features.
 
         Args:
             max_retries: Maximum number of retry attempts
             retry_delay: Delay in seconds between retries
+            use_cache: Enable Redis caching (default: from settings)
+            cache_ttl: Cache TTL in seconds (default: from settings)
+            use_circuit_breaker: Enable circuit breaker (default: from settings)
+            use_proxy: Enable proxy rotation (default: from settings)
         """
-        self.headers = {
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8",
-            "Accept-Language": "fr-FR,fr;q=0.9,en-US;q=0.8,en;q=0.7",
-            "Accept-Encoding": "gzip, deflate, br",
-            "DNT": "1",
-            "Connection": "keep-alive",
-            "Upgrade-Insecure-Requests": "1",
-            "Sec-Fetch-Dest": "document",
-            "Sec-Fetch-Mode": "navigate",
-            "Sec-Fetch-Site": "none",
-            "Sec-Fetch-User": "?1",
-            "Cache-Control": "max-age=0",
-        }
         self.max_retries = max_retries
         self.retry_delay = retry_delay
         self.session = requests.Session()
-        self.session.headers.update(self.headers)
 
-    def scrape_product(self, url: str) -> Optional[ProductScrapedData]:
+        # Initialize advanced features (use settings as defaults)
+        self.use_cache = use_cache if use_cache is not None else settings.SCRAPER_CACHE_ENABLED
+        cache_ttl = cache_ttl or settings.SCRAPER_CACHE_TTL
+        self.cache = ScraperCache(default_ttl=cache_ttl) if self.use_cache else None
+
+        self.use_circuit_breaker = (
+            use_circuit_breaker if use_circuit_breaker is not None else settings.SCRAPER_CIRCUIT_BREAKER_ENABLED
+        )
+        self.circuit_breaker = (
+            CircuitBreaker(
+                failure_threshold=settings.SCRAPER_CIRCUIT_BREAKER_THRESHOLD,
+                recovery_timeout=settings.SCRAPER_CIRCUIT_BREAKER_TIMEOUT,
+            )
+            if self.use_circuit_breaker
+            else None
+        )
+
+        self.use_proxy = use_proxy if use_proxy is not None else settings.SCRAPER_PROXY_ENABLED
+        self.proxy_rotator = ProxyRotator() if self.use_proxy else None
+
+        logger.info(
+            f"PriceScraper initialized (cache={self.use_cache}, "
+            f"circuit_breaker={self.use_circuit_breaker}, proxy={self.use_proxy})"
+        )
+
+    def scrape_product(self, url: str, bypass_cache: bool = False) -> Optional[ProductScrapedData]:
         """
-        Scrape product information from a URL with retry logic.
+        Scrape product information from a URL with retry logic and advanced features.
         Supports Amazon, Fnac, Darty and other common e-commerce sites.
 
         Args:
             url: Product URL to scrape
+            bypass_cache: If True, skip cache lookup and force fresh scrape
 
         Returns:
             ProductScrapedData if successful, None otherwise
@@ -109,6 +134,22 @@ class PriceScraper:
         Raises:
             ProductUnavailableError: If product is no longer available
         """
+        # Detect site for circuit breaker
+        site = SiteDetector.detect_site(url) or "unknown"
+
+        # Check cache first (unless bypassed)
+        if self.use_cache and self.cache is not None and not bypass_cache:
+            cached_data = self.cache.get(url)
+            if cached_data:
+                logger.info(f"Returning cached result for {url}")
+                return ProductScrapedData(**cached_data)
+
+        # Check circuit breaker
+        if self.use_circuit_breaker and self.circuit_breaker is not None:
+            if not self.circuit_breaker.is_available(site):
+                logger.error(f"Circuit breaker OPEN for '{site}' - skipping scrape for {url}")
+                return None
+
         last_exception = None
 
         for attempt in range(1, self.max_retries + 1):
@@ -120,7 +161,17 @@ class PriceScraper:
                     delay = random.uniform(1.0, 3.0)
                     time.sleep(delay)
 
-                response = self.session.get(url, timeout=15)
+                # Rotate User-Agent on each attempt
+                headers = UserAgentRotator.get_headers()
+
+                # Get proxy if enabled
+                proxies = None
+                if self.use_proxy and self.proxy_rotator:
+                    proxies = self.proxy_rotator.get_proxies_dict(random_selection=True)
+                    if proxies:
+                        logger.debug(f"Using proxy for request (attempt {attempt})")
+
+                response = self.session.get(url, headers=headers, proxies=proxies, timeout=15)
                 response.raise_for_status()
                 soup = BeautifulSoup(response.content, "html.parser")
 
@@ -129,9 +180,7 @@ class PriceScraper:
                     logger.warning(f"Product unavailable at URL: {url}")
                     raise ProductUnavailableError(f"Product is no longer available: {url}")
 
-                # Detect site automatically and use appropriate scraping strategy
-                site = SiteDetector.detect_site(url)
-
+                # Use appropriate scraping strategy based on site
                 if site == "amazon":
                     result = self._scrape_amazon(soup)
                 elif site == "fnac":
@@ -151,11 +200,25 @@ class PriceScraper:
 
                 if result:
                     logger.info(f"Successfully scraped {url}: {result.name} - €{result.price}")
+
+                    # Record success for circuit breaker
+                    if self.use_circuit_breaker and self.circuit_breaker is not None:
+                        self.circuit_breaker.record_success(site)
+
+                    # Cache the result
+                    if self.use_cache and self.cache is not None:
+                        self.cache.set(url, result.model_dump())
+
                     return result
                 else:
                     logger.warning(f"Failed to extract product data from {url}")
                     # For sites that might need JavaScript rendering, mark as extraction failure
                     last_exception = Exception(f"Failed to extract data from {url}")
+
+                    # Record failure for circuit breaker
+                    if self.use_circuit_breaker and self.circuit_breaker is not None:
+                        self.circuit_breaker.record_failure(site)
+
                     continue
 
             except ProductUnavailableError:
@@ -165,6 +228,9 @@ class PriceScraper:
             except requests.exceptions.Timeout as e:
                 last_exception = e
                 logger.warning(f"Timeout on attempt {attempt} for {url}: {str(e)}")
+                # Record failure for circuit breaker
+                if self.use_circuit_breaker and self.circuit_breaker is not None:
+                    self.circuit_breaker.record_failure(site)
 
             except requests.exceptions.HTTPError as e:
                 last_exception = e
@@ -184,9 +250,16 @@ class PriceScraper:
                         logger.info(f"Waiting {wait_time}s before retry (anti-bot delay)...")
                         time.sleep(wait_time)
 
+                # Record failure for circuit breaker
+                if self.use_circuit_breaker and self.circuit_breaker is not None:
+                    self.circuit_breaker.record_failure(site)
+
             except Exception as e:
                 last_exception = e
                 logger.warning(f"Error on attempt {attempt} for {url}: {str(e)}")
+                # Record failure for circuit breaker
+                if self.use_circuit_breaker and self.circuit_breaker is not None:
+                    self.circuit_breaker.record_failure(site)
 
             # Wait before retry (exponential backoff)
             if attempt < self.max_retries:

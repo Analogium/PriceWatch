@@ -9,10 +9,8 @@ class UserPreferencesBase(BaseModel):
     email_notifications: bool = True
     webhook_notifications: bool = False
     webhook_url: Optional[str] = None
-    notification_frequency: Literal["instant", "daily", "weekly"] = "instant"
     price_drop_alerts: bool = True
     weekly_summary: bool = False
-    availability_alerts: bool = True
     webhook_type: Optional[Literal["slack", "discord", "custom"]] = None
 
 
@@ -28,10 +26,8 @@ class UserPreferencesUpdate(BaseModel):
     email_notifications: Optional[bool] = None
     webhook_notifications: Optional[bool] = None
     webhook_url: Optional[str] = None
-    notification_frequency: Optional[Literal["instant", "daily", "weekly"]] = None
     price_drop_alerts: Optional[bool] = None
     weekly_summary: Optional[bool] = None
-    availability_alerts: Optional[bool] = None
     webhook_type: Optional[Literal["slack", "discord", "custom"]] = None
 
     @field_validator("webhook_url")

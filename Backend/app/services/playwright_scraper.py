@@ -192,7 +192,33 @@ class PlaywrightScraper:
                             # Try without decimals
                             match = re.search(r"(\d+)", price_text)
                             if match:
-                                price = float(match.group(1))
+                                # Found integer part, try to find fraction separately
+                                integer_part = match.group(1)
+
+                                # Try to find decimal part in adjacent elements
+                                decimal_part = None
+                                fraction_selectors = [
+                                    ".a-price-fraction",
+                                    'span[class*="price-fraction"]',
+                                ]
+                                for frac_selector in fraction_selectors:
+                                    try:
+                                        frac_elem = await page.query_selector(frac_selector)
+                                        if frac_elem:
+                                            frac_text = await frac_elem.inner_text()
+                                            frac_text = frac_text.strip()
+                                            frac_match = re.search(r"(\d+)", frac_text)
+                                            if frac_match:
+                                                decimal_part = frac_match.group(1)
+                                                break
+                                    except Exception:
+                                        continue
+
+                                # Construct final price
+                                if decimal_part:
+                                    price = float(f"{integer_part}.{decimal_part}")
+                                else:
+                                    price = float(integer_part)
                                 break
                 except Exception:
                     continue

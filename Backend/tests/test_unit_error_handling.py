@@ -15,83 +15,94 @@ from app.services.scraper import PriceScraper, ProductUnavailableError
 class TestRetryLogic:
     """Test retry logic in scraper."""
 
+    @patch("app.services.scraper_advanced.UserAgentRotator.get_headers")
     @patch("app.services.scraper.time.sleep")
-    def test_retry_on_timeout(self, mock_sleep):
+    def test_retry_on_timeout(self, mock_sleep, mock_headers):
         """Test that scraper retries on timeout."""
-        scraper = PriceScraper(max_retries=3, retry_delay=1)
+        mock_headers.return_value = {"User-Agent": "Mozilla/5.0"}
+        scraper = PriceScraper(max_retries=3, retry_delay=1, use_cache=False, use_circuit_breaker=False)
 
         # Mock session.get to raise timeout, then succeed
-        scraper.session.get = Mock(
+        with patch.object(
+            scraper.session,
+            "get",
             side_effect=[
                 requests.exceptions.Timeout("Timeout 1"),
                 requests.exceptions.Timeout("Timeout 2"),
                 self._create_mock_response(200, self._create_amazon_html()),
-            ]
-        )
+            ],
+        ) as mock_get:
 
-        result = scraper.scrape_product("https://amazon.fr/product")
+            result = scraper.scrape_product("https://amazon.fr/product")
 
-        # Should have made 3 attempts
-        assert scraper.session.get.call_count == 3
-        # Should have slept at least twice (random delay + retry delay after failures)
-        assert mock_sleep.call_count >= 2
-        # Should succeed on third attempt
-        assert result is not None
-        assert result.name == "Test Product"
+            # Should have made 3 attempts
+            assert mock_get.call_count == 3
+            # Should have slept at least twice (random delay + retry delay after failures)
+            assert mock_sleep.call_count >= 2
+            # Should succeed on third attempt
+            assert result is not None
+            assert result.name == "Test Product"
 
+    @patch("app.services.scraper_advanced.UserAgentRotator.get_headers")
     @patch("app.services.scraper.time.sleep")
-    def test_retry_exhaustion(self, mock_sleep):
+    def test_retry_exhaustion(self, mock_sleep, mock_headers):
         """Test that scraper gives up after max retries."""
-        scraper = PriceScraper(max_retries=3, retry_delay=1)
+        mock_headers.return_value = {"User-Agent": "Mozilla/5.0"}
+        scraper = PriceScraper(max_retries=3, retry_delay=1, use_cache=False, use_circuit_breaker=False)
 
         # All attempts timeout
-        scraper.session.get = Mock(side_effect=requests.exceptions.Timeout("Timeout"))
+        with patch.object(scraper.session, "get", side_effect=requests.exceptions.Timeout("Timeout")) as mock_get:
+            result = scraper.scrape_product("https://amazon.fr/product")
 
-        result = scraper.scrape_product("https://amazon.fr/product")
+            # Should have made 3 attempts
+            assert mock_get.call_count == 3
+            # Should return None after exhausting retries
+            assert result is None
 
-        # Should have made 3 attempts
-        assert scraper.session.get.call_count == 3
-        # Should return None after exhausting retries
-        assert result is None
-
-    def test_no_retry_on_404(self):
+    @patch("app.services.scraper_advanced.UserAgentRotator.get_headers")
+    def test_no_retry_on_404(self, mock_headers):
         """Test that scraper doesn't retry on 404 errors."""
-        scraper = PriceScraper(max_retries=3, retry_delay=1)
+        mock_headers.return_value = {"User-Agent": "Mozilla/5.0"}
+        scraper = PriceScraper(max_retries=3, retry_delay=1, use_cache=False, use_circuit_breaker=False)
 
         mock_response = Mock()
         mock_response.status_code = 404
         mock_response.raise_for_status.side_effect = requests.exceptions.HTTPError(response=mock_response)
-        scraper.session.get = Mock(return_value=mock_response)
 
-        with pytest.raises(ProductUnavailableError):
-            scraper.scrape_product("https://amazon.fr/product")
+        with patch.object(scraper.session, "get", return_value=mock_response) as mock_get:
+            with pytest.raises(ProductUnavailableError):
+                scraper.scrape_product("https://amazon.fr/product")
 
-        # Should only attempt once (no retry on 404)
-        assert scraper.session.get.call_count == 1
+            # Should only attempt once (no retry on 404)
+            assert mock_get.call_count == 1
 
+    @patch("app.services.scraper_advanced.UserAgentRotator.get_headers")
     @patch("app.services.scraper.time.sleep")
     @patch("app.services.scraper.random.uniform")
-    def test_exponential_backoff(self, mock_uniform, mock_sleep):
+    def test_exponential_backoff(self, mock_uniform, mock_sleep, mock_headers):
         """Test that retry mechanism includes delays."""
+        mock_headers.return_value = {"User-Agent": "Mozilla/5.0"}
         # Mock random.uniform to return fixed value for predictable testing
         mock_uniform.return_value = 1.5
 
-        scraper = PriceScraper(max_retries=3, retry_delay=2)
+        scraper = PriceScraper(max_retries=3, retry_delay=2, use_cache=False, use_circuit_breaker=False)
 
-        scraper.session.get = Mock(
+        with patch.object(
+            scraper.session,
+            "get",
             side_effect=[
                 requests.exceptions.Timeout("Timeout 1"),
                 requests.exceptions.Timeout("Timeout 2"),
                 self._create_mock_response(200, self._create_amazon_html()),
-            ]
-        )
+            ],
+        ):
 
-        result = scraper.scrape_product("https://amazon.fr/product")
+            result = scraper.scrape_product("https://amazon.fr/product")
 
-        # Check that sleep was called multiple times (for random delays between retries)
-        assert mock_sleep.call_count >= 2
-        # Verify we eventually succeeded
-        assert result is not None
+            # Check that sleep was called multiple times (for random delays between retries)
+            assert mock_sleep.call_count >= 2
+            # Verify we eventually succeeded
+            assert result is not None
 
     @staticmethod
     def _create_mock_response(status_code, html_content):
@@ -258,19 +269,21 @@ class TestLoggingIntegration:
         assert mock_logger.info.called
         assert result is not None
 
+    @patch("app.services.scraper_advanced.UserAgentRotator.get_headers")
     @patch("app.services.scraper.logger")
-    def test_logging_on_failure(self, mock_logger):
+    def test_logging_on_failure(self, mock_logger, mock_headers):
         """Test that failures are logged."""
-        scraper = PriceScraper(max_retries=2)
-        scraper.session.get = Mock(side_effect=requests.exceptions.Timeout("Timeout"))
+        mock_headers.return_value = {"User-Agent": "Mozilla/5.0"}
+        scraper = PriceScraper(max_retries=2, use_cache=False, use_circuit_breaker=False)
 
-        result = scraper.scrape_product("https://amazon.fr/product")
+        with patch.object(scraper.session, "get", side_effect=requests.exceptions.Timeout("Timeout")):
+            result = scraper.scrape_product("https://amazon.fr/product")
 
-        # Check that warning logs were called for retries
-        assert mock_logger.warning.called
-        # Check that error log was called for final failure
-        assert mock_logger.error.called
-        assert result is None
+            # Check that warning logs were called for retries
+            assert mock_logger.warning.called
+            # Check that error log was called for final failure
+            assert mock_logger.error.called
+            assert result is None
 
     @patch("app.services.scraper.logger")
     def test_logging_unavailability(self, mock_logger):

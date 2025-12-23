@@ -47,6 +47,15 @@ class Settings(BaseSettings):
     MAX_PARALLEL_SCRAPERS: int = 5  # Maximum number of concurrent scrapers
     SCRAPING_BATCH_SIZE: int = 10  # Number of products to scrape in parallel batches
 
+    # Scraping Advanced Features
+    SCRAPER_CACHE_ENABLED: bool = True  # Enable Redis cache for scraping results
+    SCRAPER_CACHE_TTL: int = 3600  # Cache TTL in seconds (default: 1 hour)
+    SCRAPER_CIRCUIT_BREAKER_ENABLED: bool = True  # Enable circuit breaker pattern
+    SCRAPER_CIRCUIT_BREAKER_THRESHOLD: int = 5  # Failures before opening circuit
+    SCRAPER_CIRCUIT_BREAKER_TIMEOUT: int = 60  # Seconds before attempting recovery
+    SCRAPER_PROXY_ENABLED: bool = False  # Enable proxy rotation
+    PROXY_LIST: str = ""  # Comma or newline-separated list of proxy URLs
+
     # Sentry Error Monitoring
     SENTRY_DSN: Optional[str] = None
     SENTRY_ENVIRONMENT: str = "development"

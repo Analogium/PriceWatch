@@ -20,14 +20,9 @@ class UserPreferences(Base):
     webhook_notifications: Mapped[bool] = mapped_column(default=False)
     webhook_url: Mapped[Optional[str]] = mapped_column(String, nullable=True)  # For Slack, Discord, etc.
 
-    # Notification frequency
-    # Options: "instant", "daily", "weekly"
-    notification_frequency: Mapped[str] = mapped_column(String, default="instant")
-
     # Email preferences
     price_drop_alerts: Mapped[bool] = mapped_column(default=True)
     weekly_summary: Mapped[bool] = mapped_column(default=False)
-    availability_alerts: Mapped[bool] = mapped_column(default=True)
 
     # Webhook type (for future extension)
     # Options: "slack", "discord", "custom"

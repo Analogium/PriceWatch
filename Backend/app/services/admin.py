@@ -254,12 +254,10 @@ class AdminService:
             output.write("=== PREFERENCES ===\n")
             prefs = db.query(UserPreferences).filter(UserPreferences.user_id == user_id).first()
             if prefs:
-                output.write(
-                    "Email Notifications,Webhook Notifications,Price Drop Alerts,Weekly Summary,Availability Alerts\n"
-                )
+                output.write("Email Notifications,Webhook Notifications,Price Drop Alerts,Weekly Summary\n")
                 output.write(
                     f"{prefs.email_notifications},{prefs.webhook_notifications},"
-                    f"{prefs.price_drop_alerts},{prefs.weekly_summary},{prefs.availability_alerts}\n"
+                    f"{prefs.price_drop_alerts},{prefs.weekly_summary}\n"
                 )
             output.write("\n")
 
@@ -329,8 +327,6 @@ class AdminService:
                     "webhook_notifications": prefs.webhook_notifications,
                     "price_drop_alerts": prefs.price_drop_alerts,
                     "weekly_summary": prefs.weekly_summary,
-                    "availability_alerts": prefs.availability_alerts,
-                    "notification_frequency": prefs.notification_frequency,
                     "webhook_url": prefs.webhook_url,
                     "webhook_type": prefs.webhook_type,
                 }
