@@ -28,19 +28,15 @@ class TestUserPreferencesModel:
             user_id=1,
             email_notifications=True,
             webhook_notifications=False,
-            notification_frequency="instant",
             price_drop_alerts=True,
             weekly_summary=False,
-            availability_alerts=True,
         )
 
         assert preferences.user_id == 1
         assert preferences.email_notifications is True
         assert preferences.webhook_notifications is False
-        assert preferences.notification_frequency == "instant"
         assert preferences.price_drop_alerts is True
         assert preferences.weekly_summary is False
-        assert preferences.availability_alerts is True
 
     @pytest.mark.unit
     def test_user_preferences_defaults(self):
@@ -51,18 +47,14 @@ class TestUserPreferencesModel:
             user_id=1,
             email_notifications=True,
             webhook_notifications=False,
-            notification_frequency="instant",
             price_drop_alerts=True,
             weekly_summary=False,
-            availability_alerts=True,
         )
 
         assert preferences.email_notifications is True
         assert preferences.webhook_notifications is False
-        assert preferences.notification_frequency == "instant"
         assert preferences.price_drop_alerts is True
         assert preferences.weekly_summary is False
-        assert preferences.availability_alerts is True
 
 
 class TestUserPreferencesSchemas:
@@ -75,10 +67,8 @@ class TestUserPreferencesSchemas:
             "email_notifications": True,
             "webhook_notifications": True,
             "webhook_url": "https://hooks.slack.com/test",
-            "notification_frequency": "daily",
             "price_drop_alerts": True,
             "weekly_summary": True,
-            "availability_alerts": True,
             "webhook_type": "slack",
         }
         schema = UserPreferencesCreate(**data)
@@ -86,17 +76,18 @@ class TestUserPreferencesSchemas:
         assert schema.email_notifications is True
         assert schema.webhook_notifications is True
         assert schema.webhook_url == "https://hooks.slack.com/test"
-        assert schema.notification_frequency == "daily"
+        assert schema.price_drop_alerts is True
+        assert schema.weekly_summary is True
         assert schema.webhook_type == "slack"
 
     @pytest.mark.unit
     def test_preferences_update_schema(self):
         """Test updating preferences with partial data."""
-        data = {"email_notifications": False, "notification_frequency": "weekly"}
+        data = {"email_notifications": False, "weekly_summary": True}
         schema = UserPreferencesUpdate(**data)
 
         assert schema.email_notifications is False
-        assert schema.notification_frequency == "weekly"
+        assert schema.weekly_summary is True
         assert schema.webhook_notifications is None  # Not provided
 
     @pytest.mark.unit
@@ -113,17 +104,17 @@ class TestUserPreferencesSchemas:
             schema = UserPreferencesUpdate(**invalid_data)
 
     @pytest.mark.unit
-    def test_notification_frequency_validation(self):
-        """Test notification frequency literal validation."""
-        # Valid frequencies
-        for freq in ["instant", "daily", "weekly"]:
-            data = {"notification_frequency": freq}
+    def test_webhook_type_validation(self):
+        """Test webhook type literal validation."""
+        # Valid webhook types
+        for webhook_type in ["slack", "discord", "custom"]:
+            data = {"webhook_type": webhook_type}
             schema = UserPreferencesCreate(**data)
-            assert schema.notification_frequency == freq
+            assert schema.webhook_type == webhook_type
 
-        # Invalid frequency should raise validation error
+        # Invalid webhook type should raise validation error
         with pytest.raises(ValueError):
-            data = {"notification_frequency": "hourly"}  # Not in allowed values
+            data = {"webhook_type": "teams"}  # Not in allowed values
             UserPreferencesCreate(**data)
 
 

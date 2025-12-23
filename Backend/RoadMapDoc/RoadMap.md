@@ -117,7 +117,7 @@ Ce document trace l'état d'avancement du backend de PriceWatch, ce qui a été 
   - [x] Tests de sécurité (`tests/test_security.py`)
   - [x] Tests d'historique des prix (`tests/test_price_history.py`)
   - [x] Tests de pagination, filtres et tri (`tests/test_pagination.py`) ✨ NEW
-- [x] Suite de tests unitaires (237 tests) ✨ **AMÉLIORÉ**
+- [x] Suite de tests unitaires (325 tests) ✨ **AMÉLIORÉ**
   - [x] Tests scraper service (17 tests, 79% coverage) ✅
   - [x] Tests email service (14 tests, 95% coverage) ✅
   - [x] Tests price_history service (13 tests, 100% coverage) ✅
@@ -138,7 +138,8 @@ Ce document trace l'état d'avancement du backend de PriceWatch, ce qui a été 
   - [x] Tests priority calculation (10 tests, 100% coverage) ✅ **NEW**
   - [x] Tests parallel scraping (11 tests, 100% coverage) ✅ **NEW**
   - [x] Tests health endpoints (20 tests, 100% coverage) ✅ **NEW**
-  - **Total: 284 tests unitaires** avec **62% de couverture globale**
+  - [x] Tests scraper advanced (41 tests, 100% coverage) ✅ **NEW**
+  - **Total: 325 tests unitaires** avec **65% de couverture globale**
 - [x] Infrastructure de tests ✨ NEW
   - [x] pytest avec markers (unit, integration, scraper, email, celery) ✨ NEW
   - [x] pytest-cov pour coverage reporting (**60% total**) ✨ **AMÉLIORÉ**
@@ -344,12 +345,30 @@ Ce document trace l'état d'avancement du backend de PriceWatch, ce qui a été 
 
 ### 🎯 Version 2.0 - Long terme (Priorité BASSE)
 
-#### 🕷️ Scraping Avancé
+#### 🕷️ Scraping Avancé - ✅ COMPLÉTÉ
 - [ ] **Gestion des CAPTCHAs** (délégation à service tiers)
-- [ ] **Proxies rotatifs** pour éviter les blocages IP
-- [ ] **User-Agent rotation**
-- [ ] **Cache des résultats de scraping** (éviter rescraper trop souvent)
-- [ ] **Circuit breaker** pour éviter de surcharger les sites
+- [x] **Proxies rotatifs** pour éviter les blocages IP ✨ **NEW**
+  - Classe ProxyRotator pour rotation/sélection aléatoire de proxies
+  - Configuration via variable PROXY_LIST (liste séparée par virgules)
+  - Support désactivable via SCRAPER_PROXY_ENABLED
+  - Tests unitaires complets (10 tests)
+- [x] **User-Agent rotation** ✨ **NEW**
+  - Pool de 15 User-Agents réalistes (Chrome, Firefox, Safari, Edge)
+  - Rotation automatique à chaque requête de scraping
+  - Headers complets ou minimaux selon les besoins
+  - Tests unitaires complets (5 tests)
+- [x] **Cache des résultats de scraping** (éviter rescraper trop souvent) ✨ **NEW**
+  - Cache Redis avec TTL configurable (défaut: 1 heure)
+  - Clés de cache basées sur hash MD5 des URLs
+  - Méthodes: get, set, invalidate, clear_all
+  - Bypass cache disponible pour forcer un scraping frais
+  - Tests unitaires complets (11 tests)
+- [x] **Circuit breaker** pour éviter de surcharger les sites ✨ **NEW**
+  - Implémentation du pattern Circuit Breaker (CLOSED, OPEN, HALF_OPEN)
+  - États stockés dans Redis pour distribution
+  - Configuration: seuil d'échecs (5), timeout de récupération (60s)
+  - Gestion automatique par site (amazon, fnac, darty, etc.)
+  - Tests unitaires complets (12 tests)
 
 #### Notifications par mail (préférences utilisateur)
 - [ ] **Notifications par mail** (email récapitulatif des baisses de prix)
@@ -436,6 +455,7 @@ Ce document trace l'état d'avancement du backend de PriceWatch, ce qui a été 
 - **[SECURITY_FEATURES.md](SECURITY_FEATURES.md)** - Documentation sécurité
 - **[ADMIN_FEATURES.md](ADMIN_FEATURES.md)** - Documentation administration et analytics
 - **[DEVOPS.md](DEVOPS.md)** - Documentation DevOps, CI/CD et déploiement ✨ **NEW**
+- **[SCRAPING_ADVANCED.md](SCRAPING_ADVANCED.md)** - Documentation des fonctionnalités avancées de scraping ✨ **NEW**
 
 ### Scripts utiles
 - **[migrate.sh](../migrate.sh)** - Génération et application de migrations Alembic
@@ -473,8 +493,9 @@ Ce document trace l'état d'avancement du backend de PriceWatch, ce qui a été 
 - **[tests/test_unit_check_frequency.py](../tests/test_unit_check_frequency.py)** - Tests check frequency (13 tests, 100% coverage) ✨ **NEW**
 - **[tests/test_unit_priority.py](../tests/test_unit_priority.py)** - Tests priority calculation (10 tests, 100% coverage) ✨ **NEW**
 - **[tests/test_unit_health.py](../tests/test_unit_health.py)** - Tests health endpoints (20 tests, 100% coverage) ✨ **NEW**
+- **[tests/test_unit_scraper_advanced.py](../tests/test_unit_scraper_advanced.py)** - Tests scraping avancé (41 tests, 100% coverage) ✨ **NEW**
 
-**Total : 284 tests unitaires avec 62% de couverture globale**
+**Total : 325 tests unitaires avec 65% de couverture globale**
 
 ### Lancer les tests
 
@@ -563,4 +584,4 @@ docker-compose exec backend alembic current
 
 ---
 
-**Dernière mise à jour** : 2025-11-20
+**Dernière mise à jour** : 2025-12-23

@@ -23,14 +23,23 @@ class TestPriceScraper:
 
     def setup_method(self):
         """Set up test fixtures."""
-        self.scraper = PriceScraper()
+        # Disable advanced features for testing basic scraping logic
+        self.scraper = PriceScraper(
+            use_cache=False,
+            use_circuit_breaker=False,
+            use_proxy=False
+        )
 
     @pytest.mark.unit
     def test_scraper_initialization(self):
-        """Test that scraper initializes with correct headers."""
+        """Test that scraper initializes with correct configuration."""
         assert self.scraper is not None
-        assert "User-Agent" in self.scraper.headers
-        assert "Mozilla" in self.scraper.headers["User-Agent"]
+        assert self.scraper.max_retries == 3
+        assert self.scraper.retry_delay == 2
+        # Test that advanced features can be disabled
+        assert self.scraper.use_cache is False
+        assert self.scraper.use_circuit_breaker is False
+        assert self.scraper.use_proxy is False
 
     @pytest.mark.unit
     @pytest.mark.scraper
@@ -194,8 +203,12 @@ class TestPriceScraper:
 
     @pytest.mark.unit
     @pytest.mark.scraper
-    def test_scrape_product_amazon_url(self):
+    @patch('app.services.scraper_advanced.UserAgentRotator.get_headers')
+    def test_scrape_product_amazon_url(self, mock_get_headers):
         """Test scrape_product with Amazon URL."""
+        # Mock User-Agent headers
+        mock_get_headers.return_value = {"User-Agent": "Mozilla/5.0"}
+
         mock_response = Mock()
         mock_response.status_code = 200
         mock_response.content = b"""
@@ -209,14 +222,13 @@ class TestPriceScraper:
         """
 
         # Mock the session.get method
-        self.scraper.session.get = Mock(return_value=mock_response)
+        with patch.object(self.scraper.session, 'get', return_value=mock_response) as mock_get:
+            result = self.scraper.scrape_product("https://www.amazon.fr/product/test")
 
-        result = self.scraper.scrape_product("https://www.amazon.fr/product/test")
-
-        assert result is not None
-        assert result.name == "Amazon Product"
-        assert result.price == 99.99
-        self.scraper.session.get.assert_called_once()
+            assert result is not None
+            assert result.name == "Amazon Product"
+            assert result.price == 99.99
+            mock_get.assert_called_once()
 
     @pytest.mark.unit
     @pytest.mark.scraper
@@ -295,40 +307,41 @@ class TestPriceScraper:
 
     @pytest.mark.unit
     @pytest.mark.scraper
-    @patch("app.services.scraper.requests.get")
-    def test_scrape_product_http_error(self, mock_get):
+    @patch('app.services.scraper_advanced.UserAgentRotator.get_headers')
+    def test_scrape_product_http_error(self, mock_get_headers):
         """Test scrape_product with HTTP error."""
-        mock_get.side_effect = Exception("Connection error")
+        mock_get_headers.return_value = {"User-Agent": "Mozilla/5.0"}
 
-        result = self.scraper.scrape_product("https://www.example.com/product/test")
-
-        assert result is None
+        with patch.object(self.scraper.session, 'get', side_effect=Exception("Connection error")):
+            result = self.scraper.scrape_product("https://www.example.com/product/test")
+            assert result is None
 
     @pytest.mark.unit
     @pytest.mark.scraper
-    @patch("app.services.scraper.requests.get")
-    def test_scrape_product_timeout(self, mock_get):
+    @patch('app.services.scraper_advanced.UserAgentRotator.get_headers')
+    def test_scrape_product_timeout(self, mock_get_headers):
         """Test scrape_product with timeout."""
-        mock_get.side_effect = Exception("Timeout")
+        mock_get_headers.return_value = {"User-Agent": "Mozilla/5.0"}
 
-        result = self.scraper.scrape_product("https://www.example.com/product/test")
-
-        assert result is None
+        with patch.object(self.scraper.session, 'get', side_effect=Exception("Timeout")):
+            result = self.scraper.scrape_product("https://www.example.com/product/test")
+            assert result is None
 
     @pytest.mark.unit
     @pytest.mark.scraper
-    @patch("app.services.scraper.requests.get")
-    def test_scrape_product_invalid_html(self, mock_get):
+    @patch('app.services.scraper_advanced.UserAgentRotator.get_headers')
+    def test_scrape_product_invalid_html(self, mock_get_headers):
         """Test scrape_product with invalid HTML."""
+        mock_get_headers.return_value = {"User-Agent": "Mozilla/5.0"}
+
         mock_response = Mock()
         mock_response.status_code = 200
         mock_response.content = b"<html><body>Invalid content</body></html>"
-        mock_get.return_value = mock_response
 
-        result = self.scraper.scrape_product("https://www.amazon.fr/product/test")
-
-        # Should return None when no price is found
-        assert result is None
+        with patch.object(self.scraper.session, 'get', return_value=mock_response):
+            result = self.scraper.scrape_product("https://www.amazon.fr/product/test")
+            # Should return None when no price is found
+            assert result is None
 
     @pytest.mark.unit
     def test_singleton_scraper_instance(self):
