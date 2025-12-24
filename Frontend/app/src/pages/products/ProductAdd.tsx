@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { productsApi } from '@/api/products';
+import { useCreateProduct } from '@/hooks/useProducts';
 import { ProductForm } from '@/components/products';
 import { Card, Button, Breadcrumb } from '@/components/ui';
 import { useToast } from '@/contexts/ToastContext';
@@ -10,18 +10,18 @@ import type { Product } from '@/types';
 export default function ProductAdd() {
   const navigate = useNavigate();
   const { success, error } = useToast();
-  const [isLoading, setIsLoading] = useState(false);
+  const createProduct = useCreateProduct();
   const [scrapedProduct, setScrapedProduct] = useState<Product | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const handleSubmit = async (data: ProductCreateFormData) => {
     try {
-      setIsLoading(true);
       setScrapedProduct(null);
       setErrorMessage(null);
 
       // Appel à l'API pour créer le produit (le backend va scraper automatiquement)
-      const newProduct = await productsApi.create({
+      // Le hook useCreateProduct va automatiquement invalider le cache React Query
+      const newProduct = await createProduct.mutateAsync({
         url: data.url,
         target_price: data.target_price,
         check_frequency: data.check_frequency,
@@ -44,8 +44,6 @@ export default function ProductAdd() {
         "Impossible d'ajouter le produit. Vérifiez que l'URL est valide et que le site est accessible.";
       setErrorMessage(finalMessage);
       error(finalMessage);
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -79,7 +77,7 @@ export default function ProductAdd() {
 
       {/* Formulaire */}
       <Card>
-        <ProductForm onSubmit={handleSubmit} isLoading={isLoading} />
+        <ProductForm onSubmit={handleSubmit} isLoading={createProduct.isPending} />
       </Card>
 
       {/* Affichage du produit créé (feedback visuel) */}
@@ -143,7 +141,7 @@ export default function ProductAdd() {
       )}
 
       {/* Message d'information pendant le scraping */}
-      {isLoading && (
+      {createProduct.isPending && (
         <Card className="mt-6 border-primary-200 bg-primary-50">
           <div className="flex items-start gap-4">
             <div className="shrink-0">
@@ -163,7 +161,7 @@ export default function ProductAdd() {
       )}
 
       {/* Message d'erreur */}
-      {errorMessage && !isLoading && (
+      {errorMessage && !createProduct.isPending && (
         <Card className="mt-6 border-danger-200 bg-danger-50">
           <div className="flex items-start gap-4">
             <span className="material-symbols-outlined text-danger-600 text-3xl">error</span>
@@ -198,7 +196,7 @@ export default function ProductAdd() {
         <Button
           variant="secondary"
           onClick={() => navigate('/dashboard')}
-          disabled={isLoading}
+          disabled={createProduct.isPending}
           leftIcon={<span className="material-symbols-outlined">arrow_back</span>}
         >
           Retour au tableau de bord
