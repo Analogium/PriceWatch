@@ -34,6 +34,7 @@ const LinkButton = React.forwardRef<HTMLAnchorElement, LinkButtonProps>(
       secondary:
         'bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 focus:ring-gray-300 dark:focus:ring-gray-700',
       danger: 'bg-danger-600 text-white hover:bg-danger-700 focus:ring-danger-600',
+      ghost: 'border border-gray-300 text-gray-700 hover:bg-gray-50 focus:ring-gray-300',
     };
 
     const sizeStyles = {
@@ -50,9 +51,9 @@ const LinkButton = React.forwardRef<HTMLAnchorElement, LinkButtonProps>(
         className={cn(baseStyles, variantStyles[variant], sizeStyles[size], widthStyles, className)}
         {...props}
       >
-        {leftIcon && <span className="flex-shrink-0">{leftIcon}</span>}
+        {leftIcon && <span className="flex-shrink-0 inline-flex items-center">{leftIcon}</span>}
         {children}
-        {rightIcon && <span className="flex-shrink-0">{rightIcon}</span>}
+        {rightIcon && <span className="flex-shrink-0 inline-flex items-center">{rightIcon}</span>}
       </Link>
     );
   }

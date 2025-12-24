@@ -67,16 +67,16 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       >
         {isLoading ? (
           <>
-            <span className="material-symbols-outlined animate-spin !text-xl">
+            <span className="material-symbols-outlined animate-spin !text-xl inline-flex items-center">
               progress_activity
             </span>
             {children}
           </>
         ) : (
           <>
-            {leftIcon && <span className="flex-shrink-0">{leftIcon}</span>}
+            {leftIcon && <span className="flex-shrink-0 inline-flex items-center">{leftIcon}</span>}
             {children}
-            {rightIcon && <span className="flex-shrink-0">{rightIcon}</span>}
+            {rightIcon && <span className="flex-shrink-0 inline-flex items-center">{rightIcon}</span>}
           </>
         )}
       </button>
