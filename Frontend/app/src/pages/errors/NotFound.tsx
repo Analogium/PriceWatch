@@ -1,5 +1,4 @@
-import { Link } from 'react-router-dom';
-import { Button } from '@/components/ui';
+import { Button, LinkButton } from '@/components/ui';
 
 export default function NotFound() {
   return (
@@ -25,25 +24,32 @@ export default function NotFound() {
 
         {/* Actions */}
         <div className="flex gap-3 justify-center">
-          <Button variant="secondary" onClick={() => window.history.back()}>
-            <span className="material-symbols-outlined">arrow_back</span>
+          <Button
+            variant="secondary"
+            onClick={() => window.history.back()}
+            leftIcon={<span className="material-symbols-outlined">arrow_back</span>}
+          >
             Retour
           </Button>
-          <Link to="/dashboard">
-            <Button variant="primary">
-              <span className="material-symbols-outlined">home</span>
-              Tableau de bord
-            </Button>
-          </Link>
+          <LinkButton
+            to="/dashboard"
+            variant="primary"
+            leftIcon={<span className="material-symbols-outlined">home</span>}
+          >
+            Tableau de bord
+          </LinkButton>
         </div>
 
         {/* Help Link */}
         <div className="mt-8">
           <p className="text-sm text-gray-500 dark:text-gray-400">
             Besoin d'aide ?{' '}
-            <Link to="/support" className="text-primary-600 dark:text-primary-400 hover:underline">
+            <a
+              href="/support"
+              className="text-primary-600 dark:text-primary-400 hover:underline"
+            >
               Contactez le support
-            </Link>
+            </a>
           </p>
         </div>
       </div>

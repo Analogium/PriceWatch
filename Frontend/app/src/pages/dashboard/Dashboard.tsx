@@ -1,5 +1,4 @@
 import { useState, useCallback, useMemo } from 'react';
-import { Link } from 'react-router-dom';
 import {
   ProductCard,
   EmptyState,
@@ -8,7 +7,7 @@ import {
   SortSelect,
   Pagination,
 } from '@/components/products';
-import { Button, Modal, Alert } from '@/components/ui';
+import { Button, Modal, Alert, LinkButton } from '@/components/ui';
 import type { Product, SortBy, SortOrder } from '@/types';
 import { useToast } from '@/contexts/ToastContext';
 import { usePriceCheck } from '@/contexts/PriceCheckContext';
@@ -141,13 +140,13 @@ export default function Dashboard() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
         <h1 className="text-2xl font-bold text-gray-900">Mes produits suivis</h1>
-        <Link
+        <LinkButton
           to="/products/add"
-          className="inline-flex items-center gap-2 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors font-medium"
+          variant="primary"
+          leftIcon={<span className="material-symbols-outlined">add</span>}
         >
-          <span className="material-symbols-outlined">add</span>
           Ajouter un produit
-        </Link>
+        </LinkButton>
       </div>
 
       {/* Filters */}

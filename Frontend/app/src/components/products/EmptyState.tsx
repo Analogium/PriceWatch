@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { LinkButton, Button } from '@/components/ui';
 
 interface EmptyStateProps {
   hasSearch?: boolean;
@@ -14,12 +14,13 @@ export function EmptyState({ hasSearch = false, onClearSearch }: EmptyStateProps
         </span>
         <h3 className="text-lg font-semibold text-gray-900 mb-2">Aucun produit trouvé</h3>
         <p className="text-gray-600 mb-6">Essayez de modifier votre recherche ou vos filtres</p>
-        <button
+        <Button
           onClick={onClearSearch}
-          className="px-4 py-2 text-primary-600 hover:text-primary-700 font-medium"
+          variant="ghost"
+          className="text-primary-600 hover:text-primary-700 border-0"
         >
           Effacer la recherche
-        </button>
+        </Button>
       </div>
     );
   }
@@ -33,13 +34,14 @@ export function EmptyState({ hasSearch = false, onClearSearch }: EmptyStateProps
       <p className="text-gray-600 mb-6">
         Commencez à suivre des produits pour être notifié des baisses de prix
       </p>
-      <Link
+      <LinkButton
         to="/products/add"
-        className="inline-flex items-center gap-2 px-6 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors font-medium"
+        variant="primary"
+        size="lg"
+        leftIcon={<span className="material-symbols-outlined">add</span>}
       >
-        <span className="material-symbols-outlined">add</span>
         Ajouter mon premier produit
-      </Link>
+      </LinkButton>
     </div>
   );
 }
