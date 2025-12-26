@@ -1,4 +1,4 @@
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { productCreateSchema, type ProductCreateFormData } from '@/utils/validators';
 import { Input, Button } from '@/components/ui';
@@ -18,6 +18,7 @@ export function ProductForm({ onSubmit, isLoading = false }: ProductFormProps) {
   const {
     register,
     handleSubmit,
+    control,
     formState: { errors },
   } = useForm<ProductCreateFormData>({
     resolver: zodResolver(productCreateSchema),
@@ -69,26 +70,37 @@ export function ProductForm({ onSubmit, isLoading = false }: ProductFormProps) {
         <label className="block text-sm font-medium text-gray-700 mb-2">
           Fréquence de vérification
         </label>
-        <div className="space-y-3">
-          {CHECK_FREQUENCY_OPTIONS.map((option) => (
-            <label
-              key={option.value}
-              className="flex items-center gap-3 p-4 border border-gray-300 rounded-lg cursor-pointer hover:border-primary-500 hover:bg-primary-50 transition-colors"
-            >
-              <input
-                type="radio"
-                value={option.value}
-                disabled={isLoading}
-                {...register('check_frequency')}
-                className="w-4 h-4 text-primary-600 focus:ring-primary-500 border-gray-300"
-              />
-              <span className="flex items-center gap-2 text-gray-900 font-medium">
-                <span className="material-symbols-outlined text-gray-400 text-xl">schedule</span>
-                {option.label}
-              </span>
-            </label>
-          ))}
-        </div>
+        <Controller
+          name="check_frequency"
+          control={control}
+          render={({ field }) => (
+            <div className="space-y-3">
+              {CHECK_FREQUENCY_OPTIONS.map((option) => (
+                <label
+                  key={option.value}
+                  className="flex items-center gap-3 p-4 border border-gray-300 rounded-lg cursor-pointer hover:border-primary-500 hover:bg-primary-50 transition-colors"
+                >
+                  <input
+                    type="radio"
+                    name={field.name}
+                    value={option.value}
+                    disabled={isLoading}
+                    checked={field.value === option.value}
+                    onChange={() => field.onChange(option.value)}
+                    onBlur={field.onBlur}
+                    className="w-4 h-4 text-primary-600 focus:ring-primary-500 border-gray-300"
+                  />
+                  <span className="flex items-center gap-2 text-gray-900 font-medium">
+                    <span className="material-symbols-outlined text-gray-400 text-xl">
+                      schedule
+                    </span>
+                    {option.label}
+                  </span>
+                </label>
+              ))}
+            </div>
+          )}
+        />
         {errors.check_frequency && (
           <p className="mt-2 text-sm text-danger-600">{errors.check_frequency.message}</p>
         )}

@@ -17,6 +17,7 @@ from redis import Redis
 from app.services.scraper_advanced import CircuitBreaker, ProxyRotator, ScraperCache, UserAgentRotator
 
 
+@pytest.mark.unit
 class TestUserAgentRotator:
     """Test User-Agent rotation functionality."""
 
@@ -57,6 +58,7 @@ class TestUserAgentRotator:
         assert len(headers) == 1  # Only User-Agent
 
 
+@pytest.mark.unit
 class TestScraperCache:
     """Test Redis-based scraping cache."""
 
@@ -183,6 +185,7 @@ class TestScraperCache:
         mock_redis.scan_iter.assert_called_once_with(match="scraper_cache:*")
 
 
+@pytest.mark.unit
 class TestCircuitBreaker:
     """Test Circuit Breaker pattern."""
 
@@ -304,6 +307,7 @@ class TestCircuitBreaker:
         assert mock_redis.delete.call_count >= 3
 
 
+@pytest.mark.unit
 class TestProxyRotator:
     """Test proxy rotation functionality."""
 

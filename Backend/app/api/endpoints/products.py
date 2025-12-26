@@ -153,6 +153,8 @@ def update_product(
         product.name = product_data.name
     if product_data.target_price is not None:
         product.target_price = product_data.target_price
+    if product_data.check_frequency is not None:
+        product.check_frequency = product_data.check_frequency
 
     db.commit()
     db.refresh(product)

@@ -1,6 +1,7 @@
 /* eslint-disable react-refresh/only-export-components */
 import { createContext, useState, useEffect, useCallback, useMemo, type ReactNode } from 'react';
 import { authApi } from '../api';
+import { queryClient } from '../lib/queryClient';
 import type { User, LoginCredentials, RegisterData } from '../types';
 
 interface AuthContextType {
@@ -65,6 +66,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem('access_token');
     localStorage.removeItem('refresh_token');
     setUser(null);
+    // Clear all React Query cache to prevent showing previous user's data
+    queryClient.clear();
   }, []);
 
   const value = useMemo(

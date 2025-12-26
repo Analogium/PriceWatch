@@ -1,6 +1,6 @@
 import { memo } from 'react';
+import { Link } from 'react-router-dom';
 import { usePriceCheck } from '@/contexts/PriceCheckContext';
-import { LinkButton, Button } from '@/components/ui';
 import type { Product } from '@/types';
 
 interface ProductCardProps {
@@ -9,11 +9,7 @@ interface ProductCardProps {
   onCheckPrice?: (id: number) => void;
 }
 
-export const ProductCard = memo(function ProductCard({
-  product,
-  onDelete,
-  onCheckPrice,
-}: ProductCardProps) {
+export const ProductCard = memo(function ProductCard({ product, onDelete, onCheckPrice }: ProductCardProps) {
   const { isChecking } = usePriceCheck();
   const isPriceBelowTarget = product.current_price <= product.target_price;
   const priceColor = isPriceBelowTarget ? 'text-green-600' : 'text-gray-900';
@@ -113,33 +109,31 @@ export const ProductCard = memo(function ProductCard({
 
         {/* Actions */}
         <div className="flex gap-2">
-          <LinkButton to={`/products/${product.id}`} variant="primary" size="sm" className="flex-1">
+          <Link
+            to={`/products/${product.id}`}
+            className="flex-1 px-2 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors text-center text-sm font-medium"
+          >
             Détails
-          </LinkButton>
-          <Button
+          </Link>
+          <button
             onClick={() => onCheckPrice?.(product.id)}
             disabled={isChecking(product.id)}
-            variant="ghost"
-            size="md"
-            iconOnly
+            className="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             title="Vérifier le prix maintenant"
           >
             <span
-              className={`material-symbols-outlined ${isChecking(product.id) ? 'animate-spin' : ''}`}
+              className={`material-symbols-outlined text-gray-700 ${isChecking(product.id) ? 'animate-spin' : ''}`}
             >
               refresh
             </span>
-          </Button>
-          <Button
+          </button>
+          <button
             onClick={() => onDelete?.(product.id)}
-            variant="ghost"
-            size="md"
-            iconOnly
+            className="px-3 py-2 border border-red-300 text-red-600 rounded-lg hover:bg-red-50 transition-colors"
             title="Supprimer"
-            className="border-red-300 text-red-600 hover:bg-red-50"
           >
             <span className="material-symbols-outlined">delete</span>
-          </Button>
+          </button>
         </div>
       </div>
     </div>

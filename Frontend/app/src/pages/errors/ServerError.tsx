@@ -1,5 +1,4 @@
-import { Link } from 'react-router-dom';
-import { Button } from '@/components/ui';
+import { Button, LinkButton } from '@/components/ui';
 
 export default function ServerError() {
   return (
@@ -24,16 +23,20 @@ export default function ServerError() {
 
         {/* Actions */}
         <div className="flex gap-3 justify-center">
-          <Button variant="secondary" onClick={() => window.location.reload()}>
-            <span className="material-symbols-outlined">refresh</span>
+          <Button
+            variant="secondary"
+            onClick={() => window.location.reload()}
+            leftIcon={<span className="material-symbols-outlined">refresh</span>}
+          >
             Recharger la page
           </Button>
-          <Link to="/dashboard">
-            <Button variant="primary">
-              <span className="material-symbols-outlined">home</span>
-              Tableau de bord
-            </Button>
-          </Link>
+          <LinkButton
+            to="/dashboard"
+            variant="primary"
+            leftIcon={<span className="material-symbols-outlined">home</span>}
+          >
+            Tableau de bord
+          </LinkButton>
         </div>
 
         {/* Status Link */}
