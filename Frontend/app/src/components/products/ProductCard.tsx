@@ -9,7 +9,11 @@ interface ProductCardProps {
   onCheckPrice?: (id: number) => void;
 }
 
-export const ProductCard = memo(function ProductCard({ product, onDelete, onCheckPrice }: ProductCardProps) {
+export const ProductCard = memo(function ProductCard({
+  product,
+  onDelete,
+  onCheckPrice,
+}: ProductCardProps) {
   const { isChecking } = usePriceCheck();
   const isPriceBelowTarget = product.current_price <= product.target_price;
   const priceColor = isPriceBelowTarget ? 'text-green-600' : 'text-gray-900';
@@ -109,12 +113,7 @@ export const ProductCard = memo(function ProductCard({ product, onDelete, onChec
 
         {/* Actions */}
         <div className="flex gap-2">
-          <LinkButton
-            to={`/products/${product.id}`}
-            variant="primary"
-            size="sm"
-            className="flex-1"
-          >
+          <LinkButton to={`/products/${product.id}`} variant="primary" size="sm" className="flex-1">
             Détails
           </LinkButton>
           <Button

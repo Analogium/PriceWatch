@@ -2,11 +2,7 @@ import { useState, useEffect } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { Card, Button, Toggle, Select, Input, Spinner, Breadcrumb } from '@/components/ui';
 import { preferencesApi } from '@/api';
-import type {
-  UserPreferences,
-  UserPreferencesUpdate,
-  WebhookType,
-} from '@/types';
+import type { UserPreferences, UserPreferencesUpdate, WebhookType } from '@/types';
 import { WEBHOOK_TYPES } from '@/utils';
 import { useToast } from '@/contexts/ToastContext';
 

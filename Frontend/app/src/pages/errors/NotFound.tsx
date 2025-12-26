@@ -44,10 +44,7 @@ export default function NotFound() {
         <div className="mt-8">
           <p className="text-sm text-gray-500 dark:text-gray-400">
             Besoin d'aide ?{' '}
-            <a
-              href="/support"
-              className="text-primary-600 dark:text-primary-400 hover:underline"
-            >
+            <a href="/support" className="text-primary-600 dark:text-primary-400 hover:underline">
               Contactez le support
             </a>
           </p>

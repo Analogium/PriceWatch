@@ -216,11 +216,7 @@ export default function Dashboard() {
           )}
 
           <div className="flex gap-3 justify-end">
-            <Button
-              variant="secondary"
-              onClick={cancelDelete}
-              disabled={deleteMutation.isPending}
-            >
+            <Button variant="secondary" onClick={cancelDelete} disabled={deleteMutation.isPending}>
               Annuler
             </Button>
             <Button

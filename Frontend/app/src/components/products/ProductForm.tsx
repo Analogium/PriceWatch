@@ -91,7 +91,9 @@ export function ProductForm({ onSubmit, isLoading = false }: ProductFormProps) {
                     className="w-4 h-4 text-primary-600 focus:ring-primary-500 border-gray-300"
                   />
                   <span className="flex items-center gap-2 text-gray-900 font-medium">
-                    <span className="material-symbols-outlined text-gray-400 text-xl">schedule</span>
+                    <span className="material-symbols-outlined text-gray-400 text-xl">
+                      schedule
+                    </span>
                     {option.label}
                   </span>
                 </label>

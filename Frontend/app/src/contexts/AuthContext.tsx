@@ -1,7 +1,7 @@
 /* eslint-disable react-refresh/only-export-components */
 import { createContext, useState, useEffect, useCallback, useMemo, type ReactNode } from 'react';
 import { authApi } from '../api';
-import { queryClient } from '../App';
+import { queryClient } from '../lib/queryClient';
 import type { User, LoginCredentials, RegisterData } from '../types';
 
 interface AuthContextType {
