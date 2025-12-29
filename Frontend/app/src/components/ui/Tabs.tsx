@@ -1,4 +1,4 @@
-import { useState, useRef, ReactNode } from 'react';
+import { useState, useRef, type ReactNode } from 'react';
 import { cn } from '@/utils';
 
 export interface TabItem {

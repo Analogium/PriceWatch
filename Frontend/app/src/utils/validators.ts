@@ -40,25 +40,21 @@ export const resetPasswordSchema = z
     path: ['confirmPassword'],
   });
 
-export const productCreateSchema = z.object({
+const productCreateSchemaBase = z.object({
   url: z.string().url('URL invalide').min(1, "L'URL est requise"),
   target_price: z
-    .number({
-      required_error: 'Le prix est requis',
-      invalid_type_error: 'Le prix doit être un nombre',
-    })
+    .number()
     .positive('Le prix cible doit être positif')
     .min(0.01, 'Le prix cible doit être au moins 0.01€'),
   check_frequency: z.union([z.literal(6), z.literal(12), z.literal(24)]).default(24),
 });
 
+export const productCreateSchema = productCreateSchemaBase;
+
 export const productUpdateSchema = z.object({
   name: z.string().min(1, 'Le nom est requis').optional(),
   target_price: z
-    .number({
-      required_error: 'Le prix est requis',
-      invalid_type_error: 'Le prix doit être un nombre',
-    })
+    .number()
     .positive('Le prix cible doit être positif')
     .min(0.01, 'Le prix cible doit être au moins 0.01€')
     .optional(),
@@ -69,5 +65,5 @@ export type LoginFormData = z.infer<typeof loginSchema>;
 export type RegisterFormData = z.infer<typeof registerSchema>;
 export type ForgotPasswordFormData = z.infer<typeof forgotPasswordSchema>;
 export type ResetPasswordFormData = z.infer<typeof resetPasswordSchema>;
-export type ProductCreateFormData = z.infer<typeof productCreateSchema>;
+export type ProductCreateFormData = z.input<typeof productCreateSchema>;
 export type ProductUpdateFormData = z.infer<typeof productUpdateSchema>;
