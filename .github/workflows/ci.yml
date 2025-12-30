@@ -257,25 +257,59 @@ jobs:
         working-directory: ./Backend
         run: docker compose down -v
 
-  # Deploy job (placeholder for future implementation)
+  # Deploy to VPS
   deploy:
-    name: Deploy
+    name: Deploy to VPS
     runs-on: ubuntu-latest
-    needs: [test, docker-build]
+    needs: [lint, test, docker-build, security]
     if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
     environment: production
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - name: Deploy to VPS via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USERNAME }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_PORT || 2222 }}
+          script: |
+            echo "🚀 Starting deployment on VPS..."
 
-      - name: Deploy notification
+            # Navigate to project directory
+            cd /apps/PriceWatch || exit 1
+
+            # Pull latest changes
+            echo "📥 Pulling latest changes from master..."
+            git pull origin master
+
+            # Navigate to apps directory for docker-compose
+            cd /apps
+
+            # Rebuild and restart services
+            echo "🔨 Building Docker images..."
+            docker compose build pricewatch-backend pricewatch-frontend pricewatch-celery-worker pricewatch-celery-beat
+
+            echo "♻️ Restarting services..."
+            docker compose up -d pricewatch-backend pricewatch-celery-worker pricewatch-celery-beat pricewatch-frontend
+
+            # Wait for services to start
+            sleep 5
+
+            # Health check
+            echo "🏥 Running health check..."
+            curl -f http://10.0.0.1:8000/health || echo "⚠️ Backend health check failed"
+
+            echo "✅ Deployment completed!"
+
+            # Show running containers
+            docker ps | grep pricewatch
+
+      - name: Deployment notification
+        if: always()
         run: |
-          echo "🚀 Deployment would happen here"
+          echo "📊 Deployment Summary"
           echo "Branch: ${{ github.ref }}"
           echo "Commit: ${{ github.sha }}"
           echo "Actor: ${{ github.actor }}"
-          # Add your deployment steps here:
-          # - Docker registry push
-          # - Kubernetes deployment
-          # - Cloud provider deployment (AWS, GCP, DigitalOcean)
+          echo "Status: ${{ job.status }}"
