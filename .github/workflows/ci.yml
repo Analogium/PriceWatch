@@ -277,14 +277,14 @@ jobs:
             echo "🚀 Starting deployment on VPS..."
 
             # Navigate to project directory
-            cd /apps/PriceWatch || exit 1
+            cd apps/PriceWatch || exit 1
 
             # Pull latest changes
             echo "📥 Pulling latest changes from master..."
             git pull origin master
 
             # Navigate to apps directory for docker-compose
-            cd /apps
+            cd apps
 
             # Rebuild and restart services
             echo "🔨 Building Docker images..."
