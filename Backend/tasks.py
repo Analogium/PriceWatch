@@ -225,10 +225,11 @@ def check_prices_by_frequency(frequency_hours: int):
         cutoff_time = datetime.utcnow() - timedelta(hours=frequency_hours)
 
         # Query products with this frequency that need checking
+        # Include products that have never been checked (last_checked IS NULL)
         products = (
             db.query(Product)
             .filter(Product.check_frequency == frequency_hours)
-            .filter(Product.last_checked <= cutoff_time)
+            .filter((Product.last_checked <= cutoff_time) | (Product.last_checked.is_(None)))
             .all()
         )
 
