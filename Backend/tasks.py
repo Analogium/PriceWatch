@@ -388,20 +388,22 @@ def check_single_product(product_id: int):
 
 
 # Configure periodic tasks
+# All tasks run every hour for improved precision (±1h instead of ±6h/12h/24h)
+# The filter in check_prices_by_frequency() ensures only eligible products are checked
 celery_app.conf.beat_schedule = {
     "check-prices-6h": {
         "task": "check_prices_by_frequency",
-        "schedule": 21600.0,  # Run every 6 hours (in seconds)
+        "schedule": 3600.0,  # Run every 1 hour (in seconds) - improved precision
         "args": (6,),  # Check products with 6h frequency
     },
     "check-prices-12h": {
         "task": "check_prices_by_frequency",
-        "schedule": 43200.0,  # Run every 12 hours (in seconds)
+        "schedule": 3600.0,  # Run every 1 hour (in seconds) - improved precision
         "args": (12,),  # Check products with 12h frequency
     },
     "check-prices-24h": {
         "task": "check_prices_by_frequency",
-        "schedule": 86400.0,  # Run every 24 hours (in seconds)
+        "schedule": 3600.0,  # Run every 1 hour (in seconds) - improved precision
         "args": (24,),  # Check products with 24h frequency
     },
 }
