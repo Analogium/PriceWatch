@@ -20,6 +20,7 @@ class EmailService:
         self.smtp_user = settings.SMTP_USER
         self.smtp_password = settings.SMTP_PASSWORD
         self.from_email = settings.EMAIL_FROM
+        self.frontend_url = settings.FRONTEND_URL
 
     def send_price_alert(
         self,
@@ -55,6 +56,8 @@ class EmailService:
         savings = old_price - new_price
         savings_percent = (savings / old_price * 100) if old_price > 0 else 0
 
+        preferences_url = f"{self.frontend_url}/settings/notifications"
+
         html_content = """
         <html>
             <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
@@ -76,6 +79,10 @@ class EmailService:
                     Vous recevez cet email car vous surveillez ce produit sur PriceWatch.<br>
                     <em>PriceWatch : surveillez les prix, pas vos onglets.</em>
                 </p>
+                <p style="font-size: 0.8em; color: #999; margin-top: 20px;">
+                    <a href="{preferences_url}" style="color: #999;">Gérer mes préférences de notifications</a> |
+                    Pour ne plus recevoir ces alertes, désactivez les notifications dans vos paramètres.
+                </p>
             </body>
         </html>
         """.format(
@@ -85,6 +92,7 @@ class EmailService:
             product_url=product_url,
             savings=savings,
             savings_percent=savings_percent,
+            preferences_url=preferences_url,
         )
 
         self._send_email(to_email, subject, html_content)
@@ -104,8 +112,7 @@ class EmailService:
         """Send email verification link."""
         subject = "Vérifiez votre email - PriceWatch"
 
-        # Note: In production, use the actual frontend URL
-        verification_url = f"http://localhost:5173/verify-email?token={token}"
+        verification_url = f"{self.frontend_url}/verify-email?token={token}"
 
         html_content = """
         <html>
@@ -138,8 +145,7 @@ class EmailService:
         """Send password reset link."""
         subject = "Réinitialisation de mot de passe - PriceWatch"
 
-        # Note: In production, use the actual frontend URL
-        reset_url = f"http://localhost:5173/reset-password?token={token}"
+        reset_url = f"{self.frontend_url}/reset-password?token={token}"
 
         html_content = """
         <html>
@@ -169,6 +175,106 @@ class EmailService:
         )
 
         self._send_email(to_email, subject, html_content)
+
+    def send_weekly_summary(
+        self,
+        to_email: str,
+        products_summary: list,
+        total_products: int,
+        total_savings: float,
+        user_preferences=None,
+    ):
+        """Send a weekly summary email with price tracking highlights.
+
+        Args:
+            to_email: User's email address
+            products_summary: List of dicts with product info (name, current_price, lowest_price, highest_price, url)
+            total_products: Total number of tracked products
+            total_savings: Total potential savings if all products reached target price
+            user_preferences: UserPreferences object (optional)
+        """
+        # Check if user has email notifications and weekly summary enabled
+        if user_preferences:
+            if not user_preferences.email_notifications:
+                logger.info(f"Email notifications disabled for {to_email}, skipping weekly summary")
+                return
+            if not user_preferences.weekly_summary:
+                logger.info(f"Weekly summary disabled for {to_email}, skipping")
+                return
+
+        subject = "📊 Votre résumé hebdomadaire PriceWatch"
+
+        # Build products table HTML
+        products_html = ""
+        for product in products_summary[:10]:  # Limit to 10 products
+            price_change = product.get("price_change", 0)
+            price_change_class = (
+                "color: #4CAF50;" if price_change < 0 else "color: #F44336;" if price_change > 0 else ""
+            )
+            price_change_symbol = "↓" if price_change < 0 else "↑" if price_change > 0 else "→"
+            price_change_text = f"{price_change_symbol} {abs(price_change):.2f} €" if price_change != 0 else "Stable"
+
+            products_html += f"""
+            <tr style="border-bottom: 1px solid #eee;">
+                <td style="padding: 10px;">
+                    <a href="{product['url']}" style="color: #333; text-decoration: none;">{product['name'][:50]}{'...' if len(product['name']) > 50 else ''}</a>
+                </td>
+                <td style="padding: 10px; text-align: right;">{product['current_price']:.2f} €</td>
+                <td style="padding: 10px; text-align: right; {price_change_class}">{price_change_text}</td>
+                <td style="padding: 10px; text-align: right; color: #4CAF50;">{product.get('lowest_price', product['current_price']):.2f} €</td>
+            </tr>
+            """
+
+        preferences_url = f"{self.frontend_url}/settings/notifications"
+        dashboard_url = f"{self.frontend_url}/dashboard"
+
+        html_content = f"""
+        <html>
+            <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+                <h2 style="color: #2196F3;">📊 Votre résumé hebdomadaire</h2>
+                <p>Bonjour,</p>
+                <p>Voici un aperçu de vos produits surveillés cette semaine :</p>
+
+                <div style="background-color: #f4f4f4; padding: 15px; border-radius: 5px; margin: 20px 0;">
+                    <p style="margin: 5px 0;"><strong>Produits surveillés :</strong> {total_products}</p>
+                    <p style="margin: 5px 0;"><strong>Économies potentielles :</strong> <span style="color: #4CAF50;">{total_savings:.2f} €</span></p>
+                </div>
+
+                <h3 style="color: #333;">Évolution des prix</h3>
+                <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+                    <thead>
+                        <tr style="background-color: #f4f4f4;">
+                            <th style="padding: 10px; text-align: left;">Produit</th>
+                            <th style="padding: 10px; text-align: right;">Prix actuel</th>
+                            <th style="padding: 10px; text-align: right;">Variation</th>
+                            <th style="padding: 10px; text-align: right;">Prix le plus bas</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {products_html if products_html else '<tr><td colspan="4" style="padding: 20px; text-align: center; color: #777;">Aucun produit surveillé pour le moment</td></tr>'}
+                    </tbody>
+                </table>
+
+                <p>
+                    <a href="{dashboard_url}" style="display: inline-block; padding: 10px 20px; background-color: #2196F3; color: white; text-decoration: none; border-radius: 5px;">
+                        📈 Voir mon tableau de bord
+                    </a>
+                </p>
+
+                <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
+                <p style="font-size: 0.9em; color: #777;">
+                    <em>PriceWatch : surveillez les prix, pas vos onglets.</em>
+                </p>
+                <p style="font-size: 0.8em; color: #999; margin-top: 20px;">
+                    <a href="{preferences_url}" style="color: #999;">Gérer mes préférences de notifications</a> |
+                    Pour ne plus recevoir ce résumé, désactivez le résumé hebdomadaire dans vos paramètres.
+                </p>
+            </body>
+        </html>
+        """
+
+        self._send_email(to_email, subject, html_content)
+        logger.info(f"Weekly summary sent successfully to {to_email}")
 
     def _send_email(self, to_email: str, subject: str, html_content: str):
         """Internal method to send email via SMTP."""

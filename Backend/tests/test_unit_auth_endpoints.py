@@ -66,7 +66,10 @@ class TestRegisterEndpoint:
             mock_validate_pwd.assert_called_once_with("SecurePass123!")
             mock_gen_token.assert_called_once()
             mock_hash.assert_called_once_with("SecurePass123!")
-            mock_commit.assert_called_once()
+            # Commit is called twice: once for user, once for default preferences
+            assert mock_commit.call_count == 2
+            # Add is called twice: once for User, once for UserPreferences
+            assert mock_add.call_count == 2
             mock_send_email.assert_called_once_with("test@example.com", "verification_token_123")
 
     @pytest.mark.asyncio
@@ -151,7 +154,8 @@ class TestRegisterEndpoint:
             # Should still succeed even if email fails
             result = await register(mock_request, user_data, mock_db)
 
-            mock_commit.assert_called_once()
+            # Commit is called twice: once for user, once for default preferences
+            assert mock_commit.call_count == 2
             assert mock_send_email.called
 
 

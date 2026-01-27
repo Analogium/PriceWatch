@@ -19,6 +19,7 @@ from app.core.security import (
 )
 from app.db.base import get_db
 from app.models.user import User
+from app.models.user_preferences import UserPreferences
 from app.schemas.user import (
     EmailVerification,
     PasswordResetConfirm,
@@ -60,6 +61,11 @@ async def register(request: Request, user_data: UserCreate, db: Session = Depend
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
+
+    # Create default user preferences
+    default_preferences = UserPreferences(user_id=new_user.id)
+    db.add(default_preferences)
+    db.commit()
 
     # Send verification email
     try:

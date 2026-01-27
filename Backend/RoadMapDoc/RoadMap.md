@@ -371,10 +371,14 @@ Ce document trace l'état d'avancement du backend de PriceWatch, ce qui a été 
   - Tests unitaires complets (12 tests)
 
 #### Notifications par mail (préférences utilisateur)
-- [ ] **Notifications par mail** (email récapitulatif des baisses de prix)
-  - Tâche Celery hebdomadaire
-  - Tâche Celery quotidienne
-  - Tâche Celery instantanée
+- [x] **Notifications par mail** (préférences utilisateur) ✨ **NEW**
+  - Création automatique des préférences à l'inscription
+  - Vérification manuelle respecte les préférences
+  - Email résumé hebdomadaire (récapitulatif des prix)
+  - Lien de gestion des préférences dans tous les emails
+  - URL frontend configurable via variable d'environnement
+  - Tâche Celery hebdomadaire pour les résumés
+  - Tests unitaires complets (22 tests)
 
 #### 🔎 Fonctionnalités Avancées
 - [ ] **Comparaison de prix** entre plusieurs sites pour un même produit

@@ -13,6 +13,7 @@ from sqlalchemy.orm import Session
 from app.core.config import settings
 from app.core.logging_config import get_logger
 from app.db.base import SessionLocal
+from app.models.price_history import PriceHistory
 from app.models.product import Product
 from app.models.user import User
 from app.models.user_preferences import UserPreferences
@@ -387,6 +388,113 @@ def check_single_product(product_id: int):
         db.close()
 
 
+@celery_app.task(name="send_weekly_summaries")
+def send_weekly_summaries():
+    """
+    Send weekly summary emails to users who have enabled this feature.
+    This task should be scheduled to run once per week (e.g., every Monday morning).
+    """
+    db: Session = SessionLocal()
+    try:
+        # Get all users with weekly_summary enabled
+        users_with_summary = (
+            db.query(User)
+            .join(UserPreferences, User.id == UserPreferences.user_id)
+            .filter(UserPreferences.weekly_summary == True)  # noqa: E712
+            .filter(UserPreferences.email_notifications == True)  # noqa: E712
+            .all()
+        )
+
+        logger.info(f"Sending weekly summaries to {len(users_with_summary)} users")
+
+        sent_count = 0
+        error_count = 0
+
+        for user in users_with_summary:
+            try:
+                # Get user's products
+                products = db.query(Product).filter(Product.user_id == user.id).all()
+
+                if not products:
+                    logger.info(f"User {user.id} has no products, skipping weekly summary")
+                    continue
+
+                # Calculate summary data for each product
+                products_summary = []
+                total_savings = 0
+
+                # Get price history from the last 7 days
+                week_ago = datetime.utcnow() - timedelta(days=7)
+
+                for product in products:
+                    # Get price history for this week
+                    history = (
+                        db.query(PriceHistory)
+                        .filter(PriceHistory.product_id == product.id)
+                        .filter(PriceHistory.recorded_at >= week_ago)
+                        .order_by(PriceHistory.recorded_at.asc())
+                        .all()
+                    )
+
+                    # Get all-time lowest price
+                    all_time_lowest = (
+                        db.query(PriceHistory.price)
+                        .filter(PriceHistory.product_id == product.id)
+                        .order_by(PriceHistory.price.asc())
+                        .first()
+                    )
+                    lowest_price = all_time_lowest[0] if all_time_lowest else product.current_price
+
+                    # Calculate weekly price change
+                    if history and len(history) >= 1:
+                        first_price = history[0].price
+                        price_change = product.current_price - first_price
+                    else:
+                        price_change = 0
+
+                    products_summary.append(
+                        {
+                            "name": product.name,
+                            "current_price": product.current_price,
+                            "lowest_price": lowest_price,
+                            "price_change": price_change,
+                            "url": product.url,
+                        }
+                    )
+
+                    # Calculate potential savings (difference between current price and target)
+                    if product.current_price > product.target_price:
+                        total_savings += product.current_price - product.target_price
+
+                # Sort products by price change (biggest drops first)
+                products_summary.sort(key=lambda x: x["price_change"])
+
+                # Get user preferences
+                preferences = db.query(UserPreferences).filter(UserPreferences.user_id == user.id).first()
+
+                # Send weekly summary email
+                email_service.send_weekly_summary(
+                    to_email=user.email,
+                    products_summary=products_summary,
+                    total_products=len(products),
+                    total_savings=total_savings,
+                    user_preferences=preferences,
+                )
+
+                sent_count += 1
+                logger.info(f"Weekly summary sent to user {user.id}")
+
+            except Exception as e:
+                logger.error(f"Error sending weekly summary to user {user.id}: {str(e)}", exc_info=True)
+                error_count += 1
+                continue
+
+        logger.info(f"Weekly summaries completed: {sent_count} sent, {error_count} errors")
+
+    finally:
+        db.close()
+
+
 # Configure periodic tasks
 # All tasks run every hour for improved precision (±1h instead of ±6h/12h/24h)
 # The filter in check_prices_by_frequency() ensures only eligible products are checked
@@ -405,5 +513,10 @@ celery_app.conf.beat_schedule = {
         "task": "check_prices_by_frequency",
         "schedule": 3600.0,  # Run every 1 hour (in seconds) - improved precision
         "args": (24,),  # Check products with 24h frequency
+    },
+    "send-weekly-summaries": {
+        "task": "send_weekly_summaries",
+        "schedule": 604800.0,  # Run every week (7 days * 24h * 3600s = 604800 seconds)
+        # Runs every Monday at the same time Celery Beat was started
     },
 }
