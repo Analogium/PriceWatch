@@ -33,6 +33,7 @@ class Settings(BaseSettings):
     SMTP_USER: str
     SMTP_PASSWORD: str
     EMAIL_FROM: str
+    FRONTEND_URL: str = "http://localhost:5173"  # Frontend URL for email links
 
     # Redis
     REDIS_URL: str = "redis://localhost:6379/0"

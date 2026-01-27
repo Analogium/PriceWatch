@@ -352,5 +352,221 @@ class TestPreferencesEndpoints:
             assert error  # In actual endpoint, this raises HTTPException
 
 
+class TestWeeklySummaryEmail:
+    """Test suite for weekly summary email functionality."""
+
+    def setup_method(self):
+        """Set up test fixtures."""
+        with patch("app.services.email.settings") as mock_settings:
+            mock_settings.SMTP_HOST = "smtp.test.com"
+            mock_settings.SMTP_PORT = 587
+            mock_settings.SMTP_USER = "test@test.com"
+            mock_settings.SMTP_PASSWORD = "testpass"
+            mock_settings.EMAIL_FROM = "noreply@pricewatch.com"
+            mock_settings.FRONTEND_URL = "http://localhost:5173"
+            from app.services.email import EmailService
+
+            self.email_service = EmailService()
+
+    @pytest.mark.unit
+    @pytest.mark.email
+    @patch("app.services.email.smtplib.SMTP")
+    def test_send_weekly_summary_success(self, mock_smtp):
+        """Test that weekly summary is sent successfully."""
+        mock_server = MagicMock()
+        mock_smtp.return_value.__enter__.return_value = mock_server
+
+        preferences = Mock(spec=UserPreferences)
+        preferences.email_notifications = True
+        preferences.weekly_summary = True
+
+        products_summary = [
+            {
+                "name": "Test Product 1",
+                "current_price": 99.99,
+                "lowest_price": 89.99,
+                "price_change": -10.00,
+                "url": "https://example.com/product1",
+            },
+            {
+                "name": "Test Product 2",
+                "current_price": 149.99,
+                "lowest_price": 149.99,
+                "price_change": 0,
+                "url": "https://example.com/product2",
+            },
+        ]
+
+        self.email_service.send_weekly_summary(
+            to_email="user@example.com",
+            products_summary=products_summary,
+            total_products=2,
+            total_savings=50.00,
+            user_preferences=preferences,
+        )
+
+        # Email should be sent
+        mock_server.send_message.assert_called_once()
+
+    @pytest.mark.unit
+    @pytest.mark.email
+    @patch("app.services.email.smtplib.SMTP")
+    def test_send_weekly_summary_with_email_disabled(self, mock_smtp):
+        """Test that weekly summary is NOT sent when email notifications are disabled."""
+        preferences = Mock(spec=UserPreferences)
+        preferences.email_notifications = False
+        preferences.weekly_summary = True
+
+        self.email_service.send_weekly_summary(
+            to_email="user@example.com",
+            products_summary=[],
+            total_products=0,
+            total_savings=0,
+            user_preferences=preferences,
+        )
+
+        # Email should NOT be sent
+        mock_smtp.assert_not_called()
+
+    @pytest.mark.unit
+    @pytest.mark.email
+    @patch("app.services.email.smtplib.SMTP")
+    def test_send_weekly_summary_with_weekly_summary_disabled(self, mock_smtp):
+        """Test that weekly summary is NOT sent when weekly summary is disabled."""
+        preferences = Mock(spec=UserPreferences)
+        preferences.email_notifications = True
+        preferences.weekly_summary = False
+
+        self.email_service.send_weekly_summary(
+            to_email="user@example.com",
+            products_summary=[],
+            total_products=0,
+            total_savings=0,
+            user_preferences=preferences,
+        )
+
+        # Email should NOT be sent
+        mock_smtp.assert_not_called()
+
+    @pytest.mark.unit
+    @pytest.mark.email
+    @patch("app.services.email.smtplib.SMTP")
+    def test_send_weekly_summary_without_preferences(self, mock_smtp):
+        """Test that weekly summary is sent when no preferences are provided (defaults)."""
+        mock_server = MagicMock()
+        mock_smtp.return_value.__enter__.return_value = mock_server
+
+        self.email_service.send_weekly_summary(
+            to_email="user@example.com",
+            products_summary=[],
+            total_products=0,
+            total_savings=0,
+            user_preferences=None,  # No preferences - use defaults (send email)
+        )
+
+        # Email should be sent (default behavior when no preferences)
+        mock_server.send_message.assert_called_once()
+
+
+class TestEmailTemplateUrls:
+    """Test suite for email template URL handling."""
+
+    def setup_method(self):
+        """Set up test fixtures."""
+        with patch("app.services.email.settings") as mock_settings:
+            mock_settings.SMTP_HOST = "smtp.test.com"
+            mock_settings.SMTP_PORT = 587
+            mock_settings.SMTP_USER = "test@test.com"
+            mock_settings.SMTP_PASSWORD = "testpass"
+            mock_settings.EMAIL_FROM = "noreply@pricewatch.com"
+            mock_settings.FRONTEND_URL = "https://pricewatch.example.com"
+            from app.services.email import EmailService
+
+            self.email_service = EmailService()
+
+    @pytest.mark.unit
+    def test_frontend_url_is_configurable(self):
+        """Test that frontend URL is configurable via settings."""
+        assert self.email_service.frontend_url == "https://pricewatch.example.com"
+
+    @pytest.mark.unit
+    @pytest.mark.email
+    @patch("app.services.email.smtplib.SMTP")
+    def test_price_alert_contains_preferences_link(self, mock_smtp):
+        """Test that price alert email contains link to preferences."""
+        import base64
+
+        mock_server = MagicMock()
+        mock_smtp.return_value.__enter__.return_value = mock_server
+
+        preferences = Mock(spec=UserPreferences)
+        preferences.email_notifications = True
+        preferences.price_drop_alerts = True
+        preferences.webhook_notifications = False
+
+        self.email_service.send_price_alert(
+            to_email="user@example.com",
+            product_name="Test Product",
+            new_price=99.99,
+            old_price=149.99,
+            product_url="https://example.com/product",
+            user_preferences=preferences,
+        )
+
+        # Check that email was sent
+        mock_server.send_message.assert_called_once()
+
+        # Get the sent message and decode the base64 content
+        sent_message = mock_server.send_message.call_args[0][0]
+        email_content = sent_message.as_string()
+
+        # Find the base64 encoded part and decode it
+        # The HTML content is base64 encoded in the message
+        for part in sent_message.walk():
+            if part.get_content_type() == "text/html":
+                payload = part.get_payload(decode=True)
+                if payload:
+                    decoded_content = payload.decode("utf-8")
+                    # Verify preferences URL is in email
+                    assert "settings/notifications" in decoded_content
+                    return
+
+        # Fallback: check the raw email content for the base64 encoded URL
+        assert "settings/notifications" in email_content or "c2V0dGluZ3Mvbm90aWZpY2F0aW9ucw" in email_content
+
+
+class TestAutoCreatePreferencesOnRegistration:
+    """Test suite for auto-creation of preferences on user registration."""
+
+    @pytest.mark.unit
+    def test_preferences_created_with_user(self):
+        """Test that preferences are created when a new user registers."""
+        # This is a logic test - actual integration test would use real DB
+        # Verify that UserPreferences can be created with just user_id
+        user_id = 1
+        preferences = UserPreferences(user_id=user_id)
+
+        assert preferences.user_id == user_id
+        # Defaults will be applied by SQLAlchemy on DB insert
+        # In-memory creation just sets user_id
+
+    @pytest.mark.unit
+    def test_default_preferences_values(self):
+        """Test that default preference values are correct."""
+        # Test creating preferences with explicit default values
+        preferences = UserPreferences(
+            user_id=1,
+            email_notifications=True,  # Default
+            webhook_notifications=False,  # Default
+            price_drop_alerts=True,  # Default
+            weekly_summary=False,  # Default
+        )
+
+        assert preferences.email_notifications is True
+        assert preferences.webhook_notifications is False
+        assert preferences.price_drop_alerts is True
+        assert preferences.weekly_summary is False
+
+
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

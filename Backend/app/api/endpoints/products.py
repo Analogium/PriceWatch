@@ -10,6 +10,7 @@ from app.api.dependencies import get_current_user
 from app.db.base import get_db
 from app.models.product import Product
 from app.models.user import User
+from app.models.user_preferences import UserPreferences
 from app.schemas.price_history import PriceHistoryResponse, PriceHistoryStats
 from app.schemas.product import (
     PaginatedProductsResponse,
@@ -205,9 +206,18 @@ def check_product_price(
 
     # Check if price dropped below target
     if scraped_data.price <= product.target_price and old_price > product.target_price:
-        # Send email notification in background
+        # Get user preferences to respect notification settings
+        preferences = db.query(UserPreferences).filter(UserPreferences.user_id == current_user.id).first()
+
+        # Send email notification in background (respecting user preferences)
         background_tasks.add_task(
-            email_service.send_price_alert, current_user.email, product.name, scraped_data.price, old_price, product.url
+            email_service.send_price_alert,
+            current_user.email,
+            product.name,
+            scraped_data.price,
+            old_price,
+            product.url,
+            user_preferences=preferences,
         )
 
     db.commit()
