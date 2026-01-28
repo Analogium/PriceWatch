@@ -91,7 +91,10 @@ def get_products(
 
 @router.post("", response_model=ProductResponse, status_code=status.HTTP_201_CREATED)
 def create_product(
-    product_data: ProductCreate, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)
+    product_data: ProductCreate,
+    background_tasks: BackgroundTasks,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
 ):
     """Add a new product to track."""
     # Scrape product information
@@ -121,6 +124,22 @@ def create_product(
 
     # Record initial price in history
     price_history_service.record_price(db, new_product.id, scraped_data.price)
+
+    # Send alert if initial price is already at or below target price
+    if scraped_data.price <= product_data.target_price:
+        # Get user preferences to respect notification settings
+        preferences = db.query(UserPreferences).filter(UserPreferences.user_id == current_user.id).first()
+
+        # Send email notification in background (respecting user preferences)
+        background_tasks.add_task(
+            email_service.send_price_alert,
+            current_user.email,
+            new_product.name,
+            scraped_data.price,
+            scraped_data.price,  # old_price = current price for new products
+            new_product.url,
+            user_preferences=preferences,
+        )
 
     return new_product
 
