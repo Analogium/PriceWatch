@@ -12,7 +12,7 @@ from typing import Optional
 from playwright.async_api import Browser, Page
 from playwright.async_api import TimeoutError as PlaywrightTimeoutError
 from playwright.async_api import async_playwright
-from playwright_stealth import stealth_async
+from playwright_stealth import Stealth
 
 from app.core.logging_config import get_logger
 from app.schemas.product import ProductScrapedData
@@ -141,7 +141,9 @@ class PlaywrightScraper:
                     page = await context.new_page()
 
                     # Apply stealth mode to avoid detection
-                    await stealth_async(page)
+                    await Stealth(
+                        navigator_languages_override=("fr-FR", "fr")
+                    ).apply_stealth_async(page)
 
                     # Navigate to URL
                     await page.goto(url, wait_until="networkidle", timeout=self.timeout)
