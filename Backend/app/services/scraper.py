@@ -70,6 +70,17 @@ class SiteDetector:
 class PriceScraper:
     """Service for scraping product information from e-commerce websites."""
 
+    # Site-specific delays (in seconds) to avoid detection
+    SITE_DELAYS = {
+        "amazon": {"min": 5, "max": 10},
+        "fnac": {"min": 2, "max": 4},
+        "cdiscount": {"min": 2, "max": 4},
+        "darty": {"min": 2, "max": 4},
+        "boulanger": {"min": 2, "max": 4},
+        "leclerc": {"min": 2, "max": 4},
+        "default": {"min": 1, "max": 3},
+    }
+
     def __init__(
         self,
         max_retries: int = 3,
@@ -119,6 +130,26 @@ class PriceScraper:
             f"circuit_breaker={self.use_circuit_breaker}, proxy={self.use_proxy})"
         )
 
+    def _clean_amazon_url(self, url: str) -> str:
+        """
+        Extract only /dp/ASIN or /gp/product/ASIN from Amazon URL.
+        Removes tracking parameters that trigger anti-bot detection.
+        """
+        asin_match = re.search(r"/(?:dp|gp/product)/([A-Z0-9]{10})", url, re.IGNORECASE)
+        if asin_match:
+            asin = asin_match.group(1).upper()
+            domain_match = re.search(r"(https?://[^/]+)", url)
+            if domain_match:
+                cleaned_url = f"{domain_match.group(1)}/dp/{asin}"
+                logger.debug(f"Cleaned Amazon URL: {url[:60]}... -> {cleaned_url}")
+                return cleaned_url
+        return url
+
+    def _get_site_delay(self, site: str) -> float:
+        """Get random delay for a specific site."""
+        delays = self.SITE_DELAYS.get(site, self.SITE_DELAYS["default"])
+        return random.uniform(delays["min"], delays["max"])
+
     def scrape_product(self, url: str, bypass_cache: bool = False) -> Optional[ProductScrapedData]:
         """
         Scrape product information from a URL with retry logic and advanced features.
@@ -136,6 +167,13 @@ class PriceScraper:
         """
         # Detect site for circuit breaker
         site = SiteDetector.detect_site(url) or "unknown"
+
+        # Clean Amazon URLs to remove tracking parameters
+        original_url = url
+        if site == "amazon":
+            url = self._clean_amazon_url(url)
+            if url != original_url:
+                logger.info("Cleaned Amazon URL for scraping")
 
         # Check cache first (unless bypassed)
         if self.use_cache and self.cache is not None and not bypass_cache:
@@ -156,13 +194,14 @@ class PriceScraper:
             try:
                 logger.info(f"Scraping attempt {attempt}/{self.max_retries} for URL: {url}")
 
-                # Add random delay to appear more human-like
+                # Add site-specific delay to appear more human-like
                 if attempt > 1:
-                    delay = random.uniform(1.0, 3.0)
+                    delay = self._get_site_delay(site)
+                    logger.debug(f"Waiting {delay:.1f}s before retry for {site}")
                     time.sleep(delay)
 
-                # Rotate User-Agent on each attempt
-                headers = UserAgentRotator.get_headers()
+                # Rotate User-Agent on each attempt with site-specific headers
+                headers = UserAgentRotator.get_headers(site=site)
 
                 # Get proxy if enabled
                 proxies = None

@@ -281,7 +281,7 @@ class TestCircuitBreaker:
     def test_record_failure_opens_circuit_at_threshold(self, breaker, mock_redis):
         """Test that circuit opens when failure threshold is reached."""
         mock_redis.get.return_value = CircuitBreaker.STATE_CLOSED
-        mock_redis.incr.return_value = 5  # Reached threshold
+        mock_redis.incr.return_value = 10  # Reached threshold (10 for Amazon)
 
         breaker.record_failure("amazon")
 

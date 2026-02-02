@@ -12,9 +12,11 @@ from typing import Optional
 from playwright.async_api import Browser, Page
 from playwright.async_api import TimeoutError as PlaywrightTimeoutError
 from playwright.async_api import async_playwright
+from playwright_stealth import stealth_async
 
 from app.core.logging_config import get_logger
 from app.schemas.product import ProductScrapedData
+from app.services.scraper_advanced import UserAgentRotator
 
 logger = get_logger(__name__)
 
@@ -30,6 +32,17 @@ class PlaywrightScraper:
     - Appear as a real human user
     """
 
+    # Site-specific delays (in seconds) to avoid detection
+    SITE_DELAYS = {
+        "amazon": {"min": 5, "max": 10},
+        "fnac": {"min": 3, "max": 5},
+        "cdiscount": {"min": 3, "max": 5},
+        "darty": {"min": 3, "max": 5},
+        "boulanger": {"min": 3, "max": 5},
+        "leclerc": {"min": 3, "max": 5},
+        "default": {"min": 2, "max": 5},
+    }
+
     def __init__(self, headless: bool = True, timeout: int = 30000, max_retries: int = 2):
         """
         Initialize Playwright scraper.
@@ -44,6 +57,38 @@ class PlaywrightScraper:
         self.max_retries = max_retries
         self.browser: Optional[Browser] = None
 
+    def _clean_amazon_url(self, url: str) -> str:
+        """Extract only /dp/ASIN from Amazon URL to remove tracking parameters."""
+        asin_match = re.search(r"/(?:dp|gp/product)/([A-Z0-9]{10})", url, re.IGNORECASE)
+        if asin_match:
+            asin = asin_match.group(1).upper()
+            domain_match = re.search(r"(https?://[^/]+)", url)
+            if domain_match:
+                return f"{domain_match.group(1)}/dp/{asin}"
+        return url
+
+    def _get_site_delay(self, site: str) -> float:
+        """Get random delay for a specific site."""
+        delays = self.SITE_DELAYS.get(site, self.SITE_DELAYS["default"])
+        return random.uniform(delays["min"], delays["max"])
+
+    def _detect_site(self, url: str) -> str:
+        """Detect site from URL."""
+        url_lower = url.lower()
+        if "amazon" in url_lower:
+            return "amazon"
+        elif "fnac" in url_lower:
+            return "fnac"
+        elif "darty" in url_lower:
+            return "darty"
+        elif "cdiscount" in url_lower:
+            return "cdiscount"
+        elif "boulanger" in url_lower:
+            return "boulanger"
+        elif "leclerc" in url_lower:
+            return "leclerc"
+        return "unknown"
+
     async def scrape_product(self, url: str) -> Optional[ProductScrapedData]:
         """
         Scrape product using browser automation with retry logic.
@@ -56,31 +101,38 @@ class PlaywrightScraper:
         """
         last_error = None
 
+        # Detect site and clean URL
+        site = self._detect_site(url)
+        original_url = url
+        if site == "amazon":
+            url = self._clean_amazon_url(url)
+            if url != original_url:
+                logger.info("Cleaned Amazon URL for Playwright scraping")
+
         for attempt in range(1, self.max_retries + 1):
             try:
-                # Add random delay between retries (2-5 seconds)
+                # Add site-specific delay between retries
                 if attempt > 1:
-                    delay = random.uniform(2.0, 5.0)
+                    delay = self._get_site_delay(site)
                     logger.info(f"Playwright retry {attempt}/{self.max_retries} - waiting {delay:.1f}s...")
                     await asyncio.sleep(delay)
 
                 logger.info(f"Playwright scraping attempt {attempt}/{self.max_retries} for: {url}")
 
                 async with async_playwright() as p:
-                    # Launch browser
+                    # Launch browser with minimal args (stealth will handle the rest)
                     browser = await p.chromium.launch(
                         headless=self.headless,
                         args=[
-                            "--disable-blink-features=AutomationControlled",
                             "--disable-dev-shm-usage",
                             "--no-sandbox",
                         ],
                     )
 
-                    # Create context with realistic settings
+                    # Create context with realistic settings and rotated user agent
                     context = await browser.new_context(
                         viewport={"width": 1920, "height": 1080},
-                        user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+                        user_agent=UserAgentRotator.get_random(),
                         locale="fr-FR",
                         timezone_id="Europe/Paris",
                     )
@@ -88,24 +140,28 @@ class PlaywrightScraper:
                     # Create page
                     page = await context.new_page()
 
+                    # Apply stealth mode to avoid detection
+                    await stealth_async(page)
+
                     # Navigate to URL
                     await page.goto(url, wait_until="networkidle", timeout=self.timeout)
 
-                    # Wait a bit for dynamic content
-                    await page.wait_for_timeout(2000)
+                    # Wait longer for dynamic content (site-specific)
+                    wait_time = 3000 if site == "amazon" else 2000
+                    await page.wait_for_timeout(wait_time)
 
-                    # Detect site and scrape accordingly
-                    if "amazon" in url.lower():
+                    # Scrape based on detected site
+                    if site == "amazon":
                         result = await self._scrape_amazon(page)
-                    elif "fnac" in url.lower():
+                    elif site == "fnac":
                         result = await self._scrape_fnac(page)
-                    elif "darty" in url.lower():
+                    elif site == "darty":
                         result = await self._scrape_darty(page)
-                    elif "cdiscount" in url.lower():
+                    elif site == "cdiscount":
                         result = await self._scrape_cdiscount(page)
-                    elif "boulanger" in url.lower():
+                    elif site == "boulanger":
                         result = await self._scrape_boulanger(page)
-                    elif "leclerc" in url.lower():
+                    elif site == "leclerc":
                         result = await self._scrape_leclerc(page)
                     else:
                         result = await self._scrape_generic(page)
