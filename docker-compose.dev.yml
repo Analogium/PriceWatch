@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # Seulement PostgreSQL et Redis pour le développement local
   db:

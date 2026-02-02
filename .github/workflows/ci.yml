@@ -279,19 +279,24 @@ jobs:
             # Navigate to project directory
             cd apps/PriceWatch || exit 1
 
+            # Stash local changes to preserve them
+            echo "📦 Stashing local changes..."
+            git stash --include-untracked
+
             # Pull latest changes
-            echo "📥 Pulling latest changes from master..."
+            echo "📥 Pulling latest changes..."
             git pull origin master
 
-            # Navigate to apps directory for docker-compose
-            cd apps
+            # Restore local changes
+            echo "📦 Restoring local changes..."
+            git stash pop || echo "⚠️ No stash to apply or merge conflict (check manually)"
 
             # Rebuild and restart services
             echo "🔨 Building Docker images..."
-            docker compose build pricewatch-backend pricewatch-frontend pricewatch-celery-worker pricewatch-celery-beat
+            docker compose build backend frontend celery_worker celery_beat
 
             echo "♻️ Restarting services..."
-            docker compose up -d pricewatch-backend pricewatch-celery-worker pricewatch-celery-beat pricewatch-frontend
+            docker compose up -d backend celery_worker celery_beat frontend
 
             # Wait for services to start
             sleep 5
