@@ -19,6 +19,39 @@ logger = get_logger(__name__)
 class UserAgentRotator:
     """Rotates User-Agent headers to avoid detection and blocking."""
 
+    # Site-specific referers to appear as legitimate traffic
+    REFERERS = {
+        "amazon": [
+            "https://www.google.fr/search?q=amazon",
+            "https://www.google.fr/",
+            "https://www.amazon.fr/",
+        ],
+        "fnac": [
+            "https://www.google.fr/search?q=fnac",
+            "https://www.google.fr/",
+            "https://www.fnac.com/",
+        ],
+        "cdiscount": [
+            "https://www.google.fr/search?q=cdiscount",
+            "https://www.google.fr/",
+        ],
+        "darty": [
+            "https://www.google.fr/search?q=darty",
+            "https://www.google.fr/",
+        ],
+        "boulanger": [
+            "https://www.google.fr/search?q=boulanger",
+            "https://www.google.fr/",
+        ],
+        "leclerc": [
+            "https://www.google.fr/search?q=leclerc",
+            "https://www.google.fr/",
+        ],
+        "default": [
+            "https://www.google.fr/",
+        ],
+    }
+
     # Comprehensive list of realistic User-Agents (browsers from 2023-2024)
     USER_AGENTS = [
         # Chrome on Windows
@@ -59,11 +92,12 @@ class UserAgentRotator:
         return user_agent
 
     @classmethod
-    def get_headers(cls, include_full_headers: bool = True) -> Dict[str, str]:
+    def get_headers(cls, site: str = "default", include_full_headers: bool = True) -> Dict[str, str]:
         """
-        Get a complete set of HTTP headers with random User-Agent.
+        Get a complete set of HTTP headers with random User-Agent and site-specific Referer.
 
         Args:
+            site: Target site name for site-specific headers (e.g., 'amazon', 'fnac')
             include_full_headers: If True, includes all browser headers. If False, only User-Agent.
 
         Returns:
@@ -74,23 +108,25 @@ class UserAgentRotator:
         }
 
         if include_full_headers:
+            referers = cls.REFERERS.get(site, cls.REFERERS["default"])
             headers.update(
                 {
-                    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8",
+                    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
                     "Accept-Language": "fr-FR,fr;q=0.9,en-US;q=0.8,en;q=0.7",
                     "Accept-Encoding": "gzip, deflate, br",
+                    "Referer": random.choice(referers),
                     "DNT": "1",
                     "Connection": "keep-alive",
                     "Upgrade-Insecure-Requests": "1",
                     "Sec-Fetch-Dest": "document",
                     "Sec-Fetch-Mode": "navigate",
-                    "Sec-Fetch-Site": "none",
+                    "Sec-Fetch-Site": "cross-site",
                     "Sec-Fetch-User": "?1",
                     "Cache-Control": "max-age=0",
                 }
             )
 
-        logger.debug(f"Generated headers with {len(headers)} fields")
+        logger.debug(f"Generated headers for site '{site}' with {len(headers)} fields")
         return headers
 
 
@@ -242,6 +278,13 @@ class CircuitBreaker:
     STATE_OPEN = "open"
     STATE_HALF_OPEN = "half_open"
 
+    # Site-specific thresholds (Amazon needs higher threshold due to frequent CAPTCHAs)
+    SITE_THRESHOLDS = {
+        "amazon": {"failure_threshold": 10, "recovery_timeout": 120},
+        "cdiscount": {"failure_threshold": 8, "recovery_timeout": 90},
+        "default": {"failure_threshold": 5, "recovery_timeout": 60},
+    }
+
     def __init__(
         self,
         redis_client: Optional[Redis] = None,
@@ -289,6 +332,10 @@ class CircuitBreaker:
         """Get Redis key for last failure timestamp."""
         return f"{self.key_prefix}{site}:last_failure"
 
+    def _get_site_thresholds(self, site: str) -> Dict[str, int]:
+        """Get failure threshold and recovery timeout for a specific site."""
+        return self.SITE_THRESHOLDS.get(site, self.SITE_THRESHOLDS["default"])
+
     def get_state(self, site: str) -> str:
         """
         Get current circuit state for a site.
@@ -317,17 +364,19 @@ class CircuitBreaker:
             True if requests allowed, False if circuit is open
         """
         state = self.get_state(site)
+        site_thresholds = self._get_site_thresholds(site)
+        recovery_timeout = site_thresholds["recovery_timeout"]
 
         if state == self.STATE_CLOSED:
             return True
 
         if state == self.STATE_OPEN:
-            # Check if recovery timeout has passed
+            # Check if recovery timeout has passed (use site-specific timeout)
             try:
                 last_failure_ts = self.redis_client.get(self._get_last_failure_key(site))
                 if last_failure_ts:
                     last_failure = datetime.fromisoformat(str(last_failure_ts))
-                    if datetime.utcnow() >= last_failure + timedelta(seconds=self.recovery_timeout):
+                    if datetime.utcnow() >= last_failure + timedelta(seconds=recovery_timeout):
                         # Move to half-open state
                         logger.info(f"Circuit for '{site}' moving to HALF_OPEN state (recovery attempt)")
                         self.redis_client.set(self._get_state_key(site), self.STATE_HALF_OPEN)
@@ -336,7 +385,7 @@ class CircuitBreaker:
             except Exception as e:
                 logger.error(f"Error checking recovery timeout: {str(e)}")
 
-            logger.warning(f"Circuit OPEN for '{site}' - requests blocked (recovery in {self.recovery_timeout}s)")
+            logger.warning(f"Circuit OPEN for '{site}' - requests blocked (recovery in {recovery_timeout}s)")
             return False
 
         # HALF_OPEN state - allow limited requests
@@ -381,6 +430,8 @@ class CircuitBreaker:
         """
         try:
             state = self.get_state(site)
+            site_thresholds = self._get_site_thresholds(site)
+            failure_threshold = site_thresholds["failure_threshold"]
 
             # Increment failure counter
             failures = int(self.redis_client.incr(self._get_failure_key(site)))  # type: ignore[arg-type]
@@ -389,7 +440,7 @@ class CircuitBreaker:
                 datetime.utcnow().isoformat(),
             )
 
-            logger.warning(f"Circuit failure for '{site}': {failures}/{self.failure_threshold}")
+            logger.warning(f"Circuit failure for '{site}': {failures}/{failure_threshold}")
 
             if state == self.STATE_HALF_OPEN:
                 # Immediate open on failure during recovery
@@ -397,7 +448,7 @@ class CircuitBreaker:
                 self.redis_client.set(self._get_state_key(site), self.STATE_OPEN)
                 self.redis_client.delete(self._get_success_key(site))
 
-            elif failures >= self.failure_threshold:
+            elif failures >= failure_threshold:
                 # Open circuit
                 logger.warning(f"Circuit OPEN for '{site}' - threshold reached ({failures} failures)")
                 self.redis_client.set(self._get_state_key(site), self.STATE_OPEN)
