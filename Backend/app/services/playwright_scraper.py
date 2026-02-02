@@ -141,9 +141,7 @@ class PlaywrightScraper:
                     page = await context.new_page()
 
                     # Apply stealth mode to avoid detection
-                    await Stealth(
-                        navigator_languages_override=("fr-FR", "fr")
-                    ).apply_stealth_async(page)
+                    await Stealth(navigator_languages_override=("fr-FR", "fr")).apply_stealth_async(page)
 
                     # Navigate to URL
                     await page.goto(url, wait_until="networkidle", timeout=self.timeout)
