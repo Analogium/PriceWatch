@@ -9,7 +9,7 @@ import json
 import random
 import re
 from pathlib import Path
-from typing import Optional
+from typing import Any, Optional
 
 from playwright.async_api import Browser, Page
 from playwright.async_api import TimeoutError as PlaywrightTimeoutError
@@ -94,7 +94,7 @@ class PlaywrightScraper:
             return "leclerc"
         return "unknown"
 
-    def _load_cookies(self, site: str) -> list[dict] | None:
+    def _load_cookies(self, site: str) -> list[dict[str, Any]] | None:
         """
         Load cookies for a specific site from the cookies directory.
 
@@ -171,7 +171,7 @@ class PlaywrightScraper:
                     # Load and inject cookies for the site (bypass anti-bot protection)
                     cookies = self._load_cookies(site)
                     if cookies:
-                        await context.add_cookies(cookies)
+                        await context.add_cookies(cookies)  # type: ignore[arg-type]
                         logger.info(f"Injected {len(cookies)} cookies for {site}")
 
                     # Create page
