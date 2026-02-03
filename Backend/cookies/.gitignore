@@ -1,0 +1,6 @@
+# Ignore all cookie files (contain sensitive session data)
+*_cookies.json
+
+# Keep these files tracked
+!.gitignore
+!README.md
