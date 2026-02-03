@@ -5,9 +5,11 @@ This scraper uses browser automation to bypass CAPTCHA and Cloudflare protection
 """
 
 import asyncio
+import json
 import random
 import re
-from typing import Optional
+from pathlib import Path
+from typing import Any, Optional
 
 from playwright.async_api import Browser, Page
 from playwright.async_api import TimeoutError as PlaywrightTimeoutError
@@ -31,6 +33,9 @@ class PlaywrightScraper:
     - Bypass CAPTCHA and Cloudflare
     - Appear as a real human user
     """
+
+    # Path to cookies directory
+    COOKIES_DIR = Path(__file__).parent.parent.parent / "cookies"
 
     # Site-specific delays (in seconds) to avoid detection
     SITE_DELAYS = {
@@ -89,6 +94,32 @@ class PlaywrightScraper:
             return "leclerc"
         return "unknown"
 
+    def _load_cookies(self, site: str) -> list[dict[str, Any]] | None:
+        """
+        Load cookies for a specific site from the cookies directory.
+
+        Args:
+            site: Site name (e.g., "amazon", "fnac")
+
+        Returns:
+            List of cookie dictionaries if file exists and is valid, None otherwise
+        """
+        cookie_file = self.COOKIES_DIR / f"{site}_cookies.json"
+        if cookie_file.exists():
+            try:
+                with open(cookie_file, "r", encoding="utf-8") as f:
+                    cookies = json.load(f)
+                if isinstance(cookies, list) and len(cookies) > 0:
+                    logger.info(f"Loaded {len(cookies)} cookies for {site}")
+                    return cookies
+                else:
+                    logger.warning(f"Cookie file for {site} is empty or invalid format")
+            except json.JSONDecodeError as e:
+                logger.warning(f"Failed to parse cookies for {site}: {e}")
+            except Exception as e:
+                logger.warning(f"Failed to load cookies for {site}: {e}")
+        return None
+
     async def scrape_product(self, url: str) -> Optional[ProductScrapedData]:
         """
         Scrape product using browser automation with retry logic.
@@ -136,6 +167,12 @@ class PlaywrightScraper:
                         locale="fr-FR",
                         timezone_id="Europe/Paris",
                     )
+
+                    # Load and inject cookies for the site (bypass anti-bot protection)
+                    cookies = self._load_cookies(site)
+                    if cookies:
+                        await context.add_cookies(cookies)  # type: ignore[arg-type]
+                        logger.info(f"Injected {len(cookies)} cookies for {site}")
 
                     # Create page
                     page = await context.new_page()
