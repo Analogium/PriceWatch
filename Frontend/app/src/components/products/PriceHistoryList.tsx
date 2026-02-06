@@ -113,7 +113,6 @@ export const PriceHistoryList = ({ priceHistory }: PriceHistoryListProps) => {
                                 : 'text-gray-600 dark:text-gray-400'
                           }`}
                         >
-                          {variation > 0 ? '+' : ''}
                           {formatPercentage(variation / 100)}
                         </span>
                       </div>
