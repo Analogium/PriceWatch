@@ -1,25 +1,52 @@
-name: CI/CD Pipeline - Backend
+name: CI/CD Pipeline
 
 on:
   push:
     branches: [main, master, develop]
     paths:
       - 'Backend/**'
+      - 'Frontend/**'
       - '.github/workflows/ci.yml'
   pull_request:
     branches: [main, master, develop]
     paths:
       - 'Backend/**'
+      - 'Frontend/**'
       - '.github/workflows/ci.yml'
 
 env:
   PYTHON_VERSION: "3.12"
+  NODE_VERSION: "22"
 
 jobs:
-  # Run linting checks
-  lint:
-    name: Code Quality
+  # Detect which parts of the codebase changed
+  detect-changes:
+    name: Detect Changes
     runs-on: ubuntu-latest
+    outputs:
+      backend: ${{ steps.filter.outputs.backend }}
+      frontend: ${{ steps.filter.outputs.frontend }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check changed paths
+        uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            backend:
+              - 'Backend/**'
+            frontend:
+              - 'Frontend/**'
+
+  # ==================== BACKEND ====================
+
+  backend-lint:
+    name: "Backend: Code Quality"
+    runs-on: ubuntu-latest
+    needs: detect-changes
+    if: needs.detect-changes.outputs.backend == 'true'
     defaults:
       run:
         working-directory: ./Backend
@@ -52,11 +79,10 @@ jobs:
       - name: Type check with mypy
         run: mypy app/ tasks.py
 
-  # Run unit tests
-  test:
-    name: Unit Tests
+  backend-test:
+    name: "Backend: Unit Tests"
     runs-on: ubuntu-latest
-    needs: lint
+    needs: backend-lint
 
     services:
       postgres:
@@ -143,11 +169,10 @@ jobs:
           name: pricewatch-coverage
           fail_ci_if_error: false
 
-  # Build and test Docker image
-  docker-build:
-    name: Docker Build
+  backend-docker-build:
+    name: "Backend: Docker Build"
     runs-on: ubuntu-latest
-    needs: test
+    needs: backend-test
 
     steps:
       - name: Checkout code
@@ -166,11 +191,10 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-  # Security scanning
-  security:
-    name: Security Scan
+  backend-security:
+    name: "Backend: Security Scan"
     runs-on: ubuntu-latest
-    needs: lint
+    needs: backend-lint
     defaults:
       run:
         working-directory: ./Backend
@@ -207,11 +231,10 @@ jobs:
           path: Backend/bandit-report.json
           retention-days: 30
 
-  # Integration tests (optional, runs on main branch only)
   integration-test:
-    name: Integration Tests
+    name: "Backend: Integration Tests"
     runs-on: ubuntu-latest
-    needs: docker-build
+    needs: backend-docker-build
     if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
 
     steps:
@@ -257,13 +280,111 @@ jobs:
         working-directory: ./Backend
         run: docker compose down -v
 
-  # Deploy to VPS
+  # ==================== FRONTEND ====================
+
+  frontend-lint:
+    name: "Frontend: Code Quality"
+    runs-on: ubuntu-latest
+    needs: detect-changes
+    if: needs.detect-changes.outputs.frontend == 'true'
+    defaults:
+      run:
+        working-directory: ./Frontend/app
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "npm"
+          cache-dependency-path: "Frontend/app/package-lock.json"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check formatting with Prettier
+        run: npm run format:check
+
+      - name: Lint with ESLint
+        run: npm run lint
+
+      - name: Type check with TypeScript
+        run: npm run type-check
+
+  frontend-build:
+    name: "Frontend: Build"
+    runs-on: ubuntu-latest
+    needs: frontend-lint
+    defaults:
+      run:
+        working-directory: ./Frontend/app
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "npm"
+          cache-dependency-path: "Frontend/app/package-lock.json"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build for production
+        run: npm run build
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-build
+          path: Frontend/app/dist/
+          retention-days: 7
+
+  frontend-docker-build:
+    name: "Frontend: Docker Build"
+    runs-on: ubuntu-latest
+    needs: frontend-build
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./Frontend
+          file: ./Frontend/Dockerfile
+          push: false
+          tags: pricewatch-frontend:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # ==================== DEPLOY ====================
+
   deploy:
     name: Deploy to VPS
     runs-on: ubuntu-latest
-    needs: [lint, test, docker-build, security]
-    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+    needs: [detect-changes, backend-lint, backend-test, backend-docker-build, backend-security, frontend-lint, frontend-build, frontend-docker-build]
+    # Run on master, and only if all required checks passed (skipped counts as passed)
+    if: |
+      always() &&
+      (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master') &&
+      !contains(needs.*.result, 'failure') &&
+      !contains(needs.*.result, 'cancelled')
     environment: production
+
+    env:
+      BACKEND_CHANGED: ${{ needs.detect-changes.outputs.backend }}
+      FRONTEND_CHANGED: ${{ needs.detect-changes.outputs.frontend }}
 
     steps:
       - name: Deploy to VPS via SSH
@@ -273,8 +394,11 @@ jobs:
           username: ${{ secrets.VPS_USERNAME }}
           key: ${{ secrets.VPS_SSH_KEY }}
           port: ${{ secrets.VPS_PORT || 2222 }}
+          envs: BACKEND_CHANGED,FRONTEND_CHANGED
           script: |
             echo "🚀 Starting deployment on VPS..."
+            echo "Backend changed: $BACKEND_CHANGED"
+            echo "Frontend changed: $FRONTEND_CHANGED"
 
             # Navigate to project directory
             cd apps/PriceWatch || exit 1
@@ -291,12 +415,25 @@ jobs:
             echo "📦 Restoring local changes..."
             git stash pop || echo "⚠️ No stash to apply or merge conflict (check manually)"
 
-            # Rebuild and restart services
-            echo "🔨 Building Docker images..."
-            docker compose build backend frontend celery_worker celery_beat
+            # Build only what changed
+            SERVICES_TO_BUILD=""
+            SERVICES_TO_RESTART=""
 
-            echo "♻️ Restarting services..."
-            docker compose up -d backend celery_worker celery_beat frontend
+            if [ "$BACKEND_CHANGED" = "true" ]; then
+              SERVICES_TO_BUILD="$SERVICES_TO_BUILD backend celery_worker celery_beat"
+              SERVICES_TO_RESTART="$SERVICES_TO_RESTART backend celery_worker celery_beat"
+            fi
+
+            if [ "$FRONTEND_CHANGED" = "true" ]; then
+              SERVICES_TO_BUILD="$SERVICES_TO_BUILD frontend"
+              SERVICES_TO_RESTART="$SERVICES_TO_RESTART frontend"
+            fi
+
+            echo "🔨 Building Docker images: $SERVICES_TO_BUILD"
+            docker compose build $SERVICES_TO_BUILD
+
+            echo "♻️ Restarting services: $SERVICES_TO_RESTART"
+            docker compose up -d $SERVICES_TO_RESTART
 
             # Wait for services to start
             sleep 5
@@ -317,4 +454,6 @@ jobs:
           echo "Branch: ${{ github.ref }}"
           echo "Commit: ${{ github.sha }}"
           echo "Actor: ${{ github.actor }}"
+          echo "Backend changed: ${{ needs.detect-changes.outputs.backend }}"
+          echo "Frontend changed: ${{ needs.detect-changes.outputs.frontend }}"
           echo "Status: ${{ job.status }}"
