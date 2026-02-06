@@ -25,6 +25,7 @@ export const formatRelativeTime = (dateString: string): string => {
 
 export const formatPercentage = (value: number | null): string => {
   if (value === null) return '-';
-  const sign = value > 0 ? '+' : '';
-  return `${sign}${value.toFixed(2)}%`;
+  const percentage = value * 100;
+  const sign = percentage > 0 ? '+' : '';
+  return `${sign}${percentage.toFixed(2)}%`;
 };
