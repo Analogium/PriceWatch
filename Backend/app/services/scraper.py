@@ -440,6 +440,41 @@ class PriceScraper:
 
         return False
 
+    def _extract_amazon_price_from_container(self, container) -> Optional[float]:
+        """
+        Extract price from an Amazon price container element.
+
+        Tries .a-offscreen first (most reliable, contains full price like "13,99 €"),
+        then falls back to .a-price-whole + .a-price-fraction.
+
+        Args:
+            container: BeautifulSoup element containing price elements
+
+        Returns:
+            Extracted price as float, or None
+        """
+        # Strategy 1: .a-offscreen within .a-price (most reliable - full formatted price)
+        a_price = container.find("span", {"class": "a-price"})
+        if a_price:
+            offscreen = a_price.find("span", {"class": "a-offscreen"})
+            if offscreen:
+                price_text = offscreen.text.strip().replace("€", "").replace(" ", "").replace("\n", "")
+                match = re.search(r"(\d+)[.,](\d+)", price_text)
+                if match:
+                    return float(f"{match.group(1)}.{match.group(2)}")
+
+        # Strategy 2: .a-price-whole + .a-price-fraction
+        price_whole = container.find("span", {"class": "a-price-whole"})
+        if price_whole:
+            price_str = price_whole.text.strip().replace(",", "").replace(" ", "")
+            price_fraction = container.find("span", {"class": "a-price-fraction"})
+            if price_fraction:
+                fraction_str = price_fraction.text.strip().replace(",", "").replace(" ", "")
+                price_str = price_str.rstrip(".") + "." + fraction_str
+            return float(re.sub(r"[^\d.]", "", price_str))
+
+        return None
+
     def _scrape_amazon(self, soup: BeautifulSoup) -> Optional[ProductScrapedData]:
         """Scrape Amazon product page."""
         try:
@@ -447,17 +482,34 @@ class PriceScraper:
             title_elem = soup.find("span", {"id": "productTitle"})
             name = title_elem.text.strip() if title_elem else "Unknown Product"
 
-            # Price (Amazon has multiple price formats)
+            # Price - scope to main product price containers to avoid picking up
+            # other sellers' prices, "Subscribe & Save" prices, or variation prices.
             price = None
-            price_whole = soup.find("span", {"class": "a-price-whole"})
-            price_fraction = soup.find("span", {"class": "a-price-fraction"})
 
-            if price_whole:
-                price_str = price_whole.text.strip().replace(",", "").replace(" ", "")
-                if price_fraction:
-                    fraction_str = price_fraction.text.strip().replace(",", "").replace(" ", "")
-                    price_str = price_str.rstrip(".") + "." + fraction_str
-                price = float(re.sub(r"[^\d.]", "", price_str))
+            # Main price container IDs in order of reliability
+            price_container_ids = [
+                "corePrice_feature_div",
+                "corePriceDisplay_desktop_feature_div",
+                "price_inside_buybox",
+                "buyBoxInner",
+                "apex_desktop",
+            ]
+
+            for container_id in price_container_ids:
+                container = soup.find(id=container_id)
+                if container:
+                    extracted = self._extract_amazon_price_from_container(container)
+                    if extracted:
+                        price = extracted
+                        logger.debug(f"Amazon price {price} extracted from #{container_id}")
+                        break
+
+            # Fallback: unscoped search (original behavior) if no container found
+            if price is None:
+                logger.debug("Amazon: no price in known containers, falling back to unscoped search")
+                extracted = self._extract_amazon_price_from_container(soup)
+                if extracted:
+                    price = extracted
 
             # Image
             image_elem = soup.find("img", {"id": "landingImage"})
