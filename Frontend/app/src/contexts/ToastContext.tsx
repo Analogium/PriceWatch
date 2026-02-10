@@ -1,6 +1,6 @@
 /* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useState, useCallback, useMemo, type ReactNode } from 'react';
-import type { ToastProps } from '@/components/ui';
+import { ToastContainer, type ToastProps } from '@/components/ui';
 
 interface ToastContextValue {
   toasts: ToastProps[];
@@ -84,7 +84,12 @@ export const ToastProvider = ({ children }: { children: ReactNode }) => {
     [toasts, addToast, removeToast, success, error, warning, info]
   );
 
-  return <ToastContext.Provider value={value}>{children}</ToastContext.Provider>;
+  return (
+    <ToastContext.Provider value={value}>
+      {children}
+      <ToastContainer toasts={toasts} />
+    </ToastContext.Provider>
+  );
 };
 
 export const useToast = () => {

@@ -22,6 +22,7 @@ from app.models.user import User
 from app.models.user_preferences import UserPreferences
 from app.schemas.user import (
     EmailVerification,
+    GoogleAuthRequest,
     PasswordResetConfirm,
     PasswordResetRequest,
     RefreshTokenRequest,
@@ -30,6 +31,7 @@ from app.schemas.user import (
     UserResponse,
 )
 from app.services.email import email_service
+from app.services.google_auth import GoogleAuthError, verify_google_token
 
 router = APIRouter()
 
@@ -86,6 +88,13 @@ async def login(request: Request, form_data: OAuth2PasswordRequestForm = Depends
     user = db.query(User).filter(User.email == form_data.username).first()
     if not user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
+
+    # Check if user has a password (Google-only users don't)
+    if not user.password_hash:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="This account uses Google sign-in. Please log in with Google.",
+        )
 
     # Verify password
     if not verify_password(form_data.password, user.password_hash):
@@ -196,6 +205,67 @@ async def reset_password(request: Request, reset_data: PasswordResetConfirm, db:
     user.password_hash = get_password_hash(reset_data.new_password)
     user.reset_token = None
     user.reset_token_expires = None
+
+    # Upgrade Google-only accounts to "both" when they set a password
+    if user.auth_provider == "google":
+        user.auth_provider = "both"
+
     db.commit()
 
     return {"message": "Password reset successfully"}
+
+
+@router.post("/google", response_model=Token)
+async def google_auth(request: Request, google_data: GoogleAuthRequest, db: Session = Depends(get_db)):
+    """Authenticate or register a user via Google OAuth."""
+    # Rate limiting
+    await rate_limiter.check_rate_limit(request)
+
+    # Verify the Google ID token
+    try:
+        google_user = verify_google_token(google_data.credential)
+    except GoogleAuthError as e:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=str(e))
+
+    # Reject unverified Google emails
+    if not google_user.email_verified:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Google email is not verified")
+
+    # Check if user with this Google ID already exists
+    user = db.query(User).filter(User.google_id == google_user.google_id).first()
+
+    if not user:
+        # Check if user with this email already exists (link accounts)
+        user = db.query(User).filter(User.email == google_user.email).first()
+
+        if user:
+            # Link Google account to existing local user
+            user.google_id = google_user.google_id
+            user.auth_provider = "both"
+            if not user.is_verified:
+                user.is_verified = True
+            db.commit()
+        else:
+            # Create new user with Google credentials
+            user = User(
+                email=google_user.email,
+                password_hash=None,
+                google_id=google_user.google_id,
+                auth_provider="google",
+                is_verified=True,
+            )
+            db.add(user)
+            db.commit()
+            db.refresh(user)
+
+            # Create default user preferences
+            default_preferences = UserPreferences(user_id=user.id)
+            db.add(default_preferences)
+            db.commit()
+
+    # Generate tokens
+    access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = create_access_token(data={"sub": user.email}, expires_delta=access_token_expires)
+    refresh_token = create_refresh_token(data={"sub": user.email})
+
+    return {"access_token": access_token, "refresh_token": refresh_token, "token_type": "bearer"}

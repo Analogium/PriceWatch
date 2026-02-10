@@ -9,6 +9,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (credentials: LoginCredentials) => Promise<void>;
+  loginWithGoogle: (credential: string) => Promise<void>;
   register: (data: RegisterData) => Promise<void>;
   logout: () => void;
   checkAuth: () => Promise<void>;
@@ -55,6 +56,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(userData);
   }, []);
 
+  const loginWithGoogle = useCallback(async (credential: string) => {
+    const tokenData = await authApi.googleLogin(credential);
+    localStorage.setItem('access_token', tokenData.access_token);
+    if (tokenData.refresh_token) {
+      localStorage.setItem('refresh_token', tokenData.refresh_token);
+    }
+    const userData = await authApi.me();
+    setUser(userData);
+  }, []);
+
   const register = useCallback(async (data: RegisterData) => {
     // Backend doesn't need confirmPassword, only email and password
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -76,11 +87,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       isAuthenticated,
       isLoading,
       login,
+      loginWithGoogle,
       register,
       logout,
       checkAuth,
     }),
-    [user, isAuthenticated, isLoading, login, register, logout, checkAuth]
+    [user, isAuthenticated, isLoading, login, loginWithGoogle, register, logout, checkAuth]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

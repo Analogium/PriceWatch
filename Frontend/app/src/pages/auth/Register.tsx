@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Link, useNavigate } from 'react-router';
+import { GoogleLogin } from '@react-oauth/google';
 import { Button, Input, Card } from '@/components/ui';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/contexts/ToastContext';
@@ -10,7 +11,7 @@ import type { RegisterData } from '@/types';
 
 export default function Register() {
   const navigate = useNavigate();
-  const { register: registerUser } = useAuth();
+  const { register: registerUser, loginWithGoogle } = useAuth();
   const { success, error } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -48,6 +49,24 @@ export default function Register() {
           ? (err.response as { data?: { detail?: string } })?.data?.detail
           : undefined;
       error(message || "Une erreur est survenue lors de l'inscription", 'Erreur');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleGoogleRegister = async (credential: string | undefined) => {
+    if (!credential) return;
+    setIsLoading(true);
+    try {
+      await loginWithGoogle(credential);
+      success('Compte créé avec succès !', 'Bienvenue sur PriceWatch');
+      navigate('/dashboard');
+    } catch (err: unknown) {
+      const message =
+        err && typeof err === 'object' && 'response' in err
+          ? (err.response as { data?: { detail?: string } })?.data?.detail
+          : undefined;
+      error(message || "Échec de l'inscription avec Google", 'Erreur');
     } finally {
       setIsLoading(false);
     }
@@ -161,6 +180,31 @@ export default function Register() {
               Créer mon compte
             </Button>
           </form>
+
+          {/* Divider */}
+          <div className="relative my-6">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-gray-300"></div>
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="px-4 bg-white text-gray-500">Ou continuez avec</span>
+            </div>
+          </div>
+
+          {/* Google OAuth */}
+          <div className="flex justify-center">
+            <GoogleLogin
+              onSuccess={(credentialResponse) => {
+                handleGoogleRegister(credentialResponse.credential);
+              }}
+              onError={() => {
+                error("Échec de l'inscription avec Google", 'Erreur');
+              }}
+              text="signup_with"
+              shape="rectangular"
+              width="400"
+            />
+          </div>
 
           {/* Login Link */}
           <p className="text-center text-gray-600 text-sm mt-6">

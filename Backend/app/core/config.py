@@ -16,6 +16,9 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
 
+    # Google OAuth
+    GOOGLE_CLIENT_ID: Optional[str] = None
+
     # Password Policy
     MIN_PASSWORD_LENGTH: int = 8
     REQUIRE_UPPERCASE: bool = True
