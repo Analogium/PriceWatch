@@ -43,6 +43,11 @@ export const authApi = {
   resetPassword: async (token: string, password: string): Promise<void> => {
     await apiClient.post('/auth/reset-password', { token, new_password: password });
   },
+
+  googleLogin: async (credential: string): Promise<Token> => {
+    const response = await apiClient.post<Token>('/auth/google', { credential });
+    return response.data;
+  },
 };
 
 export default authApi;

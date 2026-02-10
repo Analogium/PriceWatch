@@ -20,9 +20,14 @@ class UserLogin(BaseModel):
 class UserResponse(UserBase):
     id: int
     created_at: datetime
+    auth_provider: str = "local"
 
     class Config:
         from_attributes = True
+
+
+class GoogleAuthRequest(BaseModel):
+    credential: str
 
 
 class Token(BaseModel):

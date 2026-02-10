@@ -7,7 +7,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 **PriceWatch** is a price monitoring application with automatic notifications. Users can track product prices from multiple French e-commerce sites (Amazon.fr, Fnac, Darty, Cdiscount, Boulanger, E.Leclerc) and receive email alerts when prices drop below their target.
 
 ### Tech Stack
-- **Backend**: Python 3.12+, FastAPI, SQLAlchemy, PostgreSQL, Redis
+- **Backend**: Python 3.11+, FastAPI, SQLAlchemy, PostgreSQL, Redis
 - **Frontend**: React 19 + TypeScript, Vite, TailwindCSS, React Query
 - **Background Tasks**: Celery with Redis broker
 - **Web Scraping**: BeautifulSoup (HTTP) + Playwright (browser automation for anti-bot protection)
@@ -33,6 +33,7 @@ The backend follows a layered architecture with clear separation of concerns:
 - **Email Service** (`app/services/email.py`): SMTP email notifications respecting user preferences
 - **Price History Service** (`app/services/price_history.py`): Tracks price changes with deduplication logic
 - **Admin Service** (`app/services/admin.py`): Admin-specific operations and statistics
+- **Advanced Scraping** (`app/services/scraper_advanced.py`): User-Agent rotation, Redis-based response caching, circuit breaker pattern, and proxy support utilities used by the scrapers
 
 **Background Tasks:**
 - `tasks.py` - Celery tasks for periodic price checking with configurable frequency per product (daily, hourly, every 6h, every 12h)
@@ -111,6 +112,7 @@ pytest -v -m "not slow"                         # Exclude slow tests
 # Code formatting and linting
 docker-compose exec -T backend python3 -m black app/ tests/     # Format code
 docker-compose exec -T backend python3 -m isort app/ tests/     # Sort imports
+docker-compose exec backend flake8 app/ tests/                   # Lint (used in CI)
 docker-compose exec backend mypy app/                            # Type checking
 
 # Run single test with verbose output
@@ -148,6 +150,16 @@ npm run preview
 - **API Docs (Swagger)**: http://localhost:8000/docs
 - **API Docs (ReDoc)**: http://localhost:8000/redoc
 - **Frontend**: http://localhost:5173
+
+## CI/CD Pipeline
+
+GitHub Actions workflow (`.github/workflows/ci.yml`) triggers on pushes and PRs to main/master/develop when Backend/ or Frontend/ files change.
+
+**Backend pipeline**: lint (Black, isort, flake8, mypy) → unit tests with coverage → Docker build → security scan (safety, bandit). Integration tests run only on main/master merges.
+
+**Frontend pipeline**: lint (Prettier, ESLint, TypeScript) → production build → Docker build.
+
+**Deploy**: Auto-deploys to VPS via SSH on main/master after all checks pass. Only rebuilds/restarts services that changed.
 
 ## Important Implementation Details
 
