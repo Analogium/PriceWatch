@@ -361,8 +361,8 @@ jobs:
       - name: Build Docker image
         uses: docker/build-push-action@v5
         with:
-          context: ./Frontend
-          file: ./Frontend/Dockerfile
+          context: ./Frontend/app
+          file: ./Frontend/app/Dockerfile
           push: false
           tags: pricewatch-frontend:${{ github.sha }}
           cache-from: type=gha
