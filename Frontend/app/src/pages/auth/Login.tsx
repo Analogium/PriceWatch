@@ -40,7 +40,7 @@ export default function Login() {
         isGoogleOnly
           ? 'Ce compte utilise la connexion Google. Veuillez vous connecter avec le bouton Google ci-dessous.'
           : detail || 'Email ou mot de passe incorrect',
-        'Erreur de connexion',
+        'Erreur de connexion'
       );
     } finally {
       setIsLoading(false);
