@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Link, useSearchParams } from 'react-router';
+import { useTranslation } from 'react-i18next';
 import { Button, Input, Card } from '@/components/ui';
 import { useToast } from '@/contexts/ToastContext';
-import { resetPasswordSchema } from '@/utils/validators';
+import { createResetPasswordSchema } from '@/utils/validators';
 import { authApi } from '@/api';
 
 type ResetPasswordFormData = {
@@ -13,12 +14,15 @@ type ResetPasswordFormData = {
 };
 
 export default function ResetPassword() {
+  const { t, i18n } = useTranslation('auth');
   const [searchParams] = useSearchParams();
   const { success, error } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [resetSuccess, setResetSuccess] = useState(false);
 
   const token = searchParams.get('token');
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- rebuild schema when language changes
+  const schema = useMemo(() => createResetPasswordSchema(), [i18n.language]);
 
   const {
     register,
@@ -26,7 +30,7 @@ export default function ResetPassword() {
     watch,
     formState: { errors },
   } = useForm<ResetPasswordFormData>({
-    resolver: zodResolver(resetPasswordSchema),
+    resolver: zodResolver(schema),
   });
 
   const password = watch('password', '');
@@ -42,7 +46,7 @@ export default function ResetPassword() {
 
   const onSubmit = async (data: ResetPasswordFormData) => {
     if (!token) {
-      error('Le lien de réinitialisation est invalide', 'Erreur');
+      error(t('resetPassword.errorInvalidToken'), t('resetPassword.errorTitle'));
       return;
     }
 
@@ -50,16 +54,13 @@ export default function ResetPassword() {
     try {
       await authApi.resetPassword(token, data.password);
       setResetSuccess(true);
-      success(
-        'Vous pouvez maintenant vous connecter avec votre nouveau mot de passe',
-        'Mot de passe réinitialisé !'
-      );
+      success(t('resetPassword.successMessage'), t('resetPassword.successTitle'));
     } catch (err: unknown) {
       const message =
         err && typeof err === 'object' && 'response' in err
           ? (err.response as { data?: { detail?: string } })?.data?.detail
           : undefined;
-      error(message || 'Le lien de réinitialisation est invalide ou expiré', 'Erreur');
+      error(message || t('resetPassword.errorExpired'), t('resetPassword.errorTitle'));
     } finally {
       setIsLoading(false);
     }
@@ -75,12 +76,14 @@ export default function ResetPassword() {
               <div className="inline-flex items-center justify-center w-16 h-16 bg-danger-100 rounded-full mb-2">
                 <span className="material-symbols-outlined text-danger-600 text-3xl">error</span>
               </div>
-              <h2 className="text-xl font-semibold text-gray-900">Lien invalide</h2>
-              <p className="text-gray-600">Le lien de réinitialisation est invalide ou a expiré.</p>
+              <h2 className="text-xl font-semibold text-gray-900">
+                {t('resetPassword.invalidLinkTitle')}
+              </h2>
+              <p className="text-gray-600">{t('resetPassword.invalidLinkDescription')}</p>
               <div className="pt-4">
                 <Link to="/forgot-password">
                   <Button variant="primary" fullWidth>
-                    Demander un nouveau lien
+                    {t('resetPassword.invalidLinkButton')}
                   </Button>
                 </Link>
               </div>
@@ -103,14 +106,14 @@ export default function ResetPassword() {
                   check_circle
                 </span>
               </div>
-              <h2 className="text-2xl font-bold text-gray-900">Mot de passe réinitialisé !</h2>
-              <p className="text-gray-600">
-                Votre mot de passe a été modifié avec succès. Vous pouvez maintenant vous connecter.
-              </p>
+              <h2 className="text-2xl font-bold text-gray-900">
+                {t('resetPassword.successTitle')}
+              </h2>
+              <p className="text-gray-600">{t('resetPassword.successDescription')}</p>
               <div className="pt-4">
                 <Link to="/login">
                   <Button variant="primary" fullWidth className="h-12">
-                    Se connecter
+                    {t('resetPassword.successButton')}
                   </Button>
                 </Link>
               </div>
@@ -125,18 +128,20 @@ export default function ResetPassword() {
                   </span>
                   <h1 className="text-2xl font-bold text-gray-900">PriceWatch</h1>
                 </div>
-                <h2 className="text-2xl font-bold text-gray-900 mb-2">Nouveau mot de passe</h2>
-                <p className="text-gray-600 text-sm">Choisissez un mot de passe sécurisé</p>
+                <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                  {t('resetPassword.title')}
+                </h2>
+                <p className="text-gray-600 text-sm">{t('resetPassword.description')}</p>
               </div>
 
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
                 <div>
                   <label className="block text-sm font-medium text-gray-900 mb-1.5">
-                    Nouveau mot de passe
+                    {t('resetPassword.newPasswordLabel')}
                   </label>
                   <Input
                     type="password"
-                    placeholder="Entrez votre nouveau mot de passe"
+                    placeholder={t('resetPassword.newPasswordPlaceholder')}
                     error={errors.password?.message}
                     leftIcon={<span className="material-symbols-outlined text-xl">lock</span>}
                     fullWidth
@@ -146,11 +151,11 @@ export default function ResetPassword() {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-900 mb-1.5">
-                    Confirmer le mot de passe
+                    {t('resetPassword.confirmPasswordLabel')}
                   </label>
                   <Input
                     type="password"
-                    placeholder="Confirmez votre mot de passe"
+                    placeholder={t('resetPassword.confirmPasswordPlaceholder')}
                     error={errors.confirmPassword?.message}
                     leftIcon={<span className="material-symbols-outlined text-xl">lock</span>}
                     fullWidth
@@ -164,20 +169,23 @@ export default function ResetPassword() {
                     <div className="space-y-1.5">
                       <PasswordRequirement
                         met={passwordChecks.minLength}
-                        text="Au moins 8 caractères"
+                        text={t('passwordRequirements.minLength')}
                       />
                       <PasswordRequirement
                         met={passwordChecks.hasUpperCase}
-                        text="Une lettre majuscule"
+                        text={t('passwordRequirements.uppercase')}
                       />
                       <PasswordRequirement
                         met={passwordChecks.hasLowerCase}
-                        text="Une lettre minuscule"
+                        text={t('passwordRequirements.lowercase')}
                       />
-                      <PasswordRequirement met={passwordChecks.hasNumber} text="Un chiffre" />
+                      <PasswordRequirement
+                        met={passwordChecks.hasNumber}
+                        text={t('passwordRequirements.number')}
+                      />
                       <PasswordRequirement
                         met={passwordChecks.hasSpecialChar}
-                        text="Un caractère spécial (!@#$%)"
+                        text={t('passwordRequirements.specialChar')}
                       />
                     </div>
                   </div>
@@ -190,7 +198,7 @@ export default function ResetPassword() {
                   isLoading={isLoading}
                   className="h-12 mt-6"
                 >
-                  Réinitialiser le mot de passe
+                  {t('resetPassword.submit')}
                 </Button>
               </form>
 
@@ -201,7 +209,7 @@ export default function ResetPassword() {
                   className="inline-flex items-center gap-1 text-sm text-gray-600 hover:text-gray-900"
                 >
                   <span className="material-symbols-outlined text-sm">arrow_back</span>
-                  <span>Retour à la connexion</span>
+                  <span>{t('resetPassword.backToLogin')}</span>
                 </Link>
               </div>
             </>

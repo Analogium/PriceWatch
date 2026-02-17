@@ -148,7 +148,12 @@ class TestRateLimiter:
         rate_limiter = RateLimiter(redis_client=mock_redis)
 
         mock_request = Mock(spec=Request)
-        mock_request.headers.get.return_value = None
+
+        def headers_get(key, default=None):
+            headers = {"Accept-Language": "en"}
+            return headers.get(key, default)
+
+        mock_request.headers.get = headers_get
         mock_client = Mock()
         mock_client.host = "192.168.1.1"
         mock_request.client = mock_client
@@ -167,7 +172,12 @@ class TestRateLimiter:
         rate_limiter.period = 60
 
         mock_request = Mock(spec=Request)
-        mock_request.headers.get.return_value = None
+
+        def headers_get(key, default=None):
+            headers = {"Accept-Language": "en"}
+            return headers.get(key, default)
+
+        mock_request.headers.get = headers_get
         mock_client = Mock()
         mock_client.host = "192.168.1.1"
         mock_request.client = mock_client

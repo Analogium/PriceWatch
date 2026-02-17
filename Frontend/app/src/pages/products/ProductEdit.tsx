@@ -1,20 +1,16 @@
-import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useState, useEffect, useMemo } from 'react';
+import { useParams, useNavigate } from 'react-router';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { productUpdateSchema, type ProductUpdateFormData } from '@/utils/validators';
+import { useTranslation } from 'react-i18next';
+import { createProductUpdateSchema, type ProductUpdateFormData } from '@/utils/validators';
 import { productsApi } from '@/api';
 import { Input, Button, Card, Breadcrumb } from '@/components/ui';
 import { useToast } from '@/contexts/ToastContext';
 import type { Product } from '@/types';
 
-const CHECK_FREQUENCY_OPTIONS = [
-  { value: 6, label: 'Toutes les 6 heures' },
-  { value: 12, label: 'Toutes les 12 heures' },
-  { value: 24, label: 'Toutes les 24 heures' },
-];
-
 export default function ProductEdit() {
+  const { t, i18n } = useTranslation('products');
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { success, error } = useToast();
@@ -23,6 +19,15 @@ export default function ProductEdit() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- rebuild schema when language changes
+  const schema = useMemo(() => createProductUpdateSchema(), [i18n.language]);
+
+  const CHECK_FREQUENCY_OPTIONS = [
+    { value: 6, label: t('frequency.every6h') },
+    { value: 12, label: t('frequency.every12h') },
+    { value: 24, label: t('frequency.every24h') },
+  ];
+
   const {
     register,
     handleSubmit,
@@ -30,7 +35,7 @@ export default function ProductEdit() {
     formState: { errors },
     reset,
   } = useForm<ProductUpdateFormData>({
-    resolver: zodResolver(productUpdateSchema),
+    resolver: zodResolver(schema),
   });
 
   // Load product data
@@ -48,14 +53,14 @@ export default function ProductEdit() {
           check_frequency: data.check_frequency,
         });
       } catch {
-        error('Impossible de charger le produit');
+        error(t('edit.errorLoading'));
         navigate('/dashboard');
       } finally {
         setIsLoading(false);
       }
     };
     fetchProduct();
-  }, [id, navigate, error, reset]);
+  }, [id, navigate, error, reset, t]);
 
   const onSubmit = async (data: ProductUpdateFormData) => {
     if (!product) return;
@@ -64,10 +69,10 @@ export default function ProductEdit() {
       setIsSubmitting(true);
       const updatedProduct = await productsApi.update(product.id, data);
       setProduct(updatedProduct);
-      success('Produit modifié avec succès !');
+      success(t('edit.success'));
       navigate(`/products/${product.id}`);
     } catch {
-      error('Impossible de modifier le produit');
+      error(t('edit.error'));
     } finally {
       setIsSubmitting(false);
     }
@@ -98,17 +103,17 @@ export default function ProductEdit() {
       <div className="mb-6">
         <Breadcrumb
           items={[
-            { label: 'Tableau de bord', href: '/dashboard', icon: 'home' },
+            { label: t('common:breadcrumb.dashboard'), href: '/dashboard', icon: 'home' },
             { label: product.name, href: `/products/${product.id}`, icon: 'shopping_bag' },
-            { label: 'Modifier', icon: 'edit' },
+            { label: t('edit.breadcrumb'), icon: 'edit' },
           ]}
         />
       </div>
 
       {/* Header */}
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Modifier le produit</h1>
-        <p className="text-gray-600 mt-2">Modifiez les informations de votre produit</p>
+        <h1 className="text-2xl font-bold text-gray-900">{t('edit.title')}</h1>
+        <p className="text-gray-600 mt-2">{t('edit.description')}</p>
       </div>
 
       {/* Form */}
@@ -117,41 +122,37 @@ export default function ProductEdit() {
           {/* Nom du produit */}
           <div>
             <Input
-              label="Nom du produit"
+              label={t('edit.nameLabel')}
               type="text"
-              placeholder="Nom du produit"
+              placeholder={t('edit.namePlaceholder')}
               leftIcon={<span className="material-symbols-outlined">shopping_bag</span>}
               error={errors.name?.message}
               disabled={isSubmitting}
               {...register('name')}
             />
-            <p className="mt-2 text-sm text-gray-500">
-              Vous pouvez personnaliser le nom du produit
-            </p>
+            <p className="mt-2 text-sm text-gray-500">{t('edit.nameHint')}</p>
           </div>
 
           {/* Prix cible */}
           <div>
             <Input
-              label="Prix cible (€)"
+              label={t('edit.priceLabel')}
               type="number"
               step="0.01"
               min="0.01"
-              placeholder="99.99"
+              placeholder={t('edit.pricePlaceholder')}
               leftIcon={<span className="material-symbols-outlined">euro</span>}
               error={errors.target_price?.message}
               disabled={isSubmitting}
               {...register('target_price', { valueAsNumber: true })}
             />
-            <p className="mt-2 text-sm text-gray-500">
-              Vous serez notifié lorsque le prix descendra en dessous de ce montant
-            </p>
+            <p className="mt-2 text-sm text-gray-500">{t('edit.priceHint')}</p>
           </div>
 
           {/* Fréquence de vérification */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Fréquence de vérification
+              {t('edit.frequencyLabel')}
             </label>
             <Controller
               name="check_frequency"
@@ -187,9 +188,7 @@ export default function ProductEdit() {
             {errors.check_frequency && (
               <p className="mt-2 text-sm text-danger-600">{errors.check_frequency.message}</p>
             )}
-            <p className="mt-2 text-sm text-gray-500">
-              À quelle fréquence souhaitez-vous que nous vérifiions le prix ?
-            </p>
+            <p className="mt-2 text-sm text-gray-500">{t('edit.frequencyHint')}</p>
           </div>
 
           {/* Boutons d'action */}
@@ -200,7 +199,7 @@ export default function ProductEdit() {
               onClick={() => navigate(`/products/${product.id}`)}
               disabled={isSubmitting}
             >
-              Annuler
+              {t('common:buttons.cancel')}
             </Button>
             <Button
               type="submit"
@@ -208,7 +207,7 @@ export default function ProductEdit() {
               fullWidth
               leftIcon={<span className="material-symbols-outlined">save</span>}
             >
-              Sauvegarder
+              {t('common:buttons.save')}
             </Button>
           </div>
         </form>

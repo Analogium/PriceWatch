@@ -426,14 +426,20 @@ jobs:
 
             if [ "$FRONTEND_CHANGED" = "true" ]; then
               SERVICES_TO_BUILD="$SERVICES_TO_BUILD frontend"
-              SERVICES_TO_RESTART="$SERVICES_TO_RESTART frontend"
             fi
 
             echo "🔨 Building Docker images: $SERVICES_TO_BUILD"
             docker compose build $SERVICES_TO_BUILD
 
-            echo "♻️ Restarting services: $SERVICES_TO_RESTART"
-            docker compose up -d $SERVICES_TO_RESTART
+            if [ -n "$SERVICES_TO_RESTART" ]; then
+              echo "♻️ Restarting backend services: $SERVICES_TO_RESTART"
+              docker compose up -d $SERVICES_TO_RESTART
+            fi
+
+            if [ "$FRONTEND_CHANGED" = "true" ]; then
+              echo "♻️ Restarting frontend (renewing node_modules volume)..."
+              docker compose up -d --force-recreate --renew-anon-volumes frontend
+            fi
 
             # Wait for services to start
             sleep 5

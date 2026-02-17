@@ -7,6 +7,7 @@ from jose import JWTError, jwt
 from passlib.context import CryptContext
 
 from app.core.config import settings
+from app.i18n import t
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -21,25 +22,25 @@ def get_password_hash(password: str) -> str:
     return pwd_context.hash(password)
 
 
-def validate_password_strength(password: str) -> tuple[bool, str]:
+def validate_password_strength(password: str, lang: str = "fr") -> tuple[bool, str]:
     """
     Validate password strength according to policy.
     Returns (is_valid, error_message)
     """
     if len(password) < settings.MIN_PASSWORD_LENGTH:
-        return False, f"Password must be at least {settings.MIN_PASSWORD_LENGTH} characters long"
+        return False, t("password_min_length", lang, length=settings.MIN_PASSWORD_LENGTH)
 
     if settings.REQUIRE_UPPERCASE and not re.search(r"[A-Z]", password):
-        return False, "Password must contain at least one uppercase letter"
+        return False, t("password_uppercase", lang)
 
     if settings.REQUIRE_LOWERCASE and not re.search(r"[a-z]", password):
-        return False, "Password must contain at least one lowercase letter"
+        return False, t("password_lowercase", lang)
 
     if settings.REQUIRE_DIGIT and not re.search(r"\d", password):
-        return False, "Password must contain at least one digit"
+        return False, t("password_digit", lang)
 
     if settings.REQUIRE_SPECIAL_CHAR and not re.search(r'[!@#$%^&*(),.?":{}|<>]', password):
-        return False, "Password must contain at least one special character"
+        return False, t("password_special_char", lang)
 
     return True, ""
 

@@ -1,0 +1,98 @@
+{
+  "appName": "PriceWatch",
+  "nav": {
+    "dashboard": "Dashboard",
+    "addProduct": "Add a product",
+    "settings": "Settings",
+    "userMenu": "User menu",
+    "loggedInAs": "Logged in as",
+    "logout": "Log out",
+    "menu": "Menu"
+  },
+  "footer": {
+    "allRightsReserved": "All rights reserved",
+    "about": "About",
+    "support": "Support",
+    "privacy": "Privacy"
+  },
+  "buttons": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "close": "Close",
+    "back": "Back",
+    "retry": "Retry",
+    "backToDashboard": "Back to dashboard",
+    "reloadPage": "Reload page"
+  },
+  "errors": {
+    "notFound": {
+      "code": "404",
+      "title": "Page not found",
+      "description": "Sorry, the page you are looking for does not exist or has been moved.",
+      "needHelp": "Need help?",
+      "contactSupport": "Contact support"
+    },
+    "serverError": {
+      "code": "500",
+      "title": "Server error",
+      "description": "Sorry, an error occurred on our servers. We are working to resolve the issue. Please try again in a few moments.",
+      "checkStatus": "Check service status:"
+    },
+    "errorBoundary": {
+      "title": "An error occurred",
+      "description": "Sorry, an unexpected error occurred. Please try again."
+    },
+    "generic": "An error occurred"
+  },
+  "sort": {
+    "label": "Sort by:",
+    "name": "Name",
+    "currentPrice": "Current price",
+    "targetPrice": "Target price",
+    "createdAt": "Date added",
+    "lastChecked": "Last checked",
+    "ascending": "Ascending",
+    "descending": "Descending"
+  },
+  "pagination": {
+    "page": "Page",
+    "of": "of",
+    "pageInfo": "Page <strong>{{page}}</strong> of <strong>{{totalPages}}</strong>"
+  },
+  "search": {
+    "placeholder": "Search for a product..."
+  },
+  "priceCheck": {
+    "checking_one": "{{count}} check in progress",
+    "checking_other": "{{count}} checks in progress"
+  },
+  "breadcrumb": {
+    "dashboard": "Dashboard"
+  },
+  "frequency": {
+    "every6h": "Every 6 hours",
+    "every12h": "Every 12 hours",
+    "every24h": "Every 24 hours",
+    "every6hShort": "Every 6h",
+    "every12hShort": "Every 12h",
+    "every24hShort": "Every 24h",
+    "everyNHours": "Every {{count}} hours"
+  },
+  "constants": {
+    "sortOptions": {
+      "name": "Name",
+      "currentPrice": "Current price",
+      "targetPrice": "Target price",
+      "createdAt": "Creation date",
+      "lastChecked": "Last checked"
+    },
+    "webhookTypes": {
+      "slack": "Slack",
+      "discord": "Discord",
+      "custom": "Custom"
+    }
+  },
+  "needHelp": "Need help? Contact support"
+}

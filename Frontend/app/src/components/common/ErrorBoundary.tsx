@@ -1,5 +1,6 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react';
 import { Button } from '@/components/ui';
+import i18n from '@/i18n';
 
 interface ErrorBoundaryProps {
   children: ReactNode;
@@ -51,10 +52,10 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
               error
             </span>
             <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
-              Une erreur est survenue
+              {i18n.t('errors.errorBoundary.title')}
             </h1>
             <p className="text-gray-600 dark:text-gray-400 mb-6">
-              Désolé, une erreur inattendue s'est produite. Veuillez réessayer.
+              {i18n.t('errors.errorBoundary.description')}
             </p>
 
             {this.state.error && import.meta.env.DEV && (
@@ -67,10 +68,10 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
 
             <div className="flex gap-3 justify-center">
               <Button variant="secondary" onClick={this.handleReset}>
-                Réessayer
+                {i18n.t('buttons.retry')}
               </Button>
               <Button variant="primary" onClick={() => (window.location.href = '/dashboard')}>
-                Retour au tableau de bord
+                {i18n.t('buttons.backToDashboard')}
               </Button>
             </div>
           </div>

@@ -1,0 +1,27 @@
+{
+  "title": "My tracked products",
+  "addProduct": "Add a product",
+  "noProducts": {
+    "title": "No tracked products",
+    "description": "You are not tracking any products yet. Start by adding a product to monitor by clicking the button above."
+  },
+  "error": {
+    "loading": "Error loading products",
+    "delete": "Error deleting product"
+  },
+  "success": {
+    "delete": "Product deleted successfully"
+  },
+  "deleteConfirm": {
+    "title": "Confirm deletion",
+    "message": "Are you sure you want to delete this product? This action is irreversible.",
+    "product": "Product to delete:",
+    "cancel": "Cancel",
+    "delete": "Delete"
+  },
+  "checkPrice": {
+    "info": "Checking price...",
+    "success": "Price verified successfully",
+    "error": "Error checking price"
+  }
+}

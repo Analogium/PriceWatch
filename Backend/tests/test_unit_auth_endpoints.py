@@ -41,6 +41,7 @@ class TestRegisterEndpoint:
 
         # Mock request
         mock_request = Mock(spec=Request)
+        mock_request.headers = {"Accept-Language": "en"}
 
         # User data
         user_data = UserCreate(email="test@example.com", password="SecurePass123!")
@@ -63,14 +64,14 @@ class TestRegisterEndpoint:
             result = await register(mock_request, user_data, mock_db)
 
             # Assertions
-            mock_validate_pwd.assert_called_once_with("SecurePass123!")
+            mock_validate_pwd.assert_called_once_with("SecurePass123!", lang="en")
             mock_gen_token.assert_called_once()
             mock_hash.assert_called_once_with("SecurePass123!")
             # Commit is called twice: once for user, once for default preferences
             assert mock_commit.call_count == 2
             # Add is called twice: once for User, once for UserPreferences
             assert mock_add.call_count == 2
-            mock_send_email.assert_called_once_with("test@example.com", "verification_token_123")
+            mock_send_email.assert_called_once_with("test@example.com", "verification_token_123", lang="en")
 
     @pytest.mark.asyncio
     @patch("app.api.endpoints.auth.rate_limiter.check_rate_limit")
@@ -82,6 +83,7 @@ class TestRegisterEndpoint:
 
         mock_db = Mock(spec=Session)
         mock_request = Mock(spec=Request)
+        mock_request.headers = {"Accept-Language": "en"}
         user_data = UserCreate(email="test@example.com", password="weak")
 
         from app.api.endpoints.auth import register
@@ -106,6 +108,7 @@ class TestRegisterEndpoint:
         mock_db.query.return_value.filter.return_value.first.return_value = existing_user
 
         mock_request = Mock(spec=Request)
+        mock_request.headers = {"Accept-Language": "en"}
         user_data = UserCreate(email="existing@example.com", password="SecurePass123!")
 
         from app.api.endpoints.auth import register
@@ -136,6 +139,7 @@ class TestRegisterEndpoint:
         mock_db.query.return_value.filter.return_value.first.return_value = None
 
         mock_request = Mock(spec=Request)
+        mock_request.headers = {"Accept-Language": "en"}
         user_data = UserCreate(email="test@example.com", password="SecurePass123!")
 
         from app.api.endpoints.auth import register
@@ -183,6 +187,7 @@ class TestLoginEndpoint:
         mock_db.query.return_value.filter.return_value.first.return_value = mock_user
 
         mock_request = Mock(spec=Request)
+        mock_request.headers = {"Accept-Language": "en"}
         # Mock OAuth2PasswordRequestForm
         mock_form_data = Mock()
         mock_form_data.username = "test@example.com"
@@ -207,6 +212,7 @@ class TestLoginEndpoint:
         mock_db.query.return_value.filter.return_value.first.return_value = None
 
         mock_request = Mock(spec=Request)
+        mock_request.headers = {"Accept-Language": "en"}
         # Mock OAuth2PasswordRequestForm
         mock_form_data = Mock()
         mock_form_data.username = "nonexistent@example.com"
@@ -234,6 +240,7 @@ class TestLoginEndpoint:
         mock_db.query.return_value.filter.return_value.first.return_value = mock_user
 
         mock_request = Mock(spec=Request)
+        mock_request.headers = {"Accept-Language": "en"}
         # Mock OAuth2PasswordRequestForm
         mock_form_data = Mock()
         mock_form_data.username = "test@example.com"
@@ -285,6 +292,7 @@ class TestRefreshTokenEndpoint:
         mock_db.query.return_value.filter.return_value.first.return_value = mock_user
 
         mock_request = Mock(spec=Request)
+        mock_request.headers = {"Accept-Language": "en"}
 
         from app.api.endpoints.auth import refresh_token
         from app.schemas.user import RefreshTokenRequest
@@ -306,6 +314,7 @@ class TestRefreshTokenEndpoint:
 
         mock_db = Mock(spec=Session)
         mock_request = Mock(spec=Request)
+        mock_request.headers = {"Accept-Language": "en"}
 
         from app.api.endpoints.auth import refresh_token
         from app.schemas.user import RefreshTokenRequest
@@ -328,6 +337,7 @@ class TestRefreshTokenEndpoint:
 
         mock_db = Mock(spec=Session)
         mock_request = Mock(spec=Request)
+        mock_request.headers = {"Accept-Language": "en"}
 
         from app.api.endpoints.auth import refresh_token
         from app.schemas.user import RefreshTokenRequest
@@ -349,6 +359,7 @@ class TestRefreshTokenEndpoint:
 
         mock_db = Mock(spec=Session)
         mock_request = Mock(spec=Request)
+        mock_request.headers = {"Accept-Language": "en"}
 
         from app.api.endpoints.auth import refresh_token
         from app.schemas.user import RefreshTokenRequest
@@ -372,6 +383,7 @@ class TestRefreshTokenEndpoint:
         mock_db.query.return_value.filter.return_value.first.return_value = None  # User not found
 
         mock_request = Mock(spec=Request)
+        mock_request.headers = {"Accept-Language": "en"}
 
         from app.api.endpoints.auth import refresh_token
         from app.schemas.user import RefreshTokenRequest
@@ -398,12 +410,15 @@ class TestVerifyEmailEndpoint:
         mock_user.verification_token = "valid_token"
         mock_db.query.return_value.filter.return_value.first.return_value = mock_user
 
+        mock_request = Mock(spec=Request)
+        mock_request.headers = {"Accept-Language": "en"}
+
         from app.api.endpoints.auth import verify_email
         from app.schemas.user import EmailVerification
 
         verification_data = EmailVerification(token="valid_token")
 
-        result = await verify_email(verification_data, mock_db)
+        result = await verify_email(mock_request, verification_data, mock_db)
 
         assert result["message"] == "Email verified successfully"
         assert mock_user.is_verified is True
@@ -416,13 +431,16 @@ class TestVerifyEmailEndpoint:
         mock_db = Mock(spec=Session)
         mock_db.query.return_value.filter.return_value.first.return_value = None
 
+        mock_request = Mock(spec=Request)
+        mock_request.headers = {"Accept-Language": "en"}
+
         from app.api.endpoints.auth import verify_email
         from app.schemas.user import EmailVerification
 
         verification_data = EmailVerification(token="invalid_token")
 
         with pytest.raises(HTTPException) as exc_info:
-            await verify_email(verification_data, mock_db)
+            await verify_email(mock_request, verification_data, mock_db)
 
         assert exc_info.value.status_code == 400
         assert "Invalid verification token" in exc_info.value.detail
@@ -448,6 +466,7 @@ class TestForgotPasswordEndpoint:
         mock_db.query.return_value.filter.return_value.first.return_value = mock_user
 
         mock_request = Mock(spec=Request)
+        mock_request.headers = {"Accept-Language": "en"}
 
         from app.api.endpoints.auth import forgot_password
         from app.schemas.user import PasswordResetRequest
@@ -459,7 +478,7 @@ class TestForgotPasswordEndpoint:
         assert "message" in result
         mock_gen_token.assert_called_once()
         mock_db.commit.assert_called_once()
-        mock_send_email.assert_called_once_with("test@example.com", "reset_token_123")
+        mock_send_email.assert_called_once_with("test@example.com", "reset_token_123", lang="en")
 
     @pytest.mark.asyncio
     @patch("app.api.endpoints.auth.rate_limiter.check_rate_limit")
@@ -471,6 +490,7 @@ class TestForgotPasswordEndpoint:
         mock_db.query.return_value.filter.return_value.first.return_value = None
 
         mock_request = Mock(spec=Request)
+        mock_request.headers = {"Accept-Language": "en"}
 
         from app.api.endpoints.auth import forgot_password
         from app.schemas.user import PasswordResetRequest
@@ -498,6 +518,7 @@ class TestForgotPasswordEndpoint:
         mock_db.query.return_value.filter.return_value.first.return_value = mock_user
 
         mock_request = Mock(spec=Request)
+        mock_request.headers = {"Accept-Language": "en"}
 
         from app.api.endpoints.auth import forgot_password
         from app.schemas.user import PasswordResetRequest
@@ -533,6 +554,7 @@ class TestResetPasswordEndpoint:
         mock_db.query.return_value.filter.return_value.first.return_value = mock_user
 
         mock_request = Mock(spec=Request)
+        mock_request.headers = {"Accept-Language": "en"}
 
         from app.api.endpoints.auth import reset_password
         from app.schemas.user import PasswordResetConfirm
@@ -545,7 +567,7 @@ class TestResetPasswordEndpoint:
         assert mock_user.password_hash == "new_hashed_password"
         assert mock_user.reset_token is None
         assert mock_user.reset_token_expires is None
-        mock_validate_pwd.assert_called_once_with("NewSecurePass123!")
+        mock_validate_pwd.assert_called_once_with("NewSecurePass123!", lang="en")
         mock_db.commit.assert_called_once()
 
     @pytest.mark.asyncio
@@ -560,6 +582,7 @@ class TestResetPasswordEndpoint:
         mock_db.query.return_value.filter.return_value.first.return_value = None
 
         mock_request = Mock(spec=Request)
+        mock_request.headers = {"Accept-Language": "en"}
 
         from app.api.endpoints.auth import reset_password
         from app.schemas.user import PasswordResetConfirm
@@ -582,6 +605,7 @@ class TestResetPasswordEndpoint:
 
         mock_db = Mock(spec=Session)
         mock_request = Mock(spec=Request)
+        mock_request.headers = {"Accept-Language": "en"}
 
         from app.api.endpoints.auth import reset_password
         from app.schemas.user import PasswordResetConfirm
@@ -609,6 +633,7 @@ class TestResetPasswordEndpoint:
         mock_db.query.return_value.filter.return_value.first.return_value = mock_user
 
         mock_request = Mock(spec=Request)
+        mock_request.headers = {"Accept-Language": "en"}
 
         from app.api.endpoints.auth import reset_password
         from app.schemas.user import PasswordResetConfirm

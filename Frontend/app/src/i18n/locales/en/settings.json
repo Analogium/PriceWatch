@@ -1,0 +1,39 @@
+{
+  "breadcrumb": "Settings",
+  "title": "Settings",
+  "subtitle": "Manage your notification and webhook preferences",
+  "loading": "Loading preferences...",
+  "loadingError": "Unable to load preferences. Using default values.",
+  "saveSuccess": "Preferences updated successfully!",
+  "createSuccess": "Preferences created successfully!",
+  "saveError": "Unable to save preferences",
+  "email": {
+    "title": "Email notifications",
+    "description": "Receive email notifications to track your products",
+    "toggle": "Enable email notifications",
+    "toggleDescription": "Receive emails for price and availability alerts",
+    "priceAlerts": "Price drop alerts",
+    "priceAlertsDescription": "Receive an email when a product reaches the target price",
+    "weeklySummary": "Weekly summary",
+    "weeklySummaryDescription": "Receive a weekly summary of your tracked products"
+  },
+  "webhooks": {
+    "title": "Webhooks",
+    "description": "Send notifications to your external services (Slack, Discord, etc.)",
+    "toggle": "Enable webhook notifications",
+    "toggleDescription": "Send alerts to an external webhook URL",
+    "typeLabel": "Webhook type",
+    "typeHelper": "Select the webhook type (Slack, Discord or Custom)",
+    "typePlaceholder": "Select a type",
+    "urlLabel": "Webhook URL",
+    "urlPlaceholder": "https://hooks.slack.com/services/...",
+    "urlHelper": "The full URL of your webhook"
+  },
+  "language": {
+    "title": "Language",
+    "description": "Choose the interface language",
+    "label": "Interface language",
+    "fr": "Français",
+    "en": "English"
+  }
+}

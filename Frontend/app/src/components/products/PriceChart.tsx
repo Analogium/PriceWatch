@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   LineChart,
   Line,
@@ -19,13 +20,6 @@ interface PriceChartProps {
 }
 
 type PeriodFilter = '7d' | '30d' | '90d' | 'all';
-
-const PERIOD_LABELS: Record<PeriodFilter, string> = {
-  '7d': '7 jours',
-  '30d': '30 jours',
-  '90d': '90 jours',
-  all: 'Tout',
-};
 
 // Custom tooltip component (must be outside of PriceChart to avoid React hooks issues)
 const CustomTooltip = ({
@@ -50,7 +44,15 @@ const CustomTooltip = ({
 };
 
 export const PriceChart = ({ priceHistory, targetPrice }: PriceChartProps) => {
+  const { t } = useTranslation('products');
   const [selectedPeriod, setSelectedPeriod] = useState<PeriodFilter>('30d');
+
+  const PERIOD_LABELS: Record<PeriodFilter, string> = {
+    '7d': t('priceChart.period.7d'),
+    '30d': t('priceChart.period.30d'),
+    '90d': t('priceChart.period.90d'),
+    all: t('priceChart.period.all'),
+  };
 
   // Filter data based on selected period
   const getFilteredData = () => {
@@ -90,11 +92,9 @@ export const PriceChart = ({ priceHistory, targetPrice }: PriceChartProps) => {
             show_chart
           </span>
           <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
-            Aucune donnée disponible
+            {t('priceChart.empty.title')}
           </h3>
-          <p className="text-gray-600 dark:text-gray-400">
-            L'historique des prix pour cette période n'est pas encore disponible.
-          </p>
+          <p className="text-gray-600 dark:text-gray-400">{t('priceChart.empty.description')}</p>
         </div>
       </div>
     );
@@ -105,7 +105,7 @@ export const PriceChart = ({ priceHistory, targetPrice }: PriceChartProps) => {
       {/* Header with period filters */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-          Évolution du prix
+          {t('priceChart.title')}
         </h3>
         <div className="flex gap-2">
           {(Object.keys(PERIOD_LABELS) as PeriodFilter[]).map((period) => (
@@ -142,7 +142,7 @@ export const PriceChart = ({ priceHistory, targetPrice }: PriceChartProps) => {
               stroke="#16A34A"
               strokeDasharray="5 5"
               label={{
-                value: `Prix cible: ${formatPrice(targetPrice)}`,
+                value: t('priceChart.targetPriceLabel', { price: formatPrice(targetPrice) }),
                 position: 'right',
                 fill: '#16A34A',
                 fontSize: 12,
@@ -164,11 +164,15 @@ export const PriceChart = ({ priceHistory, targetPrice }: PriceChartProps) => {
       <div className="flex items-center justify-center gap-6 mt-4 pt-4 border-t border-gray-200 dark:border-gray-800">
         <div className="flex items-center gap-2">
           <div className="w-4 h-1 bg-primary-600 rounded"></div>
-          <span className="text-sm text-gray-600 dark:text-gray-400">Prix actuel</span>
+          <span className="text-sm text-gray-600 dark:text-gray-400">
+            {t('priceChart.legend.currentPrice')}
+          </span>
         </div>
         <div className="flex items-center gap-2">
           <div className="w-4 h-1 bg-success-600 rounded" style={{ borderTop: '1px dashed' }}></div>
-          <span className="text-sm text-gray-600 dark:text-gray-400">Prix cible</span>
+          <span className="text-sm text-gray-600 dark:text-gray-400">
+            {t('priceChart.legend.targetPrice')}
+          </span>
         </div>
       </div>
     </div>

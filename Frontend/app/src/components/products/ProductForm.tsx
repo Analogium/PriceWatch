@@ -1,6 +1,8 @@
+import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { productCreateSchema, type ProductCreateFormData } from '@/utils/validators';
+import { createProductCreateSchema, type ProductCreateFormData } from '@/utils/validators';
 import { Input, Button } from '@/components/ui';
 
 interface ProductFormProps {
@@ -8,13 +10,20 @@ interface ProductFormProps {
   isLoading?: boolean;
 }
 
-const CHECK_FREQUENCY_OPTIONS = [
-  { value: 6, label: 'Toutes les 6 heures' },
-  { value: 12, label: 'Toutes les 12 heures' },
-  { value: 24, label: 'Toutes les 24 heures' },
-];
-
 export function ProductForm({ onSubmit, isLoading = false }: ProductFormProps) {
+  const { t } = useTranslation('products');
+
+  const productCreateSchema = useMemo(() => createProductCreateSchema(), []);
+
+  const CHECK_FREQUENCY_OPTIONS = useMemo(
+    () => [
+      { value: 6, label: t('frequency.every6h') },
+      { value: 12, label: t('frequency.every12h') },
+      { value: 24, label: t('frequency.every24h') },
+    ],
+    [t]
+  );
+
   const {
     register,
     handleSubmit,
@@ -34,41 +43,37 @@ export function ProductForm({ onSubmit, isLoading = false }: ProductFormProps) {
       {/* URL du produit */}
       <div>
         <Input
-          label="URL du produit"
+          label={t('form.urlLabel')}
           type="url"
-          placeholder="https://www.exemple.com/produit"
+          placeholder={t('form.urlPlaceholder')}
           leftIcon={<span className="material-symbols-outlined">link</span>}
           error={errors.url?.message}
           disabled={isLoading}
           {...register('url')}
         />
-        <p className="mt-2 text-sm text-gray-500">
-          Collez l'URL complète du produit que vous souhaitez suivre
-        </p>
+        <p className="mt-2 text-sm text-gray-500">{t('form.urlHint')}</p>
       </div>
 
       {/* Prix cible */}
       <div>
         <Input
-          label="Prix cible (€)"
+          label={t('form.priceLabel')}
           type="number"
           step="0.01"
           min="0.01"
-          placeholder="99.99"
+          placeholder={t('form.pricePlaceholder')}
           leftIcon={<span className="material-symbols-outlined">euro</span>}
           error={errors.target_price?.message}
           disabled={isLoading}
           {...register('target_price', { valueAsNumber: true })}
         />
-        <p className="mt-2 text-sm text-gray-500">
-          Vous serez notifié lorsque le prix descendra en dessous de ce montant
-        </p>
+        <p className="mt-2 text-sm text-gray-500">{t('form.priceHint')}</p>
       </div>
 
       {/* Fréquence de vérification */}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">
-          Fréquence de vérification
+          {t('form.frequencyLabel')}
         </label>
         <Controller
           name="check_frequency"
@@ -104,9 +109,7 @@ export function ProductForm({ onSubmit, isLoading = false }: ProductFormProps) {
         {errors.check_frequency && (
           <p className="mt-2 text-sm text-danger-600">{errors.check_frequency.message}</p>
         )}
-        <p className="mt-2 text-sm text-gray-500">
-          À quelle fréquence souhaitez-vous que nous vérifiions le prix ?
-        </p>
+        <p className="mt-2 text-sm text-gray-500">{t('form.frequencyHint')}</p>
       </div>
 
       {/* Bouton de soumission */}
@@ -117,7 +120,7 @@ export function ProductForm({ onSubmit, isLoading = false }: ProductFormProps) {
           fullWidth
           leftIcon={<span className="material-symbols-outlined">add_shopping_cart</span>}
         >
-          Ajouter le produit
+          {t('form.submit')}
         </Button>
       </div>
     </form>

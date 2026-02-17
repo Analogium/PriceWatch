@@ -1,34 +1,39 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Link, useNavigate } from 'react-router';
 import { GoogleLogin } from '@react-oauth/google';
+import { useTranslation } from 'react-i18next';
 import { Button, Input, Card } from '@/components/ui';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/contexts/ToastContext';
-import { loginSchema } from '@/utils/validators';
+import { createLoginSchema } from '@/utils/validators';
 import type { LoginCredentials } from '@/types';
 
 export default function Login() {
+  const { t, i18n } = useTranslation('auth');
   const navigate = useNavigate();
   const { login, loginWithGoogle } = useAuth();
   const { success, error } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- rebuild schema when language changes
+  const schema = useMemo(() => createLoginSchema(), [i18n.language]);
+
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm<LoginCredentials>({
-    resolver: zodResolver(loginSchema),
+    resolver: zodResolver(schema),
   });
 
   const onSubmit = async (data: LoginCredentials) => {
     setIsLoading(true);
     try {
       await login(data);
-      success('Connexion réussie !', 'Bienvenue sur PriceWatch');
+      success(t('login.successTitle'), t('login.successMessage'));
       navigate('/dashboard');
     } catch (err: unknown) {
       const detail =
@@ -37,10 +42,8 @@ export default function Login() {
           : undefined;
       const isGoogleOnly = detail?.includes('Google sign-in');
       error(
-        isGoogleOnly
-          ? 'Ce compte utilise la connexion Google. Veuillez vous connecter avec le bouton Google ci-dessous.'
-          : detail || 'Email ou mot de passe incorrect',
-        'Erreur de connexion'
+        isGoogleOnly ? t('login.errorGoogleOnly') : detail || t('login.errorInvalid'),
+        t('login.errorTitle')
       );
     } finally {
       setIsLoading(false);
@@ -52,14 +55,14 @@ export default function Login() {
     setIsLoading(true);
     try {
       await loginWithGoogle(credential);
-      success('Connexion réussie !', 'Bienvenue sur PriceWatch');
+      success(t('login.successTitle'), t('login.successMessage'));
       navigate('/dashboard');
     } catch (err: unknown) {
       const message =
         err && typeof err === 'object' && 'response' in err
           ? (err.response as { data?: { detail?: string } })?.data?.detail
           : undefined;
-      error(message || 'Échec de la connexion Google', 'Erreur');
+      error(message || t('login.errorGoogleFailed'), t('login.errorGeneric'));
     } finally {
       setIsLoading(false);
     }
@@ -72,19 +75,17 @@ export default function Login() {
           {/* Header */}
           <div className="text-center mb-8">
             <h1 className="text-2xl font-bold text-primary-600 mb-6">PriceWatch</h1>
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">Connectez-vous à votre compte</h2>
-            <p className="text-gray-600 text-sm">
-              Suivez vos produits, ne manquez aucune baisse de prix.
-            </p>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">{t('login.title')}</h2>
+            <p className="text-gray-600 text-sm">{t('login.description')}</p>
           </div>
 
           {/* Login Form */}
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
             <div>
               <Input
-                label="Adresse e-mail"
+                label={t('login.emailLabel')}
                 type="email"
-                placeholder="exemple@domaine.com"
+                placeholder={t('login.emailPlaceholder')}
                 error={errors.email?.message}
                 leftIcon={<span className="material-symbols-outlined text-xl">mail</span>}
                 fullWidth
@@ -94,17 +95,19 @@ export default function Login() {
 
             <div>
               <div className="flex items-center justify-between mb-2">
-                <label className="text-sm font-medium text-gray-900">Mot de passe</label>
+                <label className="text-sm font-medium text-gray-900">
+                  {t('login.passwordLabel')}
+                </label>
                 <Link
                   to="/forgot-password"
                   className="text-sm font-medium text-primary-600 hover:text-primary-700"
                 >
-                  Mot de passe oublié ?
+                  {t('login.forgotPassword')}
                 </Link>
               </div>
               <Input
                 type={showPassword ? 'text' : 'password'}
-                placeholder="Entrez votre mot de passe"
+                placeholder={t('login.passwordPlaceholder')}
                 error={errors.password?.message}
                 leftIcon={<span className="material-symbols-outlined text-xl">lock</span>}
                 rightIcon={
@@ -126,7 +129,7 @@ export default function Login() {
               isLoading={isLoading}
               className="h-12"
             >
-              Se connecter
+              {t('login.submit')}
             </Button>
           </form>
 
@@ -136,7 +139,7 @@ export default function Login() {
               <div className="w-full border-t border-gray-300"></div>
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="px-4 bg-white text-gray-500">Ou continuez avec</span>
+              <span className="px-4 bg-white text-gray-500">{t('login.oauthDivider')}</span>
             </div>
           </div>
 
@@ -147,7 +150,7 @@ export default function Login() {
                 handleGoogleLogin(credentialResponse.credential);
               }}
               onError={() => {
-                error('Échec de la connexion Google', 'Erreur');
+                error(t('login.errorGoogleFailed'), t('login.errorGeneric'));
               }}
               text="continue_with"
               shape="rectangular"
@@ -157,9 +160,9 @@ export default function Login() {
 
           {/* Register Link */}
           <p className="text-center text-gray-600 text-sm mt-6">
-            Pas encore de compte ?{' '}
+            {t('login.noAccount')}{' '}
             <Link to="/register" className="font-semibold text-primary-600 hover:text-primary-700">
-              S'inscrire
+              {t('login.registerLink')}
             </Link>
           </p>
         </Card>

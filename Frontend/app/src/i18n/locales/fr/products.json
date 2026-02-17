@@ -1,0 +1,179 @@
+{
+  "add": {
+    "breadcrumb": "Ajouter un produit",
+    "title": "Ajouter un produit",
+    "description": "Ajoutez un produit à suivre en collant son URL. Nous allons automatiquement récupérer son nom, son image et son prix actuel.",
+    "success": "Produit ajouté avec succès !",
+    "errorGeneric": "Impossible d'ajouter le produit. Vérifiez que l'URL est valide et que le site est accessible.",
+    "redirect": "Redirection vers le tableau de bord...",
+    "preview": {
+      "title": "Produit ajouté avec succès !",
+      "currentPrice": "Prix actuel : ",
+      "targetPrice": "Prix cible : ",
+      "frequency": "Fréquence : "
+    },
+    "loading": {
+      "title": "Analyse du produit en cours...",
+      "description": "Nous récupérons les informations du produit depuis le site marchand. Cela peut prendre quelques secondes."
+    },
+    "error": {
+      "title": "Échec de l'ajout du produit",
+      "suggestions": "Suggestions :",
+      "suggestion1": "Vérifiez que l'URL est correcte et complète",
+      "suggestion2": "Assurez-vous que le site est accessible",
+      "suggestion3": "Certains sites bloquent le scraping automatique",
+      "suggestion4": "Essayez avec une URL différente"
+    }
+  },
+  "detail": {
+    "error": {
+      "loading": "Impossible de charger le produit",
+      "history": "Impossible de charger l'historique des prix",
+      "delete": "Impossible de supprimer le produit",
+      "checkPrice": "Impossible de vérifier le prix"
+    },
+    "status": {
+      "unavailable": "Indisponible",
+      "priceReached": "Prix cible atteint",
+      "monitoring": "En surveillance"
+    },
+    "price": {
+      "current": "Prix actuel",
+      "target": "Prix cible"
+    },
+    "link": "Voir sur le site marchand",
+    "frequencyLabel": "Fréquence de vérification",
+    "frequencyText": "Toutes les {{hours}} heures",
+    "lastChecked": "Dernière vérification",
+    "createdAt": "Date de création",
+    "unavailableSince": "Indisponible depuis",
+    "action": {
+      "checkPrice": "Vérifier le prix maintenant",
+      "edit": "Modifier",
+      "delete": "Supprimer"
+    },
+    "tabs": {
+      "stats": "Statistiques",
+      "chart": "Graphique",
+      "history": "Historique"
+    },
+    "deleteConfirm": {
+      "title": "Confirmer la suppression",
+      "message": "Êtes-vous sûr de vouloir supprimer ce produit ? Cette action est irréversible.",
+      "product": "Produit à supprimer :",
+      "cancel": "Annuler",
+      "delete": "Supprimer"
+    },
+    "checkPrice": {
+      "info": "Vérification du prix en cours...",
+      "success": "Prix vérifié avec succès !"
+    }
+  },
+  "edit": {
+    "breadcrumb": "Modifier",
+    "title": "Modifier le produit",
+    "description": "Modifiez les informations de votre produit",
+    "nameLabel": "Nom du produit",
+    "namePlaceholder": "Nom du produit",
+    "nameHint": "Vous pouvez personnaliser le nom du produit",
+    "priceLabel": "Prix cible (€)",
+    "pricePlaceholder": "99.99",
+    "priceHint": "Vous serez notifié lorsque le prix descendra en dessous de ce montant",
+    "frequencyLabel": "Fréquence de vérification",
+    "frequencyHint": "À quelle fréquence souhaitez-vous que nous vérifiions le prix ?",
+    "success": "Produit modifié avec succès !",
+    "error": "Impossible de modifier le produit",
+    "errorLoading": "Impossible de charger le produit"
+  },
+  "card": {
+    "checking": "Vérification...",
+    "unavailable": "Indisponible",
+    "priceReached": "Prix atteint !",
+    "currentPrice": "Prix actuel :",
+    "targetPrice": "Prix cible :",
+    "lastChecked": "Vérifié le {{date}}",
+    "action": {
+      "details": "Détails",
+      "checkPrice": "Vérifier le prix maintenant",
+      "delete": "Supprimer"
+    }
+  },
+  "form": {
+    "urlLabel": "URL du produit",
+    "urlPlaceholder": "https://www.exemple.com/produit",
+    "urlHint": "Collez l'URL complète du produit que vous souhaitez suivre",
+    "priceLabel": "Prix cible (€)",
+    "pricePlaceholder": "99.99",
+    "priceHint": "Vous serez notifié lorsque le prix descendra en dessous de ce montant",
+    "frequencyLabel": "Fréquence de vérification",
+    "frequencyHint": "À quelle fréquence souhaitez-vous que nous vérifiions le prix ?",
+    "submit": "Ajouter le produit"
+  },
+  "emptyState": {
+    "search": {
+      "title": "Aucun produit trouvé",
+      "description": "Essayez de modifier votre recherche ou vos filtres",
+      "clearButton": "Effacer la recherche"
+    },
+    "noProducts": {
+      "title": "Aucun produit suivi",
+      "description": "Commencez à suivre des produits pour être notifié des baisses de prix",
+      "action": "Ajouter mon premier produit"
+    }
+  },
+  "priceChart": {
+    "title": "Évolution du prix",
+    "period": {
+      "7d": "7 jours",
+      "30d": "30 jours",
+      "90d": "90 jours",
+      "all": "Tout"
+    },
+    "empty": {
+      "title": "Aucune donnée disponible",
+      "description": "L'historique des prix pour cette période n'est pas encore disponible."
+    },
+    "legend": {
+      "currentPrice": "Prix actuel",
+      "targetPrice": "Prix cible"
+    },
+    "targetPriceLabel": "Prix cible: {{price}}"
+  },
+  "priceStats": {
+    "title": "Statistiques",
+    "currentPrice": "Prix actuel",
+    "lowestPrice": "Prix minimum",
+    "lowestPriceSub": "Meilleur prix observé",
+    "highestPrice": "Prix maximum",
+    "highestPriceSub": "Prix le plus élevé",
+    "averagePrice": "Prix moyen",
+    "overallChange": "Variation globale",
+    "priceDown": "Prix en baisse",
+    "priceUp": "Prix en hausse",
+    "totalRecords": "Nombre de relevés",
+    "checks_one": "{{count}} vérification",
+    "checks_other": "{{count}} vérifications"
+  },
+  "priceHistory": {
+    "title": "Historique des prix",
+    "count_one": "{{count}} relevé enregistré",
+    "count_other": "{{count}} relevés enregistrés",
+    "empty": {
+      "title": "Aucun historique disponible",
+      "description": "L'historique des prix sera disponible après la première vérification."
+    },
+    "table": {
+      "date": "Date et heure",
+      "price": "Prix",
+      "variation": "Variation"
+    }
+  },
+  "frequency": {
+    "every6h": "Toutes les 6 heures",
+    "every12h": "Toutes les 12 heures",
+    "every24h": "Toutes les 24 heures",
+    "every6hShort": "Toutes les 6h",
+    "every12hShort": "Toutes les 12h",
+    "every24hShort": "Toutes les 24h"
+  }
+}

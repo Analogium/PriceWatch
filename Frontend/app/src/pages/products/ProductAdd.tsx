@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useCreateProduct } from '@/hooks/useProducts';
 import { ProductForm } from '@/components/products';
 import { Card, Button, Breadcrumb } from '@/components/ui';
@@ -8,6 +9,7 @@ import type { ProductCreateFormData } from '@/utils/validators';
 import type { Product } from '@/types';
 
 export default function ProductAdd() {
+  const { t } = useTranslation('products');
   const navigate = useNavigate();
   const { success, error } = useToast();
   const createProduct = useCreateProduct();
@@ -28,7 +30,7 @@ export default function ProductAdd() {
       });
 
       setScrapedProduct(newProduct);
-      success('Produit ajouté avec succès !');
+      success(t('add.success'));
 
       // Redirection vers le dashboard après 2 secondes pour laisser le temps de voir le produit
       setTimeout(() => {
@@ -39,9 +41,7 @@ export default function ProductAdd() {
         err && typeof err === 'object' && 'response' in err
           ? (err.response as { data?: { detail?: string } })?.data?.detail
           : undefined;
-      const finalMessage =
-        message ||
-        "Impossible d'ajouter le produit. Vérifiez que l'URL est valide et que le site est accessible.";
+      const finalMessage = message || t('add.errorGeneric');
       setErrorMessage(finalMessage);
       error(finalMessage);
     }
@@ -60,19 +60,16 @@ export default function ProductAdd() {
       <div className="mb-6">
         <Breadcrumb
           items={[
-            { label: 'Tableau de bord', href: '/dashboard', icon: 'home' },
-            { label: 'Ajouter un produit', icon: 'add_shopping_cart' },
+            { label: t('common:breadcrumb.dashboard'), href: '/dashboard', icon: 'home' },
+            { label: t('add.breadcrumb'), icon: 'add_shopping_cart' },
           ]}
         />
       </div>
 
       {/* Header */}
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900 mb-2">Ajouter un produit</h1>
-        <p className="text-gray-600">
-          Ajoutez un produit à suivre en collant son URL. Nous allons automatiquement récupérer son
-          nom, son image et son prix actuel.
-        </p>
+        <h1 className="text-2xl font-bold text-gray-900 mb-2">{t('add.title')}</h1>
+        <p className="text-gray-600">{t('add.description')}</p>
       </div>
 
       {/* Formulaire */}
@@ -88,10 +85,8 @@ export default function ProductAdd() {
               check_circle
             </span>
             <div className="flex-1">
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                Produit ajouté avec succès !
-              </h3>
-              <p className="text-sm text-gray-600 mb-4">Redirection vers le tableau de bord...</p>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">{t('add.preview.title')}</h3>
+              <p className="text-sm text-gray-600 mb-4">{t('add.redirect')}</p>
 
               {/* Aperçu du produit */}
               <div className="bg-white rounded-lg border border-success-200 overflow-hidden">
@@ -114,19 +109,19 @@ export default function ProductAdd() {
                     </h4>
                     <div className="flex flex-wrap items-center gap-4 text-sm">
                       <div>
-                        <span className="text-gray-500">Prix actuel : </span>
+                        <span className="text-gray-500">{t('add.preview.currentPrice')}</span>
                         <span className="font-semibold text-gray-900">
                           {formatPrice(scrapedProduct.current_price)}
                         </span>
                       </div>
                       <div>
-                        <span className="text-gray-500">Prix cible : </span>
+                        <span className="text-gray-500">{t('add.preview.targetPrice')}</span>
                         <span className="font-semibold text-primary-600">
                           {formatPrice(scrapedProduct.target_price)}
                         </span>
                       </div>
                       <div>
-                        <span className="text-gray-500">Fréquence : </span>
+                        <span className="text-gray-500">{t('add.preview.frequency')}</span>
                         <span className="font-medium text-gray-900">
                           {scrapedProduct.check_frequency}h
                         </span>
@@ -148,13 +143,8 @@ export default function ProductAdd() {
               <div className="animate-spin h-6 w-6 border-2 border-primary-600 border-t-transparent rounded-full" />
             </div>
             <div className="flex-1">
-              <h3 className="text-lg font-semibold text-gray-900 mb-1">
-                Analyse du produit en cours...
-              </h3>
-              <p className="text-sm text-gray-600">
-                Nous récupérons les informations du produit depuis le site marchand. Cela peut
-                prendre quelques secondes.
-              </p>
+              <h3 className="text-lg font-semibold text-gray-900 mb-1">{t('add.loading.title')}</h3>
+              <p className="text-sm text-gray-600">{t('add.loading.description')}</p>
             </div>
           </div>
         </Card>
@@ -166,17 +156,15 @@ export default function ProductAdd() {
           <div className="flex items-start gap-4">
             <span className="material-symbols-outlined text-danger-600 text-3xl">error</span>
             <div className="flex-1">
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                Échec de l'ajout du produit
-              </h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">{t('add.error.title')}</h3>
               <p className="text-sm text-gray-700 mb-4">{errorMessage}</p>
               <div className="flex flex-col gap-2 text-sm text-gray-600">
-                <p className="font-medium">Suggestions :</p>
+                <p className="font-medium">{t('add.error.suggestions')}</p>
                 <ul className="list-disc list-inside space-y-1 ml-2">
-                  <li>Vérifiez que l'URL est correcte et complète</li>
-                  <li>Assurez-vous que le site est accessible</li>
-                  <li>Certains sites bloquent le scraping automatique</li>
-                  <li>Essayez avec une URL différente</li>
+                  <li>{t('add.error.suggestion1')}</li>
+                  <li>{t('add.error.suggestion2')}</li>
+                  <li>{t('add.error.suggestion3')}</li>
+                  <li>{t('add.error.suggestion4')}</li>
                 </ul>
               </div>
               <button
@@ -184,7 +172,7 @@ export default function ProductAdd() {
                 className="mt-4 px-4 py-2 bg-danger-600 text-white rounded-lg hover:bg-danger-700 transition-colors font-medium inline-flex items-center gap-2"
               >
                 <span className="material-symbols-outlined text-sm">close</span>
-                Fermer
+                {t('common:buttons.close')}
               </button>
             </div>
           </div>
@@ -199,7 +187,7 @@ export default function ProductAdd() {
           disabled={createProduct.isPending}
           leftIcon={<span className="material-symbols-outlined">arrow_back</span>}
         >
-          Retour au tableau de bord
+          {t('common:buttons.backToDashboard')}
         </Button>
       </div>
     </div>

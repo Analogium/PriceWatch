@@ -10,7 +10,8 @@ from typing import List
 from fastapi import APIRouter, Depends, HTTPException, Query, Response, UploadFile, status
 from sqlalchemy.orm import Session
 
-from app.api.dependencies import get_current_admin_user, get_db
+from app.api.dependencies import get_current_admin_user, get_db, get_language
+from app.i18n import t
 from app.models.user import User
 from app.schemas.admin import GlobalStats, ScrapingStatsResponse, SiteStats, UserStats
 from app.services.admin import AdminService
@@ -36,7 +37,12 @@ def get_global_statistics(db: Session = Depends(get_db), admin: User = Depends(g
 
 
 @router.get("/stats/site/{site_name}", response_model=SiteStats)
-def get_site_statistics(site_name: str, db: Session = Depends(get_db), admin: User = Depends(get_current_admin_user)):
+def get_site_statistics(
+    site_name: str,
+    db: Session = Depends(get_db),
+    admin: User = Depends(get_current_admin_user),
+    lang: str = Depends(get_language),
+):
     """
     Get statistics for a specific site (admin only)
 
@@ -46,7 +52,7 @@ def get_site_statistics(site_name: str, db: Session = Depends(get_db), admin: Us
     if site_name not in valid_sites:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Invalid site name. Must be one of: {', '.join(valid_sites)}",
+            detail=t("invalid_site_name", lang, sites=", ".join(valid_sites)),
         )
 
     return AdminService.get_site_stats(db, site_name)
@@ -70,7 +76,12 @@ def get_all_users_statistics(
 
 
 @router.get("/stats/users/{user_id}", response_model=UserStats)
-def get_user_statistics(user_id: int, db: Session = Depends(get_db), admin: User = Depends(get_current_admin_user)):
+def get_user_statistics(
+    user_id: int,
+    db: Session = Depends(get_db),
+    admin: User = Depends(get_current_admin_user),
+    lang: str = Depends(get_language),
+):
     """
     Get statistics for a specific user (admin only)
 
@@ -82,7 +93,7 @@ def get_user_statistics(user_id: int, db: Session = Depends(get_db), admin: User
     """
     user_stats = AdminService.get_user_stats(db, user_id)
     if not user_stats:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"User {user_id} not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=t("user_id_not_found", lang, user_id=user_id))
     return user_stats
 
 
@@ -173,7 +184,12 @@ def export_user_data_json(
 
 
 @router.post("/users/{user_id}/admin")
-def promote_user_to_admin(user_id: int, db: Session = Depends(get_db), admin: User = Depends(get_current_admin_user)):
+def promote_user_to_admin(
+    user_id: int,
+    db: Session = Depends(get_db),
+    admin: User = Depends(get_current_admin_user),
+    lang: str = Depends(get_language),
+):
     """
     Promote a user to admin (admin only)
 
@@ -181,19 +197,24 @@ def promote_user_to_admin(user_id: int, db: Session = Depends(get_db), admin: Us
     """
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"User {user_id} not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=t("user_id_not_found", lang, user_id=user_id))
 
     if user.is_admin:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="User is already an admin")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=t("user_already_admin", lang))
 
     user.is_admin = True
     db.commit()
 
-    return {"message": f"User {user.email} promoted to admin"}
+    return {"message": t("user_promoted", lang, email=user.email)}
 
 
 @router.delete("/users/{user_id}/admin")
-def revoke_admin_privileges(user_id: int, db: Session = Depends(get_db), admin: User = Depends(get_current_admin_user)):
+def revoke_admin_privileges(
+    user_id: int,
+    db: Session = Depends(get_db),
+    admin: User = Depends(get_current_admin_user),
+    lang: str = Depends(get_language),
+):
     """
     Revoke admin privileges from a user (admin only)
 
@@ -201,23 +222,28 @@ def revoke_admin_privileges(user_id: int, db: Session = Depends(get_db), admin: 
     """
     # Prevent self-demotion
     if user_id == admin.id:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Cannot revoke your own admin privileges")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=t("cannot_revoke_own_admin", lang))
 
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"User {user_id} not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=t("user_id_not_found", lang, user_id=user_id))
 
     if not user.is_admin:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="User is not an admin")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=t("user_not_admin", lang))
 
     user.is_admin = False
     db.commit()
 
-    return {"message": f"Admin privileges revoked from user {user.email}"}
+    return {"message": t("admin_revoked", lang, email=user.email)}
 
 
 @router.delete("/users/{user_id}")
-def delete_user(user_id: int, db: Session = Depends(get_db), admin: User = Depends(get_current_admin_user)):
+def delete_user(
+    user_id: int,
+    db: Session = Depends(get_db),
+    admin: User = Depends(get_current_admin_user),
+    lang: str = Depends(get_language),
+):
     """
     Delete a user and all their data (admin only)
 
@@ -226,17 +252,17 @@ def delete_user(user_id: int, db: Session = Depends(get_db), admin: User = Depen
     """
     # Prevent self-deletion
     if user_id == admin.id:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Cannot delete your own account as admin")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=t("cannot_delete_own_account", lang))
 
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"User {user_id} not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=t("user_id_not_found", lang, user_id=user_id))
 
     email = user.email
     db.delete(user)
     db.commit()
 
-    return {"message": f"User {email} and all associated data deleted successfully"}
+    return {"message": t("user_deleted", lang, email=email)}
 
 
 # ============================================================================
@@ -284,6 +310,7 @@ async def upload_cookies(
     site: str,
     cookies: UploadFile,
     admin: User = Depends(get_current_admin_user),
+    lang: str = Depends(get_language),
 ):
     """
     Upload cookies for a specific site (admin only)
@@ -296,7 +323,7 @@ async def upload_cookies(
     if site not in VALID_SITES:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Invalid site. Must be one of: {', '.join(VALID_SITES)}",
+            detail=t("invalid_site_name", lang, sites=", ".join(VALID_SITES)),
         )
 
     # Read and validate the uploaded file
@@ -306,25 +333,25 @@ async def upload_cookies(
     except json.JSONDecodeError:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Invalid JSON format. Expected a JSON array of cookies.",
+            detail=t("invalid_json_format", lang),
         )
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Failed to read file: {str(e)}",
+            detail=t("failed_to_read_file", lang, error=str(e)),
         )
 
     # Validate format
     if not isinstance(cookies_data, list):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Invalid format. Expected a JSON array of cookies.",
+            detail=t("invalid_cookie_format", lang),
         )
 
     if len(cookies_data) == 0:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Cookie array is empty.",
+            detail=t("cookie_array_empty", lang),
         )
 
     # Validate each cookie has required fields
@@ -333,13 +360,13 @@ async def upload_cookies(
         if not isinstance(cookie, dict):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Cookie at index {i} is not an object.",
+                detail=t("cookie_not_object", lang, index=i),
             )
         missing = required_fields - set(cookie.keys())
         if missing:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Cookie at index {i} missing required fields: {', '.join(missing)}",
+                detail=t("cookie_missing_fields", lang, index=i, fields=", ".join(missing)),
             )
 
     # Ensure cookies directory exists
@@ -351,14 +378,18 @@ async def upload_cookies(
         json.dump(cookies_data, f, indent=2)
 
     return {
-        "message": f"Cookies for {site} uploaded successfully",
+        "message": t("cookies_uploaded", lang, site=site),
         "site": site,
         "cookie_count": len(cookies_data),
     }
 
 
 @router.delete("/cookies/{site}")
-def delete_cookies(site: str, admin: User = Depends(get_current_admin_user)):
+def delete_cookies(
+    site: str,
+    admin: User = Depends(get_current_admin_user),
+    lang: str = Depends(get_language),
+):
     """
     Delete cookies for a specific site (admin only)
 
@@ -367,7 +398,7 @@ def delete_cookies(site: str, admin: User = Depends(get_current_admin_user)):
     if site not in VALID_SITES:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Invalid site. Must be one of: {', '.join(VALID_SITES)}",
+            detail=t("invalid_site_name", lang, sites=", ".join(VALID_SITES)),
         )
 
     cookie_file = COOKIES_DIR / f"{site}_cookies.json"
@@ -375,16 +406,20 @@ def delete_cookies(site: str, admin: User = Depends(get_current_admin_user)):
     if not cookie_file.exists():
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"No cookies found for {site}",
+            detail=t("no_cookies_found", lang, site=site),
         )
 
     cookie_file.unlink()
 
-    return {"message": f"Cookies for {site} deleted successfully", "site": site}
+    return {"message": t("cookies_deleted", lang, site=site), "site": site}
 
 
 @router.post("/cookies/{site}/test")
-async def test_cookies(site: str, admin: User = Depends(get_current_admin_user)):
+async def test_cookies(
+    site: str,
+    admin: User = Depends(get_current_admin_user),
+    lang: str = Depends(get_language),
+):
     """
     Test if cookies for a site are valid by attempting a scrape (admin only)
 
@@ -396,7 +431,7 @@ async def test_cookies(site: str, admin: User = Depends(get_current_admin_user))
     if site not in VALID_SITES:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Invalid site. Must be one of: {', '.join(VALID_SITES)}",
+            detail=t("invalid_site_name", lang, sites=", ".join(VALID_SITES)),
         )
 
     cookie_file = COOKIES_DIR / f"{site}_cookies.json"
@@ -404,7 +439,7 @@ async def test_cookies(site: str, admin: User = Depends(get_current_admin_user))
     if not cookie_file.exists():
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"No cookies found for {site}. Upload cookies first.",
+            detail=t("no_cookies_upload_first", lang, site=site),
         )
 
     # Test URLs for each site
@@ -421,7 +456,7 @@ async def test_cookies(site: str, admin: User = Depends(get_current_admin_user))
     if not test_url:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"No test URL configured for {site}",
+            detail=t("no_test_url", lang, site=site),
         )
 
     # Import here to avoid circular imports
@@ -435,7 +470,7 @@ async def test_cookies(site: str, admin: User = Depends(get_current_admin_user))
         if result:
             return {
                 "status": "success",
-                "message": f"Cookies for {site} are valid",
+                "message": t("cookies_valid", lang, site=site),
                 "site": site,
                 "test_result": {
                     "product_name": result.name[:100] if result.name else None,
@@ -445,12 +480,12 @@ async def test_cookies(site: str, admin: User = Depends(get_current_admin_user))
         else:
             return {
                 "status": "failed",
-                "message": f"Cookies for {site} may be expired or invalid. Scraping returned no data.",
+                "message": t("cookies_may_be_expired", lang, site=site),
                 "site": site,
             }
     except Exception as e:
         return {
             "status": "error",
-            "message": f"Error testing cookies: {str(e)}",
+            "message": t("error_testing_cookies", lang, error=str(e)),
             "site": site,
         }

@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 
-from app.api.dependencies import get_current_user
+from app.api.dependencies import get_current_user, parse_accept_language
 from app.core.config import settings
 from app.core.rate_limit import rate_limiter
 from app.core.security import (
@@ -18,6 +18,7 @@ from app.core.security import (
     verify_password,
 )
 from app.db.base import get_db
+from app.i18n import t
 from app.models.user import User
 from app.models.user_preferences import UserPreferences
 from app.schemas.user import (
@@ -39,18 +40,20 @@ router = APIRouter()
 @router.post("/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
 async def register(request: Request, user_data: UserCreate, db: Session = Depends(get_db)):
     """Register a new user with email verification."""
+    lang = parse_accept_language(request)
+
     # Rate limiting
     await rate_limiter.check_rate_limit(request)
 
     # Validate password strength
-    is_valid, error_message = validate_password_strength(user_data.password)
+    is_valid, error_message = validate_password_strength(user_data.password, lang=lang)
     if not is_valid:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=error_message)
 
     # Check if user already exists
     existing_user = db.query(User).filter(User.email == user_data.email).first()
     if existing_user:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email already registered")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=t("email_already_registered", lang))
 
     # Generate verification token
     verification_token = generate_verification_token()
@@ -65,13 +68,13 @@ async def register(request: Request, user_data: UserCreate, db: Session = Depend
     db.refresh(new_user)
 
     # Create default user preferences
-    default_preferences = UserPreferences(user_id=new_user.id)
+    default_preferences = UserPreferences(user_id=new_user.id, language=lang)
     db.add(default_preferences)
     db.commit()
 
     # Send verification email
     try:
-        email_service.send_verification_email(user_data.email, verification_token)
+        email_service.send_verification_email(user_data.email, verification_token, lang=lang)
     except Exception as e:
         print(f"Failed to send verification email: {e}")
 
@@ -81,24 +84,26 @@ async def register(request: Request, user_data: UserCreate, db: Session = Depend
 @router.post("/login", response_model=Token)
 async def login(request: Request, form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
     """Login and get access and refresh tokens."""
+    lang = parse_accept_language(request)
+
     # Rate limiting
     await rate_limiter.check_rate_limit(request)
 
     # Find user (OAuth2PasswordRequestForm uses 'username' field, but we store email)
     user = db.query(User).filter(User.email == form_data.username).first()
     if not user:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=t("invalid_credentials", lang))
 
     # Check if user has a password (Google-only users don't)
     if not user.password_hash:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="This account uses Google sign-in. Please log in with Google.",
+            detail=t("google_sign_in_required", lang),
         )
 
     # Verify password
     if not verify_password(form_data.password, user.password_hash):
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=t("invalid_credentials", lang))
 
     # Create access and refresh tokens
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
@@ -117,22 +122,24 @@ def get_me(current_user: User = Depends(get_current_user)):
 @router.post("/refresh", response_model=Token)
 async def refresh_token(request: Request, token_data: RefreshTokenRequest, db: Session = Depends(get_db)):
     """Refresh access token using refresh token."""
+    lang = parse_accept_language(request)
+
     # Rate limiting
     await rate_limiter.check_rate_limit(request)
 
     # Decode refresh token
     payload = decode_access_token(token_data.refresh_token)
     if not payload or payload.get("type") != "refresh":
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid refresh token")
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=t("invalid_refresh_token", lang))
 
     email = payload.get("sub")
     if not email:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid refresh token")
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=t("invalid_refresh_token", lang))
 
     # Verify user exists
     user = db.query(User).filter(User.email == email).first()
     if not user:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found")
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=t("user_not_found", lang))
 
     # Create new access token
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
@@ -142,23 +149,27 @@ async def refresh_token(request: Request, token_data: RefreshTokenRequest, db: S
 
 
 @router.post("/verify-email")
-async def verify_email(verification_data: EmailVerification, db: Session = Depends(get_db)):
+async def verify_email(request: Request, verification_data: EmailVerification, db: Session = Depends(get_db)):
     """Verify user email address."""
+    lang = parse_accept_language(request)
+
     user = db.query(User).filter(User.verification_token == verification_data.token).first()
 
     if not user:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid verification token")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=t("invalid_verification_token", lang))
 
     user.is_verified = True
     user.verification_token = None
     db.commit()
 
-    return {"message": "Email verified successfully"}
+    return {"message": t("email_verified", lang)}
 
 
 @router.post("/forgot-password")
 async def forgot_password(request: Request, reset_data: PasswordResetRequest, db: Session = Depends(get_db)):
     """Request password reset."""
+    lang = parse_accept_language(request)
+
     # Rate limiting
     await rate_limiter.check_rate_limit(request)
 
@@ -174,32 +185,34 @@ async def forgot_password(request: Request, reset_data: PasswordResetRequest, db
 
         # Send reset email
         try:
-            email_service.send_password_reset_email(user.email, reset_token)
+            email_service.send_password_reset_email(user.email, reset_token, lang=lang)
         except Exception as e:
             print(f"Failed to send reset email: {e}")
 
-    return {"message": "If the email exists, a password reset link has been sent"}
+    return {"message": t("password_reset_sent", lang)}
 
 
 @router.post("/reset-password")
 async def reset_password(request: Request, reset_data: PasswordResetConfirm, db: Session = Depends(get_db)):
     """Reset password using token."""
+    lang = parse_accept_language(request)
+
     # Rate limiting
     await rate_limiter.check_rate_limit(request)
 
     # Validate new password strength
-    is_valid, error_message = validate_password_strength(reset_data.new_password)
+    is_valid, error_message = validate_password_strength(reset_data.new_password, lang=lang)
     if not is_valid:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=error_message)
 
     user = db.query(User).filter(User.reset_token == reset_data.token).first()
 
     if not user:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid reset token")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=t("invalid_reset_token", lang))
 
     # Check if token expired
     if user.reset_token_expires is None or user.reset_token_expires < datetime.utcnow():
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Reset token has expired")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=t("reset_token_expired", lang))
 
     # Update password
     user.password_hash = get_password_hash(reset_data.new_password)
@@ -212,12 +225,14 @@ async def reset_password(request: Request, reset_data: PasswordResetConfirm, db:
 
     db.commit()
 
-    return {"message": "Password reset successfully"}
+    return {"message": t("password_reset_success", lang)}
 
 
 @router.post("/google", response_model=Token)
 async def google_auth(request: Request, google_data: GoogleAuthRequest, db: Session = Depends(get_db)):
     """Authenticate or register a user via Google OAuth."""
+    lang = parse_accept_language(request)
+
     # Rate limiting
     await rate_limiter.check_rate_limit(request)
 
@@ -229,7 +244,7 @@ async def google_auth(request: Request, google_data: GoogleAuthRequest, db: Sess
 
     # Reject unverified Google emails
     if not google_user.email_verified:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Google email is not verified")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=t("google_email_not_verified", lang))
 
     # Check if user with this Google ID already exists
     user = db.query(User).filter(User.google_id == google_user.google_id).first()
@@ -259,7 +274,7 @@ async def google_auth(request: Request, google_data: GoogleAuthRequest, db: Sess
             db.refresh(user)
 
             # Create default user preferences
-            default_preferences = UserPreferences(user_id=user.id)
+            default_preferences = UserPreferences(user_id=user.id, language=lang)
             db.add(default_preferences)
             db.commit()
 

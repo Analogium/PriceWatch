@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Link } from 'react-router';
+import { useTranslation } from 'react-i18next';
 import { Button, Input, Card } from '@/components/ui';
 import { useToast } from '@/contexts/ToastContext';
-import { forgotPasswordSchema } from '@/utils/validators';
+import { createForgotPasswordSchema } from '@/utils/validators';
 import { authApi } from '@/api';
 
 type ForgotPasswordFormData = {
@@ -12,16 +13,20 @@ type ForgotPasswordFormData = {
 };
 
 export default function ForgotPassword() {
+  const { t, i18n } = useTranslation('auth');
   const { success, error } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- rebuild schema when language changes
+  const schema = useMemo(() => createForgotPasswordSchema(), [i18n.language]);
 
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm<ForgotPasswordFormData>({
-    resolver: zodResolver(forgotPasswordSchema),
+    resolver: zodResolver(schema),
   });
 
   const onSubmit = async (data: ForgotPasswordFormData) => {
@@ -29,16 +34,13 @@ export default function ForgotPassword() {
     try {
       await authApi.forgotPassword(data.email);
       setEmailSent(true);
-      success(
-        'Si cette adresse email est associée à un compte, vous recevrez un email avec les instructions',
-        'Email envoyé'
-      );
+      success(t('forgotPassword.successMessage'), t('forgotPassword.successTitle'));
     } catch (err: unknown) {
       const message =
         err && typeof err === 'object' && 'response' in err
           ? (err.response as { data?: { detail?: string } })?.data?.detail
           : undefined;
-      error(message || 'Une erreur est survenue', 'Erreur');
+      error(message || t('forgotPassword.errorGeneric'), t('forgotPassword.errorTitle'));
     } finally {
       setIsLoading(false);
     }
@@ -56,15 +58,14 @@ export default function ForgotPassword() {
                   mark_email_read
                 </span>
               </div>
-              <h2 className="text-2xl font-bold text-gray-900">Vérifiez votre boîte email</h2>
-              <p className="text-gray-600">
-                Si votre adresse email est enregistrée, vous recevrez un email avec les instructions
-                pour réinitialiser votre mot de passe.
-              </p>
+              <h2 className="text-2xl font-bold text-gray-900">
+                {t('forgotPassword.successPageTitle')}
+              </h2>
+              <p className="text-gray-600">{t('forgotPassword.successPageDescription')}</p>
               <div className="pt-4">
                 <Link to="/login">
                   <Button variant="primary" fullWidth className="h-12">
-                    Retour à la connexion
+                    {t('forgotPassword.successPageButton')}
                   </Button>
                 </Link>
               </div>
@@ -79,20 +80,20 @@ export default function ForgotPassword() {
                   </span>
                   <h1 className="text-2xl font-bold text-gray-900">PriceWatch</h1>
                 </div>
-                <h2 className="text-2xl font-bold text-gray-900 mb-2">Mot de passe oublié ?</h2>
-                <p className="text-gray-600 text-sm">
-                  Entrez votre email pour recevoir un lien de réinitialisation
-                </p>
+                <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                  {t('forgotPassword.title')}
+                </h2>
+                <p className="text-gray-600 text-sm">{t('forgotPassword.description')}</p>
               </div>
 
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
                 <div>
                   <label className="block text-sm font-medium text-gray-900 mb-1.5">
-                    Adresse e-mail
+                    {t('forgotPassword.emailLabel')}
                   </label>
                   <Input
                     type="email"
-                    placeholder="exemple@domaine.com"
+                    placeholder={t('forgotPassword.emailPlaceholder')}
                     error={errors.email?.message}
                     leftIcon={<span className="material-symbols-outlined text-xl">mail</span>}
                     fullWidth
@@ -107,7 +108,7 @@ export default function ForgotPassword() {
                   isLoading={isLoading}
                   className="h-12"
                 >
-                  Envoyer le lien de réinitialisation
+                  {t('forgotPassword.submit')}
                 </Button>
               </form>
 
@@ -118,7 +119,7 @@ export default function ForgotPassword() {
                   className="inline-flex items-center gap-1 text-sm text-gray-600 hover:text-gray-900"
                 >
                   <span className="material-symbols-outlined text-sm">arrow_back</span>
-                  <span>Retour à la connexion</span>
+                  <span>{t('forgotPassword.backToLogin')}</span>
                 </Link>
               </div>
             </>

@@ -6,8 +6,9 @@ from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query, s
 from sqlalchemy import func, or_
 from sqlalchemy.orm import Session
 
-from app.api.dependencies import get_current_user
+from app.api.dependencies import get_current_user, get_language
 from app.db.base import get_db
+from app.i18n import t
 from app.models.product import Product
 from app.models.user import User
 from app.models.user_preferences import UserPreferences
@@ -95,6 +96,7 @@ def create_product(
     background_tasks: BackgroundTasks,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
+    lang: str = Depends(get_language),
 ):
     """Add a new product to track."""
     # Scrape product information
@@ -103,7 +105,7 @@ def create_product(
     if not scraped_data:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Unable to extract product information from URL. Please check the URL and try again.",
+            detail=t("unable_to_scrape", lang),
         )
 
     # Create new product
@@ -139,18 +141,24 @@ def create_product(
             scraped_data.price,  # old_price = current price for new products
             new_product.url,
             user_preferences=preferences,
+            lang=lang,
         )
 
     return new_product
 
 
 @router.get("/{product_id}", response_model=ProductResponse)
-def get_product(product_id: int, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+def get_product(
+    product_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+    lang: str = Depends(get_language),
+):
     """Get a specific product by ID."""
     product = db.query(Product).filter(Product.id == product_id, Product.user_id == current_user.id).first()
 
     if not product:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=t("product_not_found", lang))
 
     return product
 
@@ -161,12 +169,13 @@ def update_product(
     product_data: ProductUpdate,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
+    lang: str = Depends(get_language),
 ):
     """Update a product (name or target price)."""
     product = db.query(Product).filter(Product.id == product_id, Product.user_id == current_user.id).first()
 
     if not product:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=t("product_not_found", lang))
 
     # Update fields
     if product_data.name is not None:
@@ -183,12 +192,17 @@ def update_product(
 
 
 @router.delete("/{product_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_product(product_id: int, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+def delete_product(
+    product_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+    lang: str = Depends(get_language),
+):
     """Delete a product from tracking."""
     product = db.query(Product).filter(Product.id == product_id, Product.user_id == current_user.id).first()
 
     if not product:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=t("product_not_found", lang))
 
     db.delete(product)
     db.commit()
@@ -202,18 +216,19 @@ def check_product_price(
     background_tasks: BackgroundTasks,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
+    lang: str = Depends(get_language),
 ):
     """Manually check and update the price of a product."""
     product = db.query(Product).filter(Product.id == product_id, Product.user_id == current_user.id).first()
 
     if not product:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=t("product_not_found", lang))
 
     # Scrape current price
     scraped_data = scraper.scrape_product(product.url)
 
     if not scraped_data:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Unable to fetch current price")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=t("unable_to_fetch_price", lang))
 
     old_price = product.current_price
     product.current_price = scraped_data.price
@@ -237,6 +252,7 @@ def check_product_price(
             old_price,
             product.url,
             user_preferences=preferences,
+            lang=lang,
         )
 
     db.commit()
@@ -247,7 +263,11 @@ def check_product_price(
 
 @router.get("/{product_id}/history", response_model=List[PriceHistoryResponse])
 def get_product_price_history(
-    product_id: int, limit: int = 100, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)
+    product_id: int,
+    limit: int = 100,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+    lang: str = Depends(get_language),
 ):
     """
     Get the price history for a specific product.
@@ -263,7 +283,7 @@ def get_product_price_history(
     product = db.query(Product).filter(Product.id == product_id, Product.user_id == current_user.id).first()
 
     if not product:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=t("product_not_found", lang))
 
     # Get price history
     history = price_history_service.get_product_history(db, product_id, limit)
@@ -273,7 +293,10 @@ def get_product_price_history(
 
 @router.get("/{product_id}/history/stats", response_model=PriceHistoryStats)
 def get_product_price_statistics(
-    product_id: int, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)
+    product_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+    lang: str = Depends(get_language),
 ):
     """
     Get price statistics for a specific product.
@@ -288,12 +311,12 @@ def get_product_price_statistics(
     product = db.query(Product).filter(Product.id == product_id, Product.user_id == current_user.id).first()
 
     if not product:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=t("product_not_found", lang))
 
     # Get statistics
     stats = price_history_service.get_price_statistics(db, product_id)
 
     if not stats:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=t("product_not_found", lang))
 
     return stats

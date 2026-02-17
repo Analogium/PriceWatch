@@ -1,0 +1,15 @@
+{
+  "invalidEmail": "Adresse email invalide",
+  "passwordMinLength": "Le mot de passe doit contenir au moins 8 caractères",
+  "passwordUppercase": "Le mot de passe doit contenir au moins une lettre majuscule",
+  "passwordLowercase": "Le mot de passe doit contenir au moins une lettre minuscule",
+  "passwordDigit": "Le mot de passe doit contenir au moins un chiffre",
+  "passwordSpecialChar": "Le mot de passe doit contenir au moins un caractère spécial",
+  "passwordRequired": "Le mot de passe est requis",
+  "passwordsDoNotMatch": "Les mots de passe ne correspondent pas",
+  "invalidUrl": "URL invalide",
+  "urlRequired": "L'URL est requise",
+  "targetPricePositive": "Le prix cible doit être positif",
+  "targetPriceMin": "Le prix cible minimum est de 0.01€",
+  "nameRequired": "Le nom est requis"
+}

@@ -1,4 +1,5 @@
 export type WebhookType = 'slack' | 'discord' | 'custom';
+export type Language = 'fr' | 'en';
 
 export interface UserPreferences {
   id: number;
@@ -9,6 +10,7 @@ export interface UserPreferences {
   webhook_type: WebhookType | null;
   price_drop_alerts: boolean;
   weekly_summary: boolean;
+  language: Language;
 }
 
 export interface UserPreferencesUpdate {
@@ -18,4 +20,5 @@ export interface UserPreferencesUpdate {
   webhook_type?: WebhookType | null;
   price_drop_alerts?: boolean;
   weekly_summary?: boolean;
+  language?: Language;
 }

@@ -8,6 +8,7 @@ from unittest.mock import Mock, patch
 import pytest
 from sqlalchemy.orm import Session
 
+from app.i18n import t
 from app.models.price_history import PriceHistory
 from app.models.product import Product
 from app.models.scraping_stats import ScrapingStats
@@ -582,4 +583,4 @@ class TestAdminDependencies:
             get_current_admin_user(mock_user)
 
         assert exc_info.value.status_code == 403
-        assert "Admin privileges required" in str(exc_info.value.detail)
+        assert t("admin_required") in str(exc_info.value.detail)

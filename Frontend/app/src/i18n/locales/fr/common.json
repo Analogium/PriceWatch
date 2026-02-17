@@ -1,0 +1,98 @@
+{
+  "appName": "PriceWatch",
+  "nav": {
+    "dashboard": "Tableau de bord",
+    "addProduct": "Ajouter un produit",
+    "settings": "Paramètres",
+    "userMenu": "Menu utilisateur",
+    "loggedInAs": "Connecté en tant que",
+    "logout": "Déconnexion",
+    "menu": "Menu"
+  },
+  "footer": {
+    "allRightsReserved": "Tous droits réservés",
+    "about": "À propos",
+    "support": "Support",
+    "privacy": "Confidentialité"
+  },
+  "buttons": {
+    "save": "Sauvegarder",
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "close": "Fermer",
+    "back": "Retour",
+    "retry": "Réessayer",
+    "backToDashboard": "Retour au tableau de bord",
+    "reloadPage": "Recharger la page"
+  },
+  "errors": {
+    "notFound": {
+      "code": "404",
+      "title": "Page introuvable",
+      "description": "Désolé, la page que vous recherchez n'existe pas ou a été déplacée.",
+      "needHelp": "Besoin d'aide ?",
+      "contactSupport": "Contactez le support"
+    },
+    "serverError": {
+      "code": "500",
+      "title": "Erreur serveur",
+      "description": "Désolé, une erreur s'est produite sur nos serveurs. Nous travaillons à résoudre le problème. Veuillez réessayer dans quelques instants.",
+      "checkStatus": "Vérifier l'état du service :"
+    },
+    "errorBoundary": {
+      "title": "Une erreur est survenue",
+      "description": "Désolé, une erreur inattendue s'est produite. Veuillez réessayer."
+    },
+    "generic": "Une erreur est survenue"
+  },
+  "sort": {
+    "label": "Trier par :",
+    "name": "Nom",
+    "currentPrice": "Prix actuel",
+    "targetPrice": "Prix cible",
+    "createdAt": "Date d'ajout",
+    "lastChecked": "Dernière vérification",
+    "ascending": "Croissant",
+    "descending": "Décroissant"
+  },
+  "pagination": {
+    "page": "Page",
+    "of": "sur",
+    "pageInfo": "Page <strong>{{page}}</strong> sur <strong>{{totalPages}}</strong>"
+  },
+  "search": {
+    "placeholder": "Rechercher un produit..."
+  },
+  "priceCheck": {
+    "checking_one": "{{count}} vérification en cours",
+    "checking_other": "{{count}} vérifications en cours"
+  },
+  "breadcrumb": {
+    "dashboard": "Tableau de bord"
+  },
+  "frequency": {
+    "every6h": "Toutes les 6 heures",
+    "every12h": "Toutes les 12 heures",
+    "every24h": "Toutes les 24 heures",
+    "every6hShort": "Toutes les 6h",
+    "every12hShort": "Toutes les 12h",
+    "every24hShort": "Toutes les 24h",
+    "everyNHours": "Toutes les {{count}} heures"
+  },
+  "constants": {
+    "sortOptions": {
+      "name": "Nom",
+      "currentPrice": "Prix actuel",
+      "targetPrice": "Prix cible",
+      "createdAt": "Date de création",
+      "lastChecked": "Dernière vérification"
+    },
+    "webhookTypes": {
+      "slack": "Slack",
+      "discord": "Discord",
+      "custom": "Custom"
+    }
+  },
+  "needHelp": "Besoin d'aide ? Contactez le support"
+}

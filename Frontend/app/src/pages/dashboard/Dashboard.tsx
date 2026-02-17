@@ -1,4 +1,5 @@
 import { useState, useCallback, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   ProductCard,
   EmptyState,
@@ -14,6 +15,7 @@ import { usePriceCheck } from '@/contexts/PriceCheckContext';
 import { useProducts, useDeleteProduct, useCheckPrice } from '@/hooks/useProducts';
 
 export default function Dashboard() {
+  const { t } = useTranslation('dashboard');
   const { success, error, info } = useToast();
   const { startChecking, finishChecking } = usePriceCheck();
   const [search, setSearch] = useState('');
@@ -46,7 +48,7 @@ export default function Dashboard() {
       queryError && typeof queryError === 'object' && 'response' in queryError
         ? (queryError.response as { data?: { detail?: string } })?.data?.detail
         : undefined;
-    error(message || 'Erreur lors du chargement des produits');
+    error(message || t('error.loading'));
   }
 
   const handleSearchChange = (value: string) => {
@@ -94,15 +96,15 @@ export default function Dashboard() {
 
       // Perform delete with React Query mutation
       await deleteMutation.mutateAsync(productId);
-      success('Produit supprimé avec succès');
+      success(t('success.delete'));
     } catch (err: unknown) {
       const message =
         err && typeof err === 'object' && 'response' in err
           ? (err.response as { data?: { detail?: string } })?.data?.detail
           : undefined;
-      error(message || 'Erreur lors de la suppression du produit');
+      error(message || t('error.delete'));
     }
-  }, [productToDelete, deleteMutation, success, error]);
+  }, [productToDelete, deleteMutation, success, error, t]);
 
   const cancelDelete = useCallback(() => {
     setShowDeleteModal(false);
@@ -117,35 +119,35 @@ export default function Dashboard() {
 
       // Start checking and show info toast
       startChecking(product);
-      info('Vérification du prix en cours...', undefined, 10000);
+      info(t('checkPrice.info'), undefined, 10000);
 
       try {
         await checkPriceMutation.mutateAsync(id);
-        success('Prix vérifié avec succès');
+        success(t('checkPrice.success'));
       } catch (err: unknown) {
         const message =
           err && typeof err === 'object' && 'response' in err
             ? (err.response as { data?: { detail?: string } })?.data?.detail
             : undefined;
-        error(message || 'Erreur lors de la vérification du prix');
+        error(message || t('checkPrice.error'));
       } finally {
         finishChecking(id);
       }
     },
-    [data, startChecking, finishChecking, checkPriceMutation, success, error, info]
+    [data, startChecking, finishChecking, checkPriceMutation, success, error, info, t]
   );
 
   return (
     <div>
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Mes produits suivis</h1>
+        <h1 className="text-2xl font-bold text-gray-900">{t('title')}</h1>
         <LinkButton
           to="/products/add"
           variant="primary"
           leftIcon={<span className="material-symbols-outlined">add</span>}
         >
-          Ajouter un produit
+          {t('addProduct')}
         </LinkButton>
       </div>
 
@@ -168,9 +170,8 @@ export default function Dashboard() {
       {!isLoading && data && data.items.length === 0 && (
         <>
           {!search && (
-            <Alert variant="info" title="Aucun produit suivi" className="mb-6">
-              Vous ne suivez aucun produit pour le moment. Commencez par ajouter un produit à
-              surveiller en cliquant sur le bouton ci-dessus.
+            <Alert variant="info" title={t('noProducts.title')} className="mb-6">
+              {t('noProducts.description')}
             </Alert>
           )}
           <EmptyState hasSearch={!!search} onClearSearch={handleClearSearch} />
@@ -200,24 +201,22 @@ export default function Dashboard() {
       <Modal
         isOpen={showDeleteModal}
         onClose={cancelDelete}
-        title="Confirmer la suppression"
+        title={t('deleteConfirm.title')}
         size="sm"
       >
         <div className="space-y-4">
-          <p className="text-gray-700">
-            Êtes-vous sûr de vouloir supprimer ce produit ? Cette action est irréversible.
-          </p>
+          <p className="text-gray-700">{t('deleteConfirm.message')}</p>
 
           {productToDelete && (
             <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-              <p className="text-sm font-medium text-gray-900 mb-1">Produit à supprimer :</p>
+              <p className="text-sm font-medium text-gray-900 mb-1">{t('deleteConfirm.product')}</p>
               <p className="text-sm text-gray-600 line-clamp-2">{productToDelete.name}</p>
             </div>
           )}
 
           <div className="flex gap-3 justify-end">
             <Button variant="secondary" onClick={cancelDelete} disabled={deleteMutation.isPending}>
-              Annuler
+              {t('deleteConfirm.cancel')}
             </Button>
             <Button
               variant="danger"
@@ -225,7 +224,7 @@ export default function Dashboard() {
               isLoading={deleteMutation.isPending}
               leftIcon={<span className="material-symbols-outlined">delete</span>}
             >
-              Supprimer
+              {t('deleteConfirm.delete')}
             </Button>
           </div>
         </div>

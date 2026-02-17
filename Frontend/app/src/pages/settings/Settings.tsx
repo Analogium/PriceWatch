@@ -1,14 +1,18 @@
 import { useState, useEffect } from 'react';
 import { useForm, Controller } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 import { Card, Button, Toggle, Select, Input, Spinner, Breadcrumb } from '@/components/ui';
 import { preferencesApi } from '@/api';
 import type { UserPreferences, UserPreferencesUpdate, WebhookType } from '@/types';
+import type { Language } from '@/types/preferences';
 import { WEBHOOK_TYPES } from '@/utils';
 import { useToast } from '@/contexts/ToastContext';
+import i18n from '@/i18n';
 
 type PreferencesFormData = Omit<UserPreferences, 'id' | 'user_id'>;
 
 export default function Settings() {
+  const { t } = useTranslation('settings');
   const [preferences, setPreferences] = useState<UserPreferences | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -28,6 +32,7 @@ export default function Settings() {
       webhook_type: null,
       price_drop_alerts: false,
       weekly_summary: false,
+      language: (i18n.language as Language) || 'fr',
     },
   });
 
@@ -46,9 +51,10 @@ export default function Settings() {
         webhook_type: data.webhook_type,
         price_drop_alerts: data.price_drop_alerts,
         weekly_summary: data.weekly_summary,
+        language: data.language || 'fr',
       });
     } catch {
-      info('Impossible de charger les préférences. Utilisation des valeurs par défaut.');
+      info(t('loadingError'));
     } finally {
       setIsLoading(false);
     }
@@ -70,15 +76,21 @@ export default function Settings() {
         webhook_type: data.webhook_type || null,
         price_drop_alerts: data.price_drop_alerts,
         weekly_summary: data.weekly_summary,
+        language: data.language,
       };
 
       let updatedPreferences: UserPreferences;
       if (preferences) {
         updatedPreferences = await preferencesApi.update(updateData);
-        success('Préférences mises à jour avec succès !');
+        success(t('saveSuccess'));
       } else {
         updatedPreferences = await preferencesApi.create(updateData);
-        success('Préférences créées avec succès !');
+        success(t('createSuccess'));
+      }
+
+      // Sync i18n language
+      if (data.language && data.language !== i18n.language) {
+        i18n.changeLanguage(data.language);
       }
 
       setPreferences(updatedPreferences);
@@ -89,9 +101,10 @@ export default function Settings() {
         webhook_type: updatedPreferences.webhook_type,
         price_drop_alerts: updatedPreferences.price_drop_alerts,
         weekly_summary: updatedPreferences.weekly_summary,
+        language: updatedPreferences.language || 'fr',
       });
     } catch {
-      error('Impossible de sauvegarder les préférences');
+      error(t('saveError'));
     } finally {
       setIsSaving(false);
     }
@@ -103,19 +116,17 @@ export default function Settings() {
         <div className="mb-6">
           <Breadcrumb
             items={[
-              { label: 'Tableau de bord', href: '/dashboard', icon: 'home' },
-              { label: 'Paramètres', icon: 'settings' },
+              { label: t('common:breadcrumb.dashboard'), href: '/dashboard', icon: 'home' },
+              { label: t('breadcrumb'), icon: 'settings' },
             ]}
           />
         </div>
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Paramètres</h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-2">
-            Gérez vos préférences de notifications et webhooks
-          </p>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">{t('title')}</h1>
+          <p className="text-gray-600 dark:text-gray-400 mt-2">{t('subtitle')}</p>
         </div>
         <div className="flex justify-center items-center py-20">
-          <Spinner size="lg" variant="primary" label="Chargement des préférences..." />
+          <Spinner size="lg" variant="primary" label={t('loading')} />
         </div>
       </div>
     );
@@ -126,19 +137,52 @@ export default function Settings() {
       <div className="mb-6">
         <Breadcrumb
           items={[
-            { label: 'Tableau de bord', href: '/dashboard', icon: 'home' },
-            { label: 'Paramètres', icon: 'settings' },
+            { label: t('common:breadcrumb.dashboard'), href: '/dashboard', icon: 'home' },
+            { label: t('breadcrumb'), icon: 'settings' },
           ]}
         />
       </div>
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Paramètres</h1>
-        <p className="text-gray-600 dark:text-gray-400 mt-2">
-          Gérez vos préférences de notifications et webhooks
-        </p>
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">{t('title')}</h1>
+        <p className="text-gray-600 dark:text-gray-400 mt-2">{t('subtitle')}</p>
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+        {/* Section Langue */}
+        <Card>
+          <div className="space-y-6">
+            <div>
+              <div className="flex items-center gap-2 mb-4">
+                <span className="material-symbols-outlined text-primary-600">language</span>
+                <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
+                  {t('language.title')}
+                </h2>
+              </div>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
+                {t('language.description')}
+              </p>
+            </div>
+
+            <Controller
+              name="language"
+              control={control}
+              render={({ field }) => (
+                <Select
+                  id="language"
+                  label={t('language.label')}
+                  leftIcon="translate"
+                  options={[
+                    { value: 'fr', label: t('language.fr') },
+                    { value: 'en', label: t('language.en') },
+                  ]}
+                  value={field.value || 'fr'}
+                  onChange={(e) => field.onChange(e.target.value as Language)}
+                />
+              )}
+            />
+          </div>
+        </Card>
+
         {/* Section Notifications Email */}
         <Card>
           <div className="space-y-6">
@@ -146,11 +190,11 @@ export default function Settings() {
               <div className="flex items-center gap-2 mb-4">
                 <span className="material-symbols-outlined text-primary-600">mail</span>
                 <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
-                  Notifications par email
+                  {t('email.title')}
                 </h2>
               </div>
               <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
-                Recevez des notifications par email pour suivre vos produits
+                {t('email.description')}
               </p>
             </div>
 
@@ -162,8 +206,8 @@ export default function Settings() {
                   id="email_notifications"
                   checked={field.value}
                   onChange={field.onChange}
-                  label="Activer les notifications par email"
-                  description="Recevez des emails pour les alertes de prix et de disponibilité"
+                  label={t('email.toggle')}
+                  description={t('email.toggleDescription')}
                 />
               )}
             />
@@ -178,8 +222,8 @@ export default function Settings() {
                       id="price_drop_alerts"
                       checked={field.value}
                       onChange={field.onChange}
-                      label="Alertes de baisse de prix"
-                      description="Recevoir un email quand un produit atteint le prix cible"
+                      label={t('email.priceAlerts')}
+                      description={t('email.priceAlertsDescription')}
                     />
                   )}
                 />
@@ -192,8 +236,8 @@ export default function Settings() {
                       id="weekly_summary"
                       checked={field.value}
                       onChange={field.onChange}
-                      label="Résumé hebdomadaire"
-                      description="Recevoir un résumé hebdomadaire de vos produits suivis"
+                      label={t('email.weeklySummary')}
+                      description={t('email.weeklySummaryDescription')}
                     />
                   )}
                 />
@@ -208,10 +252,12 @@ export default function Settings() {
             <div>
               <div className="flex items-center gap-2 mb-4">
                 <span className="material-symbols-outlined text-primary-600">webhook</span>
-                <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Webhooks</h2>
+                <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
+                  {t('webhooks.title')}
+                </h2>
               </div>
               <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
-                Envoyez des notifications vers vos services externes (Slack, Discord, etc.)
+                {t('webhooks.description')}
               </p>
             </div>
 
@@ -223,8 +269,8 @@ export default function Settings() {
                   id="webhook_notifications"
                   checked={field.value}
                   onChange={field.onChange}
-                  label="Activer les notifications webhook"
-                  description="Envoyez des alertes vers une URL webhook externe"
+                  label={t('webhooks.toggle')}
+                  description={t('webhooks.toggleDescription')}
                 />
               )}
             />
@@ -237,11 +283,11 @@ export default function Settings() {
                   render={({ field }) => (
                     <Select
                       id="webhook_type"
-                      label="Type de webhook"
-                      helperText="Sélectionnez le type de webhook (Slack, Discord ou Custom)"
+                      label={t('webhooks.typeLabel')}
+                      helperText={t('webhooks.typeHelper')}
                       leftIcon="settings"
                       options={WEBHOOK_TYPES}
-                      placeholder="Sélectionnez un type"
+                      placeholder={t('webhooks.typePlaceholder')}
                       value={field.value || ''}
                       onChange={(e) =>
                         field.onChange(e.target.value ? (e.target.value as WebhookType) : null)
@@ -257,9 +303,9 @@ export default function Settings() {
                     <Input
                       id="webhook_url"
                       type="url"
-                      label="URL du webhook"
-                      placeholder="https://hooks.slack.com/services/..."
-                      helperText="L'URL complète de votre webhook"
+                      label={t('webhooks.urlLabel')}
+                      placeholder={t('webhooks.urlPlaceholder')}
+                      helperText={t('webhooks.urlHelper')}
                       leftIcon="link"
                       value={field.value || ''}
                       onChange={field.onChange}
@@ -279,7 +325,7 @@ export default function Settings() {
             onClick={() => reset()}
             disabled={!isDirty || isSaving}
           >
-            Annuler
+            {t('common:buttons.cancel')}
           </Button>
           <Button
             type="submit"
@@ -288,7 +334,7 @@ export default function Settings() {
             disabled={!isDirty || isSaving}
           >
             <span className="material-symbols-outlined">save</span>
-            Sauvegarder
+            {t('common:buttons.save')}
           </Button>
         </div>
       </form>

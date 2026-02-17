@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router';
+import { useTranslation } from 'react-i18next';
 import { Button, Card, Spinner } from '@/components/ui';
 import { authApi } from '@/api';
 
 type VerificationState = 'loading' | 'success' | 'error';
 
 export default function VerifyEmail() {
+  const { t } = useTranslation('auth');
   const [searchParams] = useSearchParams();
   const [state, setState] = useState<VerificationState>('loading');
   const [errorMessage, setErrorMessage] = useState('');
@@ -16,7 +18,7 @@ export default function VerifyEmail() {
     const verifyEmail = async () => {
       if (!token) {
         setState('error');
-        setErrorMessage('Le lien de vérification est invalide');
+        setErrorMessage(t('verifyEmail.errorInvalidToken'));
         return;
       }
 
@@ -29,12 +31,12 @@ export default function VerifyEmail() {
           err && typeof err === 'object' && 'response' in err
             ? (err.response as { data?: { detail?: string } })?.data?.detail
             : undefined;
-        setErrorMessage(message || 'Le lien de vérification est invalide ou a expiré');
+        setErrorMessage(message || t('verifyEmail.errorExpired'));
       }
     };
 
     verifyEmail();
-  }, [token]);
+  }, [token, t]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4 py-12">
@@ -43,8 +45,8 @@ export default function VerifyEmail() {
           {state === 'loading' && (
             <div className="text-center space-y-4 py-8">
               <Spinner size="lg" variant="primary" />
-              <h2 className="text-2xl font-bold text-gray-900">Vérification en cours...</h2>
-              <p className="text-gray-600 text-sm">Nous vérifions votre adresse email</p>
+              <h2 className="text-2xl font-bold text-gray-900">{t('verifyEmail.loadingTitle')}</h2>
+              <p className="text-gray-600 text-sm">{t('verifyEmail.loadingDescription')}</p>
             </div>
           )}
 
@@ -55,15 +57,12 @@ export default function VerifyEmail() {
                   mark_email_read
                 </span>
               </div>
-              <h2 className="text-2xl font-bold text-gray-900">Email vérifié avec succès !</h2>
-              <p className="text-gray-600">
-                Votre adresse email a été confirmée. Vous pouvez maintenant vous connecter à votre
-                compte PriceWatch.
-              </p>
+              <h2 className="text-2xl font-bold text-gray-900">{t('verifyEmail.successTitle')}</h2>
+              <p className="text-gray-600">{t('verifyEmail.successDescription')}</p>
               <div className="pt-4">
                 <Link to="/login">
                   <Button variant="primary" fullWidth className="h-12">
-                    Se connecter
+                    {t('verifyEmail.successButton')}
                   </Button>
                 </Link>
               </div>
@@ -75,17 +74,17 @@ export default function VerifyEmail() {
               <div className="inline-flex items-center justify-center w-16 h-16 bg-danger-100 rounded-full mb-2">
                 <span className="material-symbols-outlined text-danger-600 text-3xl">error</span>
               </div>
-              <h2 className="text-2xl font-bold text-gray-900">Vérification échouée</h2>
+              <h2 className="text-2xl font-bold text-gray-900">{t('verifyEmail.errorTitle')}</h2>
               <p className="text-gray-600">{errorMessage}</p>
               <div className="pt-4 space-y-3">
                 <Link to="/register">
                   <Button variant="primary" fullWidth className="h-12">
-                    Créer un nouveau compte
+                    {t('verifyEmail.errorButtonRegister')}
                   </Button>
                 </Link>
                 <Link to="/login">
                   <Button variant="secondary" fullWidth className="h-12">
-                    Retour à la connexion
+                    {t('verifyEmail.errorButtonLogin')}
                   </Button>
                 </Link>
               </div>
@@ -95,9 +94,7 @@ export default function VerifyEmail() {
 
         {/* Help text */}
         {state !== 'loading' && (
-          <p className="text-center text-sm text-gray-600 mt-6">
-            Besoin d'aide ? Contactez le support
-          </p>
+          <p className="text-center text-sm text-gray-600 mt-6">{t('common:needHelp')}</p>
         )}
       </div>
     </div>

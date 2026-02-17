@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import type { PaginationMetadata } from '@/types';
 
 interface PaginationProps {
@@ -6,6 +7,7 @@ interface PaginationProps {
 }
 
 export function Pagination({ metadata, onPageChange }: PaginationProps) {
+  const { t } = useTranslation('common');
   const { page, total_pages, has_next, has_previous } = metadata;
 
   // Générer les numéros de page à afficher
@@ -53,7 +55,7 @@ export function Pagination({ metadata, onPageChange }: PaginationProps) {
     <div className="flex items-center justify-between border-t border-gray-200 pt-4">
       {/* Info */}
       <div className="text-sm text-gray-700">
-        Page <span className="font-medium">{page}</span> sur{' '}
+        {t('pagination.page')} <span className="font-medium">{page}</span> {t('pagination.of')}{' '}
         <span className="font-medium">{total_pages}</span>
       </div>
 

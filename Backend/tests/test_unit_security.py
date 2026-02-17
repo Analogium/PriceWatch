@@ -31,35 +31,35 @@ class TestPasswordStrength:
     @pytest.mark.unit
     def test_password_too_short(self):
         """Test that short passwords are rejected."""
-        is_valid, error = validate_password_strength("Short1!")
+        is_valid, error = validate_password_strength("Short1!", lang="en")
         assert is_valid is False
         assert "at least" in error and "characters" in error
 
     @pytest.mark.unit
     def test_password_no_uppercase(self):
         """Test that passwords without uppercase are rejected."""
-        is_valid, error = validate_password_strength("lowercase123!")
+        is_valid, error = validate_password_strength("lowercase123!", lang="en")
         assert is_valid is False
         assert "uppercase letter" in error
 
     @pytest.mark.unit
     def test_password_no_lowercase(self):
         """Test that passwords without lowercase are rejected."""
-        is_valid, error = validate_password_strength("UPPERCASE123!")
+        is_valid, error = validate_password_strength("UPPERCASE123!", lang="en")
         assert is_valid is False
         assert "lowercase letter" in error
 
     @pytest.mark.unit
     def test_password_no_digit(self):
         """Test that passwords without digits are rejected."""
-        is_valid, error = validate_password_strength("NoDigits!")
+        is_valid, error = validate_password_strength("NoDigits!", lang="en")
         assert is_valid is False
         assert "digit" in error
 
     @pytest.mark.unit
     def test_password_no_special_char(self):
         """Test that passwords without special characters are rejected."""
-        is_valid, error = validate_password_strength("NoSpecial123")
+        is_valid, error = validate_password_strength("NoSpecial123", lang="en")
         assert is_valid is False
         assert "special character" in error
 

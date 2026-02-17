@@ -28,5 +28,8 @@ class UserPreferences(Base):
     # Options: "slack", "discord", "custom"
     webhook_type: Mapped[Optional[str]] = mapped_column(String, nullable=True)
 
+    # Language preference
+    language: Mapped[str] = mapped_column(String(5), default="fr")
+
     # Relationship
     user: Mapped["User"] = relationship(back_populates="preferences")
