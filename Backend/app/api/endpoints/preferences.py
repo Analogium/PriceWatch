@@ -1,8 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from app.api.dependencies import get_current_user
+from app.api.dependencies import get_current_user, get_language
 from app.db.base import get_db
+from app.i18n import t
 from app.models.user import User
 from app.models.user_preferences import UserPreferences
 from app.schemas.user_preferences import UserPreferencesCreate, UserPreferencesResponse, UserPreferencesUpdate
@@ -30,21 +31,20 @@ def create_user_preferences(
     preferences_data: UserPreferencesCreate,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
+    lang: str = Depends(get_language),
 ):
     """Create notification preferences for the current user."""
     # Check if preferences already exist
     existing_preferences = db.query(UserPreferences).filter(UserPreferences.user_id == current_user.id).first()
 
     if existing_preferences:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail="Preferences already exist. Use PUT to update them."
-        )
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=t("preferences_exist", lang))
 
     # Validate webhook settings
     if preferences_data.webhook_notifications and not preferences_data.webhook_url:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Webhook URL is required when webhook notifications are enabled",
+            detail=t("webhook_url_required", lang),
         )
 
     # Create new preferences
@@ -61,6 +61,7 @@ def update_user_preferences(
     preferences_data: UserPreferencesUpdate,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
+    lang: str = Depends(get_language),
 ):
     """Update current user's notification preferences."""
     preferences = db.query(UserPreferences).filter(UserPreferences.user_id == current_user.id).first()
@@ -83,7 +84,7 @@ def update_user_preferences(
         if webhook_enabled and not webhook_url:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Webhook URL is required when webhook notifications are enabled",
+                detail=t("webhook_url_required", lang),
             )
 
     for field, value in update_data.items():

@@ -392,7 +392,7 @@ Ce document trace l'état d'avancement du backend de PriceWatch, ce qui a été 
 - [ ] **Support multi-devises** (EUR, USD, GBP)
 - [ ] **Détection automatique de la devise** depuis l'URL
 - [ ] **Conversion de devises** (API taux de change)
-- [ ] **Support multi-langues** pour emails/notifications
+- [ ] **Support multi-langues**
 
 #### 🚀 Production & Scale
 - [ ] **Variables d'environnement sécurisées** (secrets management)

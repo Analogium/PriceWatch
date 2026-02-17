@@ -1,0 +1,179 @@
+{
+  "add": {
+    "breadcrumb": "Add a product",
+    "title": "Add a product",
+    "description": "Add a product to track by pasting its URL. We will automatically retrieve its name, image and current price.",
+    "success": "Product added successfully!",
+    "errorGeneric": "Unable to add the product. Check that the URL is valid and that the site is accessible.",
+    "redirect": "Redirecting to dashboard...",
+    "preview": {
+      "title": "Product added successfully!",
+      "currentPrice": "Current price: ",
+      "targetPrice": "Target price: ",
+      "frequency": "Frequency: "
+    },
+    "loading": {
+      "title": "Analyzing product...",
+      "description": "We are retrieving product information from the retailer's website. This may take a few seconds."
+    },
+    "error": {
+      "title": "Failed to add product",
+      "suggestions": "Suggestions:",
+      "suggestion1": "Check that the URL is correct and complete",
+      "suggestion2": "Make sure the site is accessible",
+      "suggestion3": "Some sites block automatic scraping",
+      "suggestion4": "Try with a different URL"
+    }
+  },
+  "detail": {
+    "error": {
+      "loading": "Unable to load product",
+      "history": "Unable to load price history",
+      "delete": "Unable to delete product",
+      "checkPrice": "Unable to check price"
+    },
+    "status": {
+      "unavailable": "Unavailable",
+      "priceReached": "Target price reached",
+      "monitoring": "Monitoring"
+    },
+    "price": {
+      "current": "Current price",
+      "target": "Target price"
+    },
+    "link": "View on merchant site",
+    "frequencyLabel": "Check frequency",
+    "frequencyText": "Every {{hours}} hours",
+    "lastChecked": "Last check",
+    "createdAt": "Created date",
+    "unavailableSince": "Unavailable since",
+    "action": {
+      "checkPrice": "Check price now",
+      "edit": "Edit",
+      "delete": "Delete"
+    },
+    "tabs": {
+      "stats": "Statistics",
+      "chart": "Chart",
+      "history": "History"
+    },
+    "deleteConfirm": {
+      "title": "Confirm deletion",
+      "message": "Are you sure you want to delete this product? This action is irreversible.",
+      "product": "Product to delete:",
+      "cancel": "Cancel",
+      "delete": "Delete"
+    },
+    "checkPrice": {
+      "info": "Checking price...",
+      "success": "Price verified successfully!"
+    }
+  },
+  "edit": {
+    "breadcrumb": "Edit",
+    "title": "Edit product",
+    "description": "Edit your product information",
+    "nameLabel": "Product name",
+    "namePlaceholder": "Product name",
+    "nameHint": "You can customize the product name",
+    "priceLabel": "Target price (€)",
+    "pricePlaceholder": "99.99",
+    "priceHint": "You will be notified when the price drops below this amount",
+    "frequencyLabel": "Check frequency",
+    "frequencyHint": "How often would you like us to check the price?",
+    "success": "Product modified successfully!",
+    "error": "Unable to modify product",
+    "errorLoading": "Unable to load product"
+  },
+  "card": {
+    "checking": "Checking...",
+    "unavailable": "Unavailable",
+    "priceReached": "Price reached!",
+    "currentPrice": "Current price:",
+    "targetPrice": "Target price:",
+    "lastChecked": "Checked on {{date}}",
+    "action": {
+      "details": "Details",
+      "checkPrice": "Check price now",
+      "delete": "Delete"
+    }
+  },
+  "form": {
+    "urlLabel": "Product URL",
+    "urlPlaceholder": "https://www.example.com/product",
+    "urlHint": "Paste the complete URL of the product you want to track",
+    "priceLabel": "Target price (€)",
+    "pricePlaceholder": "99.99",
+    "priceHint": "You will be notified when the price drops below this amount",
+    "frequencyLabel": "Check frequency",
+    "frequencyHint": "How often would you like us to check the price?",
+    "submit": "Add product"
+  },
+  "emptyState": {
+    "search": {
+      "title": "No products found",
+      "description": "Try modifying your search or filters",
+      "clearButton": "Clear search"
+    },
+    "noProducts": {
+      "title": "No tracked products",
+      "description": "Start tracking products to be notified of price drops",
+      "action": "Add my first product"
+    }
+  },
+  "priceChart": {
+    "title": "Price evolution",
+    "period": {
+      "7d": "7 days",
+      "30d": "30 days",
+      "90d": "90 days",
+      "all": "All"
+    },
+    "empty": {
+      "title": "No data available",
+      "description": "The price history for this period is not yet available."
+    },
+    "legend": {
+      "currentPrice": "Current price",
+      "targetPrice": "Target price"
+    },
+    "targetPriceLabel": "Target price: {{price}}"
+  },
+  "priceStats": {
+    "title": "Statistics",
+    "currentPrice": "Current price",
+    "lowestPrice": "Lowest price",
+    "lowestPriceSub": "Best price observed",
+    "highestPrice": "Highest price",
+    "highestPriceSub": "Highest price observed",
+    "averagePrice": "Average price",
+    "overallChange": "Overall variation",
+    "priceDown": "Price down",
+    "priceUp": "Price up",
+    "totalRecords": "Number of records",
+    "checks_one": "{{count}} check",
+    "checks_other": "{{count}} checks"
+  },
+  "priceHistory": {
+    "title": "Price history",
+    "count_one": "{{count}} record",
+    "count_other": "{{count}} records",
+    "empty": {
+      "title": "No history available",
+      "description": "Price history will be available after the first check."
+    },
+    "table": {
+      "date": "Date and time",
+      "price": "Price",
+      "variation": "Variation"
+    }
+  },
+  "frequency": {
+    "every6h": "Every 6 hours",
+    "every12h": "Every 12 hours",
+    "every24h": "Every 24 hours",
+    "every6hShort": "Every 6h",
+    "every12hShort": "Every 12h",
+    "every24hShort": "Every 24h"
+  }
+}

@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import type { PriceHistory } from '@/types/product';
 import { formatPrice, formatDateTime, formatPercentage } from '@/utils';
 
@@ -6,6 +7,8 @@ interface PriceHistoryListProps {
 }
 
 export const PriceHistoryList = ({ priceHistory }: PriceHistoryListProps) => {
+  const { t } = useTranslation('products');
+
   // Calculate price variation between consecutive records
   const calculateVariation = (
     currentPrice: number,
@@ -23,11 +26,9 @@ export const PriceHistoryList = ({ priceHistory }: PriceHistoryListProps) => {
             history
           </span>
           <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
-            Aucun historique disponible
+            {t('priceHistory.empty.title')}
           </h3>
-          <p className="text-gray-600 dark:text-gray-400">
-            L'historique des prix sera disponible après la première vérification.
-          </p>
+          <p className="text-gray-600 dark:text-gray-400">{t('priceHistory.empty.description')}</p>
         </div>
       </div>
     );
@@ -37,11 +38,10 @@ export const PriceHistoryList = ({ priceHistory }: PriceHistoryListProps) => {
     <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 shadow-sm overflow-hidden">
       <div className="p-6 border-b border-gray-200 dark:border-gray-800">
         <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-          Historique des prix
+          {t('priceHistory.title')}
         </h3>
         <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-          {priceHistory.length} {priceHistory.length > 1 ? 'relevés' : 'relevé'} enregistré
-          {priceHistory.length > 1 ? 's' : ''}
+          {t('priceHistory.count', { count: priceHistory.length })}
         </p>
       </div>
 
@@ -50,13 +50,13 @@ export const PriceHistoryList = ({ priceHistory }: PriceHistoryListProps) => {
           <thead className="bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                Date et heure
+                {t('priceHistory.table.date')}
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                Prix
+                {t('priceHistory.table.price')}
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                Variation
+                {t('priceHistory.table.variation')}
               </th>
             </tr>
           </thead>

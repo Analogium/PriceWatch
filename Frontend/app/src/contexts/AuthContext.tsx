@@ -1,6 +1,8 @@
 /* eslint-disable react-refresh/only-export-components */
 import { createContext, useState, useEffect, useCallback, useMemo, type ReactNode } from 'react';
+import i18n from '../i18n';
 import { authApi } from '../api';
+import { preferencesApi } from '../api/preferences';
 import { queryClient } from '../lib/queryClient';
 import type { User, LoginCredentials, RegisterData } from '../types';
 
@@ -16,6 +18,17 @@ interface AuthContextType {
 }
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+const syncLanguageFromPreferences = async () => {
+  try {
+    const prefs = await preferencesApi.get();
+    if (prefs.language && prefs.language !== i18n.language) {
+      i18n.changeLanguage(prefs.language);
+    }
+  } catch {
+    // Preferences not found or error - keep current language
+  }
+};
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
@@ -33,6 +46,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const userData = await authApi.me();
       setUser(userData);
+      await syncLanguageFromPreferences();
     } catch {
       localStorage.removeItem('access_token');
       localStorage.removeItem('refresh_token');
@@ -54,6 +68,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
     const userData = await authApi.me();
     setUser(userData);
+    await syncLanguageFromPreferences();
   }, []);
 
   const loginWithGoogle = useCallback(async (credential: string) => {
@@ -64,6 +79,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
     const userData = await authApi.me();
     setUser(userData);
+    await syncLanguageFromPreferences();
   }, []);
 
   const register = useCallback(async (data: RegisterData) => {

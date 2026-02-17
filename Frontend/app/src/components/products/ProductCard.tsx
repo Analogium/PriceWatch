@@ -1,4 +1,5 @@
 import { memo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { usePriceCheck } from '@/contexts/PriceCheckContext';
 import { LinkButton, Button } from '@/components/ui';
 import type { Product } from '@/types';
@@ -14,6 +15,7 @@ export const ProductCard = memo(function ProductCard({
   onDelete,
   onCheckPrice,
 }: ProductCardProps) {
+  const { t } = useTranslation('products');
   const { isChecking } = usePriceCheck();
   const isPriceBelowTarget = product.current_price <= product.target_price;
   const priceColor = isPriceBelowTarget ? 'text-green-600' : 'text-gray-900';
@@ -37,9 +39,9 @@ export const ProductCard = memo(function ProductCard({
   };
 
   const getFrequencyLabel = (hours: number) => {
-    if (hours === 6) return 'Toutes les 6h';
-    if (hours === 12) return 'Toutes les 12h';
-    return 'Toutes les 24h';
+    if (hours === 6) return t('frequency.every6hShort');
+    if (hours === 12) return t('frequency.every12hShort');
+    return t('frequency.every24hShort');
   };
 
   return (
@@ -60,18 +62,18 @@ export const ProductCard = memo(function ProductCard({
         {isChecking(product.id) && (
           <div className="absolute top-2 left-2 bg-primary-100 text-primary-800 text-xs font-medium px-2 py-1 rounded flex items-center gap-1 animate-pulse">
             <span className="material-symbols-outlined text-sm">refresh</span>
-            Vérification...
+            {t('card.checking')}
           </div>
         )}
         {!product.is_available && (
           <div className="absolute top-2 right-2 bg-red-100 text-red-800 text-xs font-medium px-2 py-1 rounded">
-            Indisponible
+            {t('card.unavailable')}
           </div>
         )}
         {isPriceBelowTarget && product.is_available && (
           <div className="absolute top-2 right-2 bg-green-100 text-green-800 text-xs font-medium px-2 py-1 rounded flex items-center gap-1">
             <span className="material-symbols-outlined text-sm">trending_down</span>
-            Prix atteint !
+            {t('card.priceReached')}
           </div>
         )}
       </div>
@@ -86,13 +88,13 @@ export const ProductCard = memo(function ProductCard({
         {/* Prices */}
         <div className="space-y-2 mb-4">
           <div className="flex items-baseline justify-between">
-            <span className="text-sm text-gray-600">Prix actuel :</span>
+            <span className="text-sm text-gray-600">{t('card.currentPrice')}</span>
             <span className={`text-2xl font-bold ${priceColor}`}>
               {formatPrice(product.current_price)}
             </span>
           </div>
           <div className="flex items-baseline justify-between">
-            <span className="text-sm text-gray-600">Prix cible :</span>
+            <span className="text-sm text-gray-600">{t('card.targetPrice')}</span>
             <span className="text-lg font-medium text-gray-700">
               {formatPrice(product.target_price)}
             </span>
@@ -107,14 +109,14 @@ export const ProductCard = memo(function ProductCard({
           </div>
           <div className="flex items-center gap-2">
             <span className="material-symbols-outlined text-base">update</span>
-            <span>Vérifié le {formatDate(product.last_checked)}</span>
+            <span>{t('card.lastChecked', { date: formatDate(product.last_checked) })}</span>
           </div>
         </div>
 
         {/* Actions */}
         <div className="flex gap-2">
           <LinkButton to={`/products/${product.id}`} variant="primary" size="sm" className="flex-1">
-            Détails
+            {t('card.action.details')}
           </LinkButton>
           <Button
             onClick={() => onCheckPrice?.(product.id)}
@@ -122,7 +124,7 @@ export const ProductCard = memo(function ProductCard({
             variant="ghost"
             size="md"
             iconOnly
-            title="Vérifier le prix maintenant"
+            title={t('card.action.checkPrice')}
           >
             <span
               className={`material-symbols-outlined ${isChecking(product.id) ? 'animate-spin' : ''}`}
@@ -135,7 +137,7 @@ export const ProductCard = memo(function ProductCard({
             variant="ghost"
             size="md"
             iconOnly
-            title="Supprimer"
+            title={t('card.action.delete')}
             className="border-red-300 text-red-600 hover:bg-red-50"
           >
             <span className="material-symbols-outlined">delete</span>

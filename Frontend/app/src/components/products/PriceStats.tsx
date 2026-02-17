@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import type { PriceStats as PriceStatsType } from '@/types/product';
 import { formatPrice, formatPercentage } from '@/utils';
 
@@ -62,6 +63,8 @@ const StatCard = ({ icon, label, value, variant = 'default', subValue }: StatCar
 };
 
 export const PriceStats = ({ stats }: PriceStatsProps) => {
+  const { t } = useTranslation('products');
+
   const getPriceChangeVariant = (): 'success' | 'danger' | 'default' => {
     if (stats.price_change_percentage === null) return 'default';
     if (stats.price_change_percentage < 0) return 'success';
@@ -82,14 +85,16 @@ export const PriceStats = ({ stats }: PriceStatsProps) => {
         <span className="material-symbols-outlined text-primary-600 dark:text-primary-400">
           analytics
         </span>
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Statistiques</h3>
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+          {t('priceStats.title')}
+        </h3>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {/* Current Price */}
         <StatCard
           icon="price_check"
-          label="Prix actuel"
+          label={t('priceStats.currentPrice')}
           value={formatPrice(stats.current_price)}
           variant="primary"
         />
@@ -97,25 +102,25 @@ export const PriceStats = ({ stats }: PriceStatsProps) => {
         {/* Lowest Price */}
         <StatCard
           icon="arrow_downward"
-          label="Prix minimum"
+          label={t('priceStats.lowestPrice')}
           value={formatPrice(stats.lowest_price)}
           variant="success"
-          subValue="Meilleur prix observé"
+          subValue={t('priceStats.lowestPriceSub')}
         />
 
         {/* Highest Price */}
         <StatCard
           icon="arrow_upward"
-          label="Prix maximum"
+          label={t('priceStats.highestPrice')}
           value={formatPrice(stats.highest_price)}
           variant="danger"
-          subValue="Prix le plus élevé"
+          subValue={t('priceStats.highestPriceSub')}
         />
 
         {/* Average Price */}
         <StatCard
           icon="show_chart"
-          label="Prix moyen"
+          label={t('priceStats.averagePrice')}
           value={formatPrice(stats.average_price)}
           variant="default"
         />
@@ -123,7 +128,7 @@ export const PriceStats = ({ stats }: PriceStatsProps) => {
         {/* Price Change Percentage */}
         <StatCard
           icon={getPriceChangeIcon()}
-          label="Variation globale"
+          label={t('priceStats.overallChange')}
           value={
             stats.price_change_percentage !== null
               ? formatPercentage(stats.price_change_percentage / 100)
@@ -132,9 +137,9 @@ export const PriceStats = ({ stats }: PriceStatsProps) => {
           variant={getPriceChangeVariant()}
           subValue={
             stats.price_change_percentage !== null && stats.price_change_percentage < 0
-              ? 'Prix en baisse'
+              ? t('priceStats.priceDown')
               : stats.price_change_percentage !== null && stats.price_change_percentage > 0
-                ? 'Prix en hausse'
+                ? t('priceStats.priceUp')
                 : undefined
           }
         />
@@ -142,10 +147,10 @@ export const PriceStats = ({ stats }: PriceStatsProps) => {
         {/* Total Records */}
         <StatCard
           icon="data_usage"
-          label="Nombre de relevés"
+          label={t('priceStats.totalRecords')}
           value={stats.total_records.toString()}
           variant="default"
-          subValue={`${stats.total_records} ${stats.total_records > 1 ? 'vérifications' : 'vérification'}`}
+          subValue={t('priceStats.checks', { count: stats.total_records })}
         />
       </div>
     </div>

@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import type { SortBy, SortOrder } from '@/types';
 
 interface SortSelectProps {
@@ -6,15 +7,17 @@ interface SortSelectProps {
   onSortChange: (sortBy: SortBy, order: SortOrder) => void;
 }
 
-const sortOptions: { value: SortBy; label: string }[] = [
-  { value: 'name', label: 'Nom' },
-  { value: 'current_price', label: 'Prix actuel' },
-  { value: 'target_price', label: 'Prix cible' },
-  { value: 'created_at', label: "Date d'ajout" },
-  { value: 'last_checked', label: 'Dernière vérification' },
+const sortOptionKeys: { value: SortBy; labelKey: string }[] = [
+  { value: 'name', labelKey: 'sort.name' },
+  { value: 'current_price', labelKey: 'sort.currentPrice' },
+  { value: 'target_price', labelKey: 'sort.targetPrice' },
+  { value: 'created_at', labelKey: 'sort.createdAt' },
+  { value: 'last_checked', labelKey: 'sort.lastChecked' },
 ];
 
 export function SortSelect({ sortBy, order, onSortChange }: SortSelectProps) {
+  const { t } = useTranslation('common');
+
   const handleSortByChange = (newSortBy: SortBy) => {
     onSortChange(newSortBy, order);
   };
@@ -27,7 +30,7 @@ export function SortSelect({ sortBy, order, onSortChange }: SortSelectProps) {
   return (
     <div className="flex items-center gap-2">
       <label htmlFor="sort-by" className="text-sm font-medium text-gray-700 whitespace-nowrap">
-        Trier par :
+        {t('sort.label')}
       </label>
       <select
         id="sort-by"
@@ -35,16 +38,16 @@ export function SortSelect({ sortBy, order, onSortChange }: SortSelectProps) {
         onChange={(e) => handleSortByChange(e.target.value as SortBy)}
         className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white text-sm"
       >
-        {sortOptions.map((option) => (
+        {sortOptionKeys.map((option) => (
           <option key={option.value} value={option.value}>
-            {option.label}
+            {t(option.labelKey)}
           </option>
         ))}
       </select>
       <button
         onClick={handleOrderToggle}
         className="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-        title={order === 'asc' ? 'Croissant' : 'Décroissant'}
+        title={order === 'asc' ? t('sort.ascending') : t('sort.descending')}
       >
         <span className="material-symbols-outlined text-gray-700">
           {order === 'asc' ? 'arrow_upward' : 'arrow_downward'}

@@ -12,6 +12,7 @@ class UserPreferencesBase(BaseModel):
     price_drop_alerts: bool = True
     weekly_summary: bool = False
     webhook_type: Optional[Literal["slack", "discord", "custom"]] = None
+    language: str = "fr"
 
 
 class UserPreferencesCreate(UserPreferencesBase):
@@ -29,6 +30,7 @@ class UserPreferencesUpdate(BaseModel):
     price_drop_alerts: Optional[bool] = None
     weekly_summary: Optional[bool] = None
     webhook_type: Optional[Literal["slack", "discord", "custom"]] = None
+    language: Optional[Literal["fr", "en"]] = None
 
     @field_validator("webhook_url")
     @classmethod

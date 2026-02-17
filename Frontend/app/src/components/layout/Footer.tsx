@@ -1,4 +1,7 @@
+import { useTranslation } from 'react-i18next';
+
 export function Footer() {
+  const { t } = useTranslation('common');
   const currentYear = new Date().getFullYear();
 
   return (
@@ -10,20 +13,22 @@ export function Footer() {
             <span className="material-symbols-outlined text-primary-600 text-2xl">monitoring</span>
             <div>
               <p className="text-sm font-semibold text-gray-900">PriceWatch</p>
-              <p className="text-xs text-gray-600">© {currentYear} Tous droits réservés</p>
+              <p className="text-xs text-gray-600">
+                &copy; {currentYear} {t('footer.allRightsReserved')}
+              </p>
             </div>
           </div>
 
           {/* Links */}
           <div className="flex items-center gap-6">
             <a href="#" className="text-sm text-gray-600 hover:text-primary-600 transition-colors">
-              À propos
+              {t('footer.about')}
             </a>
             <a href="#" className="text-sm text-gray-600 hover:text-primary-600 transition-colors">
-              Support
+              {t('footer.support')}
             </a>
             <a href="#" className="text-sm text-gray-600 hover:text-primary-600 transition-colors">
-              Confidentialité
+              {t('footer.privacy')}
             </a>
           </div>
         </div>

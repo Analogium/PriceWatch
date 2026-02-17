@@ -11,6 +11,7 @@ from fastapi.security import HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
 
 from app.api.dependencies import get_current_user
+from app.i18n import t
 from app.models.user import User
 
 
@@ -60,7 +61,7 @@ class TestGetCurrentUser:
                 get_current_user(mock_credentials, mock_db)
 
             assert exc_info.value.status_code == 401
-            assert "Invalid or expired token" in exc_info.value.detail
+            assert t("invalid_or_expired_token") in exc_info.value.detail
 
     def test_get_current_user_missing_sub_in_payload(self):
         """Test with token payload missing 'sub' field."""
@@ -75,7 +76,7 @@ class TestGetCurrentUser:
                 get_current_user(mock_credentials, mock_db)
 
             assert exc_info.value.status_code == 401
-            assert "Invalid token payload" in exc_info.value.detail
+            assert t("invalid_token_payload") in exc_info.value.detail
 
     def test_get_current_user_user_not_found(self):
         """Test when user email from token doesn't exist in database."""
@@ -97,7 +98,7 @@ class TestGetCurrentUser:
                 get_current_user(mock_credentials, mock_db)
 
             assert exc_info.value.status_code == 401
-            assert "User not found" in exc_info.value.detail
+            assert t("user_not_found") in exc_info.value.detail
 
     def test_get_current_user_token_extraction(self):
         """Test that token is correctly extracted from credentials."""

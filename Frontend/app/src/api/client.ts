@@ -1,4 +1,5 @@
 import axios, { type AxiosError, type InternalAxiosRequestConfig } from 'axios';
+import i18n from '../i18n';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1';
 
@@ -16,6 +17,7 @@ apiClient.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+    config.headers['Accept-Language'] = i18n.language;
     return config;
   },
   (error: AxiosError) => {
@@ -87,13 +89,13 @@ export const getErrorMessage = (error: unknown): string => {
       axiosError.response?.data?.detail ||
       axiosError.response?.data?.message ||
       axiosError.message ||
-      'Une erreur est survenue'
+      i18n.t('errors.generic')
     );
   }
   if (error instanceof Error) {
     return error.message;
   }
-  return 'Une erreur est survenue';
+  return i18n.t('errors.generic');
 };
 
 export default apiClient;

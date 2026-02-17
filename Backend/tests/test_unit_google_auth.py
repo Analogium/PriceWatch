@@ -129,6 +129,7 @@ class TestGoogleAuthEndpoint:
         # Both queries (by google_id, by email) return None
         mock_db.query.return_value.filter.return_value.first.return_value = None
         mock_request = Mock(spec=Request)
+        mock_request.headers = {"Accept-Language": "en"}
 
         from app.api.endpoints.auth import google_auth
         from app.schemas.user import GoogleAuthRequest
@@ -182,6 +183,7 @@ class TestGoogleAuthEndpoint:
         # First query (by google_id) returns user
         mock_db.query.return_value.filter.return_value.first.return_value = mock_user
         mock_request = Mock(spec=Request)
+        mock_request.headers = {"Accept-Language": "en"}
 
         from app.api.endpoints.auth import google_auth
         from app.schemas.user import GoogleAuthRequest
@@ -222,6 +224,7 @@ class TestGoogleAuthEndpoint:
         # First query (by google_id) returns None, second (by email) returns user
         mock_db.query.return_value.filter.return_value.first.side_effect = [None, mock_user]
         mock_request = Mock(spec=Request)
+        mock_request.headers = {"Accept-Language": "en"}
 
         from app.api.endpoints.auth import google_auth
         from app.schemas.user import GoogleAuthRequest
@@ -247,6 +250,7 @@ class TestGoogleAuthEndpoint:
 
         mock_db = Mock(spec=Session)
         mock_request = Mock(spec=Request)
+        mock_request.headers = {"Accept-Language": "en"}
 
         from app.api.endpoints.auth import google_auth
         from app.schemas.user import GoogleAuthRequest
@@ -272,6 +276,7 @@ class TestGoogleAuthEndpoint:
 
         mock_db = Mock(spec=Session)
         mock_request = Mock(spec=Request)
+        mock_request.headers = {"Accept-Language": "en"}
 
         from app.api.endpoints.auth import google_auth
         from app.schemas.user import GoogleAuthRequest
@@ -302,6 +307,7 @@ class TestLoginGoogleOnlyUser:
         mock_db.query.return_value.filter.return_value.first.return_value = mock_user
 
         mock_request = Mock(spec=Request)
+        mock_request.headers = {"Accept-Language": "en"}
         mock_form_data = Mock()
         mock_form_data.username = "google@gmail.com"
         mock_form_data.password = "SomePassword123!"

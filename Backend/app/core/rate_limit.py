@@ -9,6 +9,7 @@ from fastapi import HTTPException, Request, status
 from redis import Redis
 
 from app.core.config import settings
+from app.i18n import DEFAULT_LANGUAGE, SUPPORTED_LANGUAGES, t
 
 
 class RateLimiter:
@@ -60,9 +61,13 @@ class RateLimiter:
         client_ip = self.get_client_ip(request)
 
         if self.is_rate_limited(client_ip):
+            # Parse Accept-Language for rate limit messages
+            accept_lang = request.headers.get("Accept-Language") or ""
+            primary = accept_lang.split(",")[0].split(";")[0].strip().split("-")[0].lower()
+            lang = primary if primary in SUPPORTED_LANGUAGES else DEFAULT_LANGUAGE
             raise HTTPException(
                 status_code=status.HTTP_429_TOO_MANY_REQUESTS,
-                detail=f"Rate limit exceeded. Maximum {self.requests} requests per {self.period} seconds.",
+                detail=t("rate_limit_exceeded", lang, requests=self.requests, period=self.period),
             )
 
 

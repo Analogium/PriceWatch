@@ -1,15 +1,17 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Link, useNavigate } from 'react-router';
 import { GoogleLogin } from '@react-oauth/google';
+import { useTranslation } from 'react-i18next';
 import { Button, Input, Card } from '@/components/ui';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/contexts/ToastContext';
-import { registerSchema } from '@/utils/validators';
+import { createRegisterSchema } from '@/utils/validators';
 import type { RegisterData } from '@/types';
 
 export default function Register() {
+  const { t, i18n } = useTranslation('auth');
   const navigate = useNavigate();
   const { register: registerUser, loginWithGoogle } = useAuth();
   const { success, error } = useToast();
@@ -17,13 +19,16 @@ export default function Register() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- rebuild schema when language changes
+  const schema = useMemo(() => createRegisterSchema(), [i18n.language]);
+
   const {
     register,
     handleSubmit,
     watch,
     formState: { errors },
   } = useForm<RegisterData>({
-    resolver: zodResolver(registerSchema),
+    resolver: zodResolver(schema),
   });
 
   const password = watch('password', '');
@@ -41,14 +46,14 @@ export default function Register() {
     setIsLoading(true);
     try {
       await registerUser(data);
-      success('Un email de vérification a été envoyé à votre adresse', 'Inscription réussie !');
+      success(t('register.successMessage'), t('register.successTitle'));
       navigate('/login');
     } catch (err: unknown) {
       const message =
         err && typeof err === 'object' && 'response' in err
           ? (err.response as { data?: { detail?: string } })?.data?.detail
           : undefined;
-      error(message || "Une erreur est survenue lors de l'inscription", 'Erreur');
+      error(message || t('register.errorGeneric'), t('register.errorTitle'));
     } finally {
       setIsLoading(false);
     }
@@ -59,14 +64,14 @@ export default function Register() {
     setIsLoading(true);
     try {
       await loginWithGoogle(credential);
-      success('Compte créé avec succès !', 'Bienvenue sur PriceWatch');
+      success(t('register.googleSuccessTitle'), t('register.googleSuccessMessage'));
       navigate('/dashboard');
     } catch (err: unknown) {
       const message =
         err && typeof err === 'object' && 'response' in err
           ? (err.response as { data?: { detail?: string } })?.data?.detail
           : undefined;
-      error(message || "Échec de l'inscription avec Google", 'Erreur');
+      error(message || t('register.googleError'), t('register.errorTitle'));
     } finally {
       setIsLoading(false);
     }
@@ -85,19 +90,19 @@ export default function Register() {
               </span>
               <h1 className="text-2xl font-bold text-gray-900">PriceWatch</h1>
             </div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">Créez votre compte</h2>
-            <p className="text-gray-600 text-sm">Ne manquez plus jamais une bonne affaire.</p>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">{t('register.title')}</h2>
+            <p className="text-gray-600 text-sm">{t('register.description')}</p>
           </div>
 
           {/* Register Form */}
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
             <div>
               <label className="block text-sm font-medium text-gray-900 mb-1.5">
-                Adresse e-mail
+                {t('register.emailLabel')}
               </label>
               <Input
                 type="email"
-                placeholder="vous@email.com"
+                placeholder={t('register.emailPlaceholder')}
                 error={errors.email?.message}
                 leftIcon={<span className="material-symbols-outlined text-xl">mail</span>}
                 fullWidth
@@ -106,10 +111,12 @@ export default function Register() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-900 mb-1.5">Mot de passe</label>
+              <label className="block text-sm font-medium text-gray-900 mb-1.5">
+                {t('register.passwordLabel')}
+              </label>
               <Input
                 type={showPassword ? 'text' : 'password'}
-                placeholder="Entrez votre mot de passe"
+                placeholder={t('register.passwordPlaceholder')}
                 error={errors.password?.message}
                 leftIcon={<span className="material-symbols-outlined text-xl">lock</span>}
                 rightIcon={
@@ -126,11 +133,11 @@ export default function Register() {
 
             <div>
               <label className="block text-sm font-medium text-gray-900 mb-1.5">
-                Confirmer le mot de passe
+                {t('register.confirmPasswordLabel')}
               </label>
               <Input
                 type={showConfirmPassword ? 'text' : 'password'}
-                placeholder="Confirmez votre mot de passe"
+                placeholder={t('register.confirmPasswordPlaceholder')}
                 error={errors.confirmPassword?.message}
                 leftIcon={<span className="material-symbols-outlined text-xl">lock</span>}
                 rightIcon={
@@ -151,20 +158,23 @@ export default function Register() {
                 <div className="space-y-1.5">
                   <PasswordRequirement
                     met={passwordChecks.minLength}
-                    text="Au moins 8 caractères"
+                    text={t('passwordRequirements.minLength')}
                   />
                   <PasswordRequirement
                     met={passwordChecks.hasUpperCase}
-                    text="Une lettre majuscule"
+                    text={t('passwordRequirements.uppercase')}
                   />
                   <PasswordRequirement
                     met={passwordChecks.hasLowerCase}
-                    text="Une lettre minuscule"
+                    text={t('passwordRequirements.lowercase')}
                   />
-                  <PasswordRequirement met={passwordChecks.hasNumber} text="Un chiffre" />
+                  <PasswordRequirement
+                    met={passwordChecks.hasNumber}
+                    text={t('passwordRequirements.number')}
+                  />
                   <PasswordRequirement
                     met={passwordChecks.hasSpecialChar}
-                    text="Un caractère spécial (!@#$%)"
+                    text={t('passwordRequirements.specialChar')}
                   />
                 </div>
               </div>
@@ -177,7 +187,7 @@ export default function Register() {
               isLoading={isLoading}
               className="h-12 mt-6"
             >
-              Créer mon compte
+              {t('register.submit')}
             </Button>
           </form>
 
@@ -187,7 +197,7 @@ export default function Register() {
               <div className="w-full border-t border-gray-300"></div>
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="px-4 bg-white text-gray-500">Ou continuez avec</span>
+              <span className="px-4 bg-white text-gray-500">{t('register.oauthDivider')}</span>
             </div>
           </div>
 
@@ -198,7 +208,7 @@ export default function Register() {
                 handleGoogleRegister(credentialResponse.credential);
               }}
               onError={() => {
-                error("Échec de l'inscription avec Google", 'Erreur');
+                error(t('register.googleError'), t('register.errorTitle'));
               }}
               text="signup_with"
               shape="rectangular"
@@ -208,9 +218,9 @@ export default function Register() {
 
           {/* Login Link */}
           <p className="text-center text-gray-600 text-sm mt-6">
-            Déjà un compte ?{' '}
+            {t('register.hasAccount')}{' '}
             <Link to="/login" className="font-semibold text-primary-600 hover:text-primary-700">
-              Se connecter
+              {t('register.loginLink')}
             </Link>
           </p>
         </Card>

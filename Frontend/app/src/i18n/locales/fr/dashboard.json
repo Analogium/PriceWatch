@@ -1,0 +1,27 @@
+{
+  "title": "Mes produits suivis",
+  "addProduct": "Ajouter un produit",
+  "noProducts": {
+    "title": "Aucun produit suivi",
+    "description": "Vous ne suivez aucun produit pour le moment. Commencez par ajouter un produit à surveiller en cliquant sur le bouton ci-dessus."
+  },
+  "error": {
+    "loading": "Erreur lors du chargement des produits",
+    "delete": "Erreur lors de la suppression du produit"
+  },
+  "success": {
+    "delete": "Produit supprimé avec succès"
+  },
+  "deleteConfirm": {
+    "title": "Confirmer la suppression",
+    "message": "Êtes-vous sûr de vouloir supprimer ce produit ? Cette action est irréversible.",
+    "product": "Produit à supprimer :",
+    "cancel": "Annuler",
+    "delete": "Supprimer"
+  },
+  "checkPrice": {
+    "info": "Vérification du prix en cours...",
+    "success": "Prix vérifié avec succès",
+    "error": "Erreur lors de la vérification du prix"
+  }
+}

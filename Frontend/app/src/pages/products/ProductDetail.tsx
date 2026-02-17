@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { productsApi } from '@/api/products';
 import { Card, Button, Badge, Modal, Breadcrumb, Tabs } from '@/components/ui';
 import { PriceChart, PriceHistoryList, PriceStats } from '@/components/products';
@@ -10,6 +11,7 @@ import type { Product } from '@/types';
 import type { PriceHistory, PriceStats as PriceStatsType } from '@/types/product';
 
 export default function ProductDetail() {
+  const { t } = useTranslation('products');
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { success, error, info } = useToast();
@@ -33,7 +35,7 @@ export default function ProductDetail() {
         const data = await productsApi.getById(Number(id));
         setProduct(data);
       } catch {
-        error('Impossible de charger le produit');
+        error(t('detail.error.loading'));
         navigate('/dashboard');
       } finally {
         setIsLoading(false);
@@ -41,7 +43,7 @@ export default function ProductDetail() {
     };
 
     fetchProduct();
-  }, [id, navigate, error]);
+  }, [id, navigate, error, t]);
 
   // Load price history and stats
   useEffect(() => {
@@ -57,14 +59,14 @@ export default function ProductDetail() {
         setPriceHistory(history);
         setPriceStats(stats);
       } catch {
-        error("Impossible de charger l'historique des prix");
+        error(t('detail.error.history'));
       } finally {
         setIsLoadingHistory(false);
       }
     };
 
     fetchPriceData();
-  }, [id, error]);
+  }, [id, error, t]);
 
   // Check price now
   const handleCheckPrice = async () => {
@@ -72,12 +74,12 @@ export default function ProductDetail() {
 
     // Start checking and show info toast
     startChecking(product);
-    info('Vérification du prix en cours...', undefined, 10000);
+    info(t('detail.checkPrice.info'), undefined, 10000);
 
     try {
       const updatedProduct = await productsApi.checkPrice(product.id);
       setProduct(updatedProduct);
-      success('Prix vérifié avec succès !');
+      success(t('detail.checkPrice.success'));
 
       // Reload price history and stats
       const [history, stats] = await Promise.all([
@@ -87,7 +89,7 @@ export default function ProductDetail() {
       setPriceHistory(history);
       setPriceStats(stats);
     } catch {
-      error('Impossible de vérifier le prix');
+      error(t('detail.error.checkPrice'));
     } finally {
       finishChecking(product.id);
     }
@@ -100,10 +102,10 @@ export default function ProductDetail() {
     try {
       setIsDeleting(true);
       await productsApi.delete(product.id);
-      success('Produit supprimé avec succès');
+      success(t('dashboard:success.delete'));
       navigate('/dashboard');
     } catch {
-      error('Impossible de supprimer le produit');
+      error(t('detail.error.delete'));
       setIsDeleting(false);
       setShowDeleteModal(false);
     }
@@ -138,7 +140,7 @@ export default function ProductDetail() {
       <div className="mb-6">
         <Breadcrumb
           items={[
-            { label: 'Tableau de bord', href: '/dashboard', icon: 'home' },
+            { label: t('common:breadcrumb.dashboard'), href: '/dashboard', icon: 'home' },
             { label: product.name, icon: 'shopping_bag' },
           ]}
         />
@@ -173,17 +175,17 @@ export default function ProductDetail() {
                 {!product.is_available ? (
                   <Badge variant="danger">
                     <span className="material-symbols-outlined text-sm">block</span>
-                    Indisponible
+                    {t('detail.status.unavailable')}
                   </Badge>
                 ) : isPriceReached ? (
                   <Badge variant="success">
                     <span className="material-symbols-outlined text-sm">check_circle</span>
-                    Prix cible atteint
+                    {t('detail.status.priceReached')}
                   </Badge>
                 ) : (
                   <Badge variant="neutral">
                     <span className="material-symbols-outlined text-sm">trending_down</span>
-                    En surveillance
+                    {t('detail.status.monitoring')}
                   </Badge>
                 )}
               </div>
@@ -191,13 +193,13 @@ export default function ProductDetail() {
               {/* Prices */}
               <div className="space-y-3 mb-6">
                 <div className="flex items-center justify-between py-3 border-b border-gray-200">
-                  <span className="text-gray-600">Prix actuel</span>
+                  <span className="text-gray-600">{t('detail.price.current')}</span>
                   <span className="text-2xl font-bold text-gray-900">
                     {formatPrice(product.current_price)}
                   </span>
                 </div>
                 <div className="flex items-center justify-between py-3 border-b border-gray-200">
-                  <span className="text-gray-600">Prix cible</span>
+                  <span className="text-gray-600">{t('detail.price.target')}</span>
                   <span className="text-xl font-semibold text-primary-600">
                     {formatPrice(product.target_price)}
                   </span>
@@ -212,7 +214,7 @@ export default function ProductDetail() {
                 className="inline-flex items-center gap-2 text-primary-600 hover:text-primary-700 font-medium transition-colors"
               >
                 <span className="material-symbols-outlined text-xl">open_in_new</span>
-                <span>Voir sur le site marchand</span>
+                <span>{t('detail.link')}</span>
               </a>
             </div>
           </div>
@@ -225,15 +227,17 @@ export default function ProductDetail() {
             <div className="flex items-start gap-3">
               <span className="material-symbols-outlined text-gray-400 text-xl">schedule</span>
               <div>
-                <p className="text-sm font-medium text-gray-900">Fréquence de vérification</p>
-                <p className="text-sm text-gray-600">Toutes les {product.check_frequency} heures</p>
+                <p className="text-sm font-medium text-gray-900">{t('detail.frequencyLabel')}</p>
+                <p className="text-sm text-gray-600">
+                  {t('detail.frequencyText', { hours: product.check_frequency })}
+                </p>
               </div>
             </div>
 
             <div className="flex items-start gap-3">
               <span className="material-symbols-outlined text-gray-400 text-xl">update</span>
               <div>
-                <p className="text-sm font-medium text-gray-900">Dernière vérification</p>
+                <p className="text-sm font-medium text-gray-900">{t('detail.lastChecked')}</p>
                 <p className="text-sm text-gray-600" title={formatDateTime(product.last_checked)}>
                   {formatRelativeTime(product.last_checked)}
                 </p>
@@ -245,7 +249,7 @@ export default function ProductDetail() {
                 calendar_today
               </span>
               <div>
-                <p className="text-sm font-medium text-gray-900">Date de création</p>
+                <p className="text-sm font-medium text-gray-900">{t('detail.createdAt')}</p>
                 <p className="text-sm text-gray-600">{formatDateTime(product.created_at)}</p>
               </div>
             </div>
@@ -254,7 +258,9 @@ export default function ProductDetail() {
               <div className="flex items-start gap-3">
                 <span className="material-symbols-outlined text-danger-600 text-xl">error</span>
                 <div>
-                  <p className="text-sm font-medium text-gray-900">Indisponible depuis</p>
+                  <p className="text-sm font-medium text-gray-900">
+                    {t('detail.unavailableSince')}
+                  </p>
                   <p className="text-sm text-gray-600">
                     {formatDateTime(product.unavailable_since)}
                   </p>
@@ -273,7 +279,7 @@ export default function ProductDetail() {
               isLoading={product ? isChecking(product.id) : false}
               leftIcon={<span className="material-symbols-outlined">refresh</span>}
             >
-              Vérifier le prix maintenant
+              {t('detail.action.checkPrice')}
             </Button>
 
             <Button
@@ -281,7 +287,7 @@ export default function ProductDetail() {
               onClick={() => navigate(`/products/${product.id}/edit`)}
               leftIcon={<span className="material-symbols-outlined">edit</span>}
             >
-              Modifier
+              {t('detail.action.edit')}
             </Button>
 
             <Button
@@ -289,7 +295,7 @@ export default function ProductDetail() {
               onClick={() => setShowDeleteModal(true)}
               leftIcon={<span className="material-symbols-outlined">delete</span>}
             >
-              Supprimer
+              {t('detail.action.delete')}
             </Button>
           </div>
         </div>
@@ -302,13 +308,13 @@ export default function ProductDetail() {
             items={[
               {
                 id: 'stats',
-                label: 'Statistiques',
+                label: t('detail.tabs.stats'),
                 icon: 'bar_chart',
                 content: <PriceStats stats={priceStats} />,
               },
               {
                 id: 'chart',
-                label: 'Graphique',
+                label: t('detail.tabs.chart'),
                 icon: 'show_chart',
                 content: (
                   <PriceChart priceHistory={priceHistory} targetPrice={product.target_price} />
@@ -316,7 +322,7 @@ export default function ProductDetail() {
               },
               {
                 id: 'history',
-                label: 'Historique',
+                label: t('detail.tabs.history'),
                 icon: 'history',
                 content: <PriceHistoryList priceHistory={priceHistory} />,
               },
@@ -339,16 +345,16 @@ export default function ProductDetail() {
       <Modal
         isOpen={showDeleteModal}
         onClose={() => setShowDeleteModal(false)}
-        title="Confirmer la suppression"
+        title={t('detail.deleteConfirm.title')}
         size="sm"
       >
         <div className="space-y-4">
-          <p className="text-gray-700">
-            Êtes-vous sûr de vouloir supprimer ce produit ? Cette action est irréversible.
-          </p>
+          <p className="text-gray-700">{t('detail.deleteConfirm.message')}</p>
 
           <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-            <p className="text-sm font-medium text-gray-900 mb-1">Produit à supprimer :</p>
+            <p className="text-sm font-medium text-gray-900 mb-1">
+              {t('detail.deleteConfirm.product')}
+            </p>
             <p className="text-sm text-gray-600 line-clamp-2">{product.name}</p>
           </div>
 
@@ -358,7 +364,7 @@ export default function ProductDetail() {
               onClick={() => setShowDeleteModal(false)}
               disabled={isDeleting}
             >
-              Annuler
+              {t('detail.deleteConfirm.cancel')}
             </Button>
             <Button
               variant="danger"
@@ -366,7 +372,7 @@ export default function ProductDetail() {
               isLoading={isDeleting}
               leftIcon={<span className="material-symbols-outlined">delete</span>}
             >
-              Supprimer
+              {t('detail.deleteConfirm.delete')}
             </Button>
           </div>
         </div>

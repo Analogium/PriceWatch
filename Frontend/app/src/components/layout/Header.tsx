@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/hooks/useAuth';
 import { usePriceCheck } from '@/contexts/PriceCheckContext';
 import { Button, Avatar } from '@/components/ui';
 
 export function Header() {
+  const { t } = useTranslation('common');
   const { user, logout } = useAuth();
   const { checkingProducts } = usePriceCheck();
   const location = useLocation();
@@ -45,7 +47,7 @@ export function Header() {
                   : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
               }`}
             >
-              Tableau de bord
+              {t('nav.dashboard')}
             </Link>
             <Link
               to="/products/add"
@@ -55,7 +57,7 @@ export function Header() {
                   : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
               }`}
             >
-              Ajouter un produit
+              {t('nav.addProduct')}
             </Link>
             <Link
               to="/settings"
@@ -65,7 +67,7 @@ export function Header() {
                   : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
               }`}
             >
-              Paramètres
+              {t('nav.settings')}
             </Link>
           </nav>
 
@@ -76,8 +78,7 @@ export function Header() {
               <div className="flex items-center gap-2 px-3 py-2 bg-primary-50 text-primary-700 rounded-lg border border-primary-200">
                 <span className="material-symbols-outlined text-lg animate-spin">refresh</span>
                 <span className="text-sm font-medium">
-                  {checkingProducts.length} vérification{checkingProducts.length > 1 ? 's' : ''} en
-                  cours
+                  {t('priceCheck.checking', { count: checkingProducts.length })}
                 </span>
               </div>
             )}
@@ -87,7 +88,7 @@ export function Header() {
                 <button
                   onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
                   className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors"
-                  aria-label="Menu utilisateur"
+                  aria-label={t('nav.userMenu')}
                 >
                   <Avatar
                     fallback={user.email.charAt(0).toUpperCase()}
@@ -109,7 +110,7 @@ export function Header() {
                     {/* Menu */}
                     <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-20">
                       <div className="px-4 py-3 border-b border-gray-100">
-                        <p className="text-sm font-medium text-gray-900">Connecté en tant que</p>
+                        <p className="text-sm font-medium text-gray-900">{t('nav.loggedInAs')}</p>
                         <p className="text-sm text-gray-600 truncate">{user.email}</p>
                       </div>
                       <Link
@@ -118,14 +119,14 @@ export function Header() {
                         onClick={() => setIsUserMenuOpen(false)}
                       >
                         <span className="material-symbols-outlined text-lg">settings</span>
-                        <span>Paramètres</span>
+                        <span>{t('nav.settings')}</span>
                       </Link>
                       <button
                         onClick={handleLogout}
                         className="w-full flex items-center gap-2 px-4 py-2 text-sm text-danger-600 hover:bg-danger-50"
                       >
                         <span className="material-symbols-outlined text-lg">logout</span>
-                        <span>Déconnexion</span>
+                        <span>{t('nav.logout')}</span>
                       </button>
                     </div>
                   </>
@@ -138,7 +139,7 @@ export function Header() {
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
             className="md:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors"
-            aria-label="Menu"
+            aria-label={t('nav.menu')}
           >
             <span className="material-symbols-outlined text-2xl text-gray-700">
               {isMenuOpen ? 'close' : 'menu'}
@@ -159,7 +160,7 @@ export function Header() {
                 }`}
                 onClick={() => setIsMenuOpen(false)}
               >
-                Tableau de bord
+                {t('nav.dashboard')}
               </Link>
               <Link
                 to="/products/add"
@@ -170,7 +171,7 @@ export function Header() {
                 }`}
                 onClick={() => setIsMenuOpen(false)}
               >
-                Ajouter un produit
+                {t('nav.addProduct')}
               </Link>
               <Link
                 to="/settings"
@@ -181,7 +182,7 @@ export function Header() {
                 }`}
                 onClick={() => setIsMenuOpen(false)}
               >
-                Paramètres
+                {t('nav.settings')}
               </Link>
             </nav>
 
@@ -189,12 +190,12 @@ export function Header() {
             {user && (
               <div className="mt-4 pt-4 border-t border-gray-200">
                 <div className="px-4 py-2">
-                  <p className="text-sm font-medium text-gray-900">Connecté en tant que</p>
+                  <p className="text-sm font-medium text-gray-900">{t('nav.loggedInAs')}</p>
                   <p className="text-sm text-gray-600 truncate">{user.email}</p>
                 </div>
                 <Button onClick={handleLogout} variant="danger" fullWidth className="mt-3">
                   <span className="material-symbols-outlined text-lg">logout</span>
-                  <span>Déconnexion</span>
+                  <span>{t('nav.logout')}</span>
                 </Button>
               </div>
             )}
