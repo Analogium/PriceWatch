@@ -1,0 +1,89 @@
+{
+  "hero": {
+    "title": "Track Prices, Save Smart",
+    "subtitle": "Never miss a great deal again. PriceWatch automatically monitors your favorite products and alerts you when prices drop.",
+    "cta_primary": "Get Started Free",
+    "cta_secondary": "See Demo"
+  },
+  "sites": {
+    "title": "Compatible with France's biggest e-commerce sites",
+    "subtitle": "Track your products on"
+  },
+  "features": {
+    "title": "Everything you need to save money",
+    "subtitle": "Powerful features to never pay full price again",
+    "auto_tracking": {
+      "title": "Automatic Tracking",
+      "description": "Simply add your product URL and we handle the rest. 24/7 monitoring without any intervention."
+    },
+    "instant_alerts": {
+      "title": "Instant Alerts",
+      "description": "Receive an email as soon as the price reaches your target. Never miss a sale again."
+    },
+    "price_history": {
+      "title": "Detailed History",
+      "description": "Visualize price trends with clear charts. Make informed purchase decisions."
+    },
+    "multi_sites": {
+      "title": "Multi-Site",
+      "description": "Track your products on Amazon, Fnac, Darty, Cdiscount, Boulanger and E.Leclerc from one place."
+    },
+    "custom_frequency": {
+      "title": "Custom Frequency",
+      "description": "Choose check frequency: hourly, every 6h, 12h or daily based on your needs."
+    },
+    "intuitive_dashboard": {
+      "title": "Intuitive Dashboard",
+      "description": "Clean and modern interface to manage all your products at a glance. Simple and efficient."
+    }
+  },
+  "how_it_works": {
+    "title": "How does it work?",
+    "subtitle": "Three simple steps to start saving",
+    "step1": {
+      "title": "Add a product",
+      "description": "Copy the product URL from any supported site and paste it into PriceWatch."
+    },
+    "step2": {
+      "title": "Set your target price",
+      "description": "Specify the price you want to buy at and choose the monitoring frequency."
+    },
+    "step3": {
+      "title": "Get an alert",
+      "description": "As soon as the price reaches your target, you receive an email to seize the opportunity."
+    }
+  },
+  "faq": {
+    "title": "Frequently Asked Questions",
+    "subtitle": "Everything you need to know about PriceWatch",
+    "q1": {
+      "question": "Is PriceWatch really free?",
+      "answer": "Yes, PriceWatch is completely free. You can track as many products as you want without any limitations."
+    },
+    "q2": {
+      "question": "Which e-commerce sites are supported?",
+      "answer": "We currently support Amazon.fr, Fnac, Darty, Cdiscount, Boulanger and E.Leclerc. More sites will be added soon."
+    },
+    "q3": {
+      "question": "How often are prices checked?",
+      "answer": "You can choose the check frequency for each product: hourly, every 6 hours, every 12 hours or daily."
+    },
+    "q4": {
+      "question": "How does the alert system work?",
+      "answer": "You receive an automatic email as soon as a product's price reaches or falls below your target price. You can customize your notification preferences."
+    },
+    "q5": {
+      "question": "Is my data secure?",
+      "answer": "Absolutely. We use standard security protocols (HTTPS, password encryption) and never share your data with third parties."
+    },
+    "q6": {
+      "question": "Can I track an unlisted product?",
+      "answer": "If the product is on one of our supported sites, you can track it. Just copy the product page URL."
+    }
+  },
+  "cta_final": {
+    "title": "Ready to save on your online shopping?",
+    "subtitle": "Join thousands of users who never pay full price anymore.",
+    "button": "Create Free Account"
+  }
+}

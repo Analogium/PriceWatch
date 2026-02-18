@@ -1,0 +1,89 @@
+{
+  "hero": {
+    "title": "Suivez les prix, économisez intelligemment",
+    "subtitle": "Ne manquez plus jamais une bonne affaire. PriceWatch surveille automatiquement les prix de vos produits préférés et vous alerte dès qu'ils baissent.",
+    "cta_primary": "Commencer gratuitement",
+    "cta_secondary": "Voir la démo"
+  },
+  "sites": {
+    "title": "Compatible avec les plus grands sites e-commerce français",
+    "subtitle": "Suivez vos produits sur"
+  },
+  "features": {
+    "title": "Tout ce dont vous avez besoin pour économiser",
+    "subtitle": "Des fonctionnalités puissantes pour ne plus jamais payer le prix fort",
+    "auto_tracking": {
+      "title": "Suivi automatique",
+      "description": "Ajoutez simplement l'URL de votre produit et nous nous occupons du reste. Surveillance 24/7 sans intervention."
+    },
+    "instant_alerts": {
+      "title": "Alertes instantanées",
+      "description": "Recevez un email dès que le prix atteint votre objectif. Ne ratez plus jamais une promotion."
+    },
+    "price_history": {
+      "title": "Historique détaillé",
+      "description": "Visualisez l'évolution des prix avec des graphiques clairs. Prenez des décisions d'achat éclairées."
+    },
+    "multi_sites": {
+      "title": "Multi-sites",
+      "description": "Suivez vos produits sur Amazon, Fnac, Darty, Cdiscount, Boulanger et E.Leclerc depuis un seul endroit."
+    },
+    "custom_frequency": {
+      "title": "Fréquence personnalisable",
+      "description": "Choisissez la fréquence de vérification : toutes les heures, 6h, 12h ou quotidiennement selon vos besoins."
+    },
+    "intuitive_dashboard": {
+      "title": "Dashboard intuitif",
+      "description": "Interface claire et moderne pour gérer tous vos produits en un coup d'œil. Simple et efficace."
+    }
+  },
+  "how_it_works": {
+    "title": "Comment ça marche ?",
+    "subtitle": "Trois étapes simples pour commencer à économiser",
+    "step1": {
+      "title": "Ajoutez un produit",
+      "description": "Copiez l'URL du produit depuis n'importe quel site supporté et collez-la dans PriceWatch."
+    },
+    "step2": {
+      "title": "Définissez votre prix cible",
+      "description": "Indiquez le prix auquel vous souhaitez acheter et choisissez la fréquence de surveillance."
+    },
+    "step3": {
+      "title": "Recevez une alerte",
+      "description": "Dès que le prix atteint votre objectif, vous recevez un email pour ne pas manquer l'opportunité."
+    }
+  },
+  "faq": {
+    "title": "Questions fréquentes",
+    "subtitle": "Tout ce que vous devez savoir sur PriceWatch",
+    "q1": {
+      "question": "PriceWatch est-il vraiment gratuit ?",
+      "answer": "Oui, PriceWatch est entièrement gratuit. Vous pouvez suivre autant de produits que vous le souhaitez sans aucune limitation."
+    },
+    "q2": {
+      "question": "Quels sites e-commerce sont supportés ?",
+      "answer": "Nous supportons actuellement Amazon.fr, Fnac, Darty, Cdiscount, Boulanger et E.Leclerc. D'autres sites seront ajoutés prochainement."
+    },
+    "q3": {
+      "question": "À quelle fréquence les prix sont-ils vérifiés ?",
+      "answer": "Vous pouvez choisir la fréquence de vérification pour chaque produit : toutes les heures, toutes les 6 heures, toutes les 12 heures ou quotidiennement."
+    },
+    "q4": {
+      "question": "Comment fonctionne le système d'alertes ?",
+      "answer": "Vous recevez un email automatique dès que le prix d'un produit atteint ou passe en dessous de votre prix cible. Vous pouvez personnaliser vos préférences de notification."
+    },
+    "q5": {
+      "question": "Mes données sont-elles sécurisées ?",
+      "answer": "Absolument. Nous utilisons des protocoles de sécurité standards (HTTPS, chiffrement des mots de passe) et ne partageons jamais vos données avec des tiers."
+    },
+    "q6": {
+      "question": "Puis-je suivre un produit qui n'est pas listé ?",
+      "answer": "Si le produit se trouve sur l'un de nos sites supportés, vous pouvez le suivre. Il suffit de copier l'URL de la page produit."
+    }
+  },
+  "cta_final": {
+    "title": "Prêt à économiser sur vos achats en ligne ?",
+    "subtitle": "Rejoignez des milliers d'utilisateurs qui ne paient plus jamais le prix fort.",
+    "button": "Créer un compte gratuit"
+  }
+}

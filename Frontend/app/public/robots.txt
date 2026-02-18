@@ -1,0 +1,15 @@
+# Allow all search engines to index public pages
+User-agent: *
+Allow: /
+Allow: /login
+Allow: /register
+
+# Disallow authenticated/private pages
+Disallow: /dashboard
+Disallow: /products
+Disallow: /settings
+Disallow: /verify-email
+Disallow: /reset-password
+
+# Sitemap
+Sitemap: https://pricewatch.fr/sitemap.xml

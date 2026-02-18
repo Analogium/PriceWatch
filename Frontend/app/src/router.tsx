@@ -1,9 +1,12 @@
-import { createBrowserRouter, Navigate } from 'react-router-dom';
+import { createBrowserRouter } from 'react-router-dom';
 import { lazy } from 'react';
 
 // Route components
 import ProtectedRoute from './components/routes/ProtectedRoute';
 import PublicRoute from './components/routes/PublicRoute';
+
+// Landing page
+const LandingPage = lazy(() => import('./pages/landing/LandingPage'));
 
 // Auth pages
 const Login = lazy(() => import('./pages/auth/Login'));
@@ -25,7 +28,7 @@ const NotFound = lazy(() => import('./pages/errors/NotFound'));
 export const router = createBrowserRouter([
   {
     path: '/',
-    element: <Navigate to="/dashboard" replace />,
+    element: <LandingPage />,
   },
   // Public routes (auth pages)
   {
