@@ -19,11 +19,7 @@ export default function LandingPage() {
 
   return (
     <>
-      <SEO
-        title={t('hero.title')}
-        description={t('hero.subtitle')}
-        canonical="/"
-      />
+      <SEO title={t('hero.title')} description={t('hero.subtitle')} canonical="/" />
 
       <div className="min-h-screen flex flex-col bg-gray-50">
         {/* Header */}
@@ -182,9 +178,7 @@ export default function LandingPage() {
                     onClick={() => setOpenFaq(openFaq === index ? null : index)}
                     className="w-full px-6 py-5 text-left flex items-center justify-between hover:bg-gray-50 transition-colors"
                   >
-                    <span className="font-semibold text-gray-900">
-                      {t(`faq.${q}.question`)}
-                    </span>
+                    <span className="font-semibold text-gray-900">{t(`faq.${q}.question`)}</span>
                     <span
                       className={cn(
                         'material-symbols-outlined text-gray-400 transition-transform',

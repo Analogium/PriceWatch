@@ -22,12 +22,13 @@ export default function SEO({
   const currentLang = lang || i18n.language;
 
   const siteUrl = import.meta.env.VITE_SITE_URL || 'https://pricewatch.fr';
-  const fullTitle = title ? `${title} | PriceWatch` : 'PriceWatch - Surveillance de prix automatique';
+  const fullTitle = title
+    ? `${title} | PriceWatch`
+    : 'PriceWatch - Surveillance de prix automatique';
   const defaultDescription =
     'Suivez automatiquement les prix de vos produits préférés sur Amazon, Fnac, Darty, Cdiscount et plus. Recevez des alertes email dès que le prix baisse.';
   const metaDescription = description || defaultDescription;
   const canonicalUrl = canonical ? `${siteUrl}${canonical}` : siteUrl;
-
 
   return (
     <Helmet>
