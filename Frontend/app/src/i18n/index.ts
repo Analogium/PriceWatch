@@ -8,6 +8,7 @@ import frDashboard from './locales/fr/dashboard.json';
 import frProducts from './locales/fr/products.json';
 import frSettings from './locales/fr/settings.json';
 import frValidation from './locales/fr/validation.json';
+import frLanding from './locales/fr/landing.json';
 
 import enCommon from './locales/en/common.json';
 import enAuth from './locales/en/auth.json';
@@ -15,6 +16,7 @@ import enDashboard from './locales/en/dashboard.json';
 import enProducts from './locales/en/products.json';
 import enSettings from './locales/en/settings.json';
 import enValidation from './locales/en/validation.json';
+import enLanding from './locales/en/landing.json';
 
 i18n
   .use(LanguageDetector)
@@ -28,6 +30,7 @@ i18n
         products: frProducts,
         settings: frSettings,
         validation: frValidation,
+        landing: frLanding,
       },
       en: {
         common: enCommon,
@@ -36,11 +39,12 @@ i18n
         products: enProducts,
         settings: enSettings,
         validation: enValidation,
+        landing: enLanding,
       },
     },
     fallbackLng: 'fr',
     defaultNS: 'common',
-    ns: ['common', 'auth', 'dashboard', 'products', 'settings', 'validation'],
+    ns: ['common', 'auth', 'dashboard', 'products', 'settings', 'validation', 'landing'],
     detection: {
       order: ['localStorage', 'navigator'],
       lookupLocalStorage: 'i18nextLng',
