@@ -2,6 +2,7 @@ import { z } from 'zod';
 import i18n from '../i18n';
 
 const tv = (key: string) => i18n.t(key, { ns: 'validation' });
+const tl = (key: string) => i18n.t(key, { ns: 'legal' });
 
 export const createEmailSchema = () => z.string().email(tv('invalidEmail'));
 
@@ -26,6 +27,7 @@ export const createRegisterSchema = () =>
       email: createEmailSchema(),
       password: createPasswordSchema(),
       confirmPassword: z.string(),
+      acceptTerms: z.literal(true, { message: tl('register.termsRequired') }),
     })
     .refine((data) => data.password === data.confirmPassword, {
       message: tv('passwordsDoNotMatch'),

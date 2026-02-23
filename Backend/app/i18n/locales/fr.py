@@ -41,6 +41,9 @@ MESSAGES = {
     "user_promoted": "L'utilisateur {email} a été promu administrateur",
     "admin_revoked": "Les privilèges administrateur ont été révoqués pour l'utilisateur {email}",
     "user_deleted": "L'utilisateur {email} et toutes les données associées ont été supprimés",
+    # User self-service (RGPD)
+    "password_required_for_deletion": "Le mot de passe est requis pour supprimer votre compte",
+    "incorrect_password": "Mot de passe incorrect",
     # Cookies
     "invalid_json_format": "Format JSON invalide. Un tableau JSON de cookies est attendu.",
     "failed_to_read_file": "Échec de la lecture du fichier : {error}",

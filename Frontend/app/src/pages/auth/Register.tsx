@@ -12,6 +12,7 @@ import type { RegisterData } from '@/types';
 
 export default function Register() {
   const { t, i18n } = useTranslation('auth');
+  const { t: tl } = useTranslation('legal');
   const navigate = useNavigate();
   const { register: registerUser, loginWithGoogle } = useAuth();
   const { success, error } = useToast();
@@ -179,6 +180,38 @@ export default function Register() {
                 </div>
               </div>
             )}
+
+            {/* Terms & Privacy acceptance */}
+            <div className="mt-2">
+              <label className="flex items-start gap-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  className="mt-0.5 h-4 w-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                  {...register('acceptTerms')}
+                />
+                <span className="text-sm text-gray-600">
+                  {tl('register.termsAccept')}{' '}
+                  <Link
+                    to="/terms"
+                    className="text-primary-600 hover:underline font-medium"
+                    target="_blank"
+                  >
+                    {tl('register.termsLink')}
+                  </Link>{' '}
+                  {tl('register.and')}{' '}
+                  <Link
+                    to="/privacy"
+                    className="text-primary-600 hover:underline font-medium"
+                    target="_blank"
+                  >
+                    {tl('register.privacyLink')}
+                  </Link>
+                </span>
+              </label>
+              {errors.acceptTerms && (
+                <p className="mt-1.5 text-xs text-red-600">{errors.acceptTerms.message}</p>
+              )}
+            </div>
 
             <Button
               type="submit"

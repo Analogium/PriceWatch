@@ -14,6 +14,7 @@ export interface RegisterData {
   email: string;
   password: string;
   confirmPassword: string;
+  acceptTerms: true;
 }
 
 export interface Token {

@@ -1,3 +1,4 @@
+import { Link } from 'react-router';
 import { useTranslation } from 'react-i18next';
 
 export function Footer() {
@@ -20,16 +21,31 @@ export function Footer() {
           </div>
 
           {/* Links */}
-          <div className="flex items-center gap-6">
-            <a href="#" className="text-sm text-gray-600 hover:text-primary-600 transition-colors">
+          <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2">
+            <Link
+              to="/about"
+              className="text-sm text-gray-600 hover:text-primary-600 transition-colors"
+            >
               {t('footer.about')}
-            </a>
-            <a href="#" className="text-sm text-gray-600 hover:text-primary-600 transition-colors">
-              {t('footer.support')}
-            </a>
-            <a href="#" className="text-sm text-gray-600 hover:text-primary-600 transition-colors">
+            </Link>
+            <Link
+              to="/terms"
+              className="text-sm text-gray-600 hover:text-primary-600 transition-colors"
+            >
+              {t('footer.terms')}
+            </Link>
+            <Link
+              to="/privacy"
+              className="text-sm text-gray-600 hover:text-primary-600 transition-colors"
+            >
               {t('footer.privacy')}
-            </a>
+            </Link>
+            <Link
+              to="/legal"
+              className="text-sm text-gray-600 hover:text-primary-600 transition-colors"
+            >
+              {t('footer.legalNotices')}
+            </Link>
           </div>
         </div>
       </div>

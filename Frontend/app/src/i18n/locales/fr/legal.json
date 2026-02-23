@@ -1,0 +1,224 @@
+{
+  "privacy": {
+    "title": "Politique de confidentialité",
+    "lastUpdated": "Dernière mise à jour : {{date}}",
+    "intro": "La présente politique de confidentialité décrit comment PriceWatch collecte, utilise et protège vos données personnelles conformément au Règlement Général sur la Protection des Données (RGPD) et à la loi Informatique et Libertés.",
+    "sections": {
+      "controller": {
+        "title": "1. Responsable du traitement",
+        "content": "Le responsable du traitement des données est :"
+      },
+      "dataCollected": {
+        "title": "2. Données collectées",
+        "intro": "Nous collectons les données suivantes :",
+        "items": [
+          "Adresse e-mail (lors de l'inscription)",
+          "Mot de passe (haché via bcrypt, jamais stocké en clair)",
+          "Identifiant Google (si connexion via Google OAuth)",
+          "URLs des produits suivis et prix cibles",
+          "Historique des prix relevés",
+          "Préférences de notification"
+        ]
+      },
+      "purposes": {
+        "title": "3. Finalités du traitement",
+        "items": [
+          "Création et gestion de votre compte utilisateur",
+          "Surveillance automatique des prix de vos produits",
+          "Envoi d'alertes par e-mail lors de baisses de prix",
+          "Envoi de notifications via webhook (si configuré)",
+          "Amélioration du service"
+        ]
+      },
+      "legalBasis": {
+        "title": "4. Base légale",
+        "content": "Le traitement est fondé sur l'exécution du contrat (CGU) que vous acceptez lors de votre inscription, et sur votre consentement pour les communications marketing."
+      },
+      "retention": {
+        "title": "5. Durée de conservation",
+        "content": "Vos données sont conservées tant que votre compte est actif. Elles sont supprimées dans un délai de 30 jours suivant la suppression de votre compte."
+      },
+      "subprocessors": {
+        "title": "6. Sous-traitants",
+        "intro": "Nous faisons appel aux sous-traitants suivants :",
+        "items": [
+          "Brevo (ex-Sendinblue) — envoi d'e-mails transactionnels",
+          "Google LLC — authentification OAuth (si vous utilisez \"Se connecter avec Google\")"
+        ]
+      },
+      "rights": {
+        "title": "7. Vos droits (RGPD)",
+        "intro": "Conformément au RGPD, vous disposez des droits suivants :",
+        "items": [
+          "Droit d'accès à vos données",
+          "Droit de rectification",
+          "Droit à l'effacement (\"droit à l'oubli\")",
+          "Droit à la portabilité",
+          "Droit d'opposition au traitement"
+        ],
+        "exercise": "Pour exercer ces droits, rendez-vous dans vos Paramètres ou contactez-nous à :"
+      },
+      "security": {
+        "title": "8. Sécurité",
+        "content": "Nous mettons en œuvre des mesures techniques et organisationnelles appropriées pour protéger vos données : chiffrement des mots de passe, tokens JWT, connexions HTTPS, accès restreint à la base de données."
+      },
+      "cookies": {
+        "title": "9. Cookies et stockage local",
+        "content": "PriceWatch utilise le stockage local (localStorage) de votre navigateur pour conserver votre session de connexion (tokens JWT). Aucun cookie publicitaire ou de traçage tiers n'est utilisé."
+      },
+      "contact": {
+        "title": "10. Contact",
+        "content": "Pour toute question relative à cette politique, contactez-nous à :"
+      }
+    }
+  },
+  "terms": {
+    "title": "Conditions Générales d'Utilisation",
+    "lastUpdated": "Dernière mise à jour : {{date}}",
+    "sections": {
+      "object": {
+        "title": "1. Objet",
+        "content": "PriceWatch est un service en ligne permettant de surveiller les prix de produits sur des sites de commerce électronique français et de recevoir des alertes lors de baisses de prix. Les présentes Conditions Générales d'Utilisation (CGU) régissent l'accès et l'utilisation du service."
+      },
+      "acceptance": {
+        "title": "2. Acceptation",
+        "content": "En créant un compte, vous acceptez les présentes CGU dans leur intégralité. Si vous n'acceptez pas ces conditions, vous ne pouvez pas utiliser le service."
+      },
+      "account": {
+        "title": "3. Compte utilisateur",
+        "items": [
+          "Vous devez fournir une adresse e-mail valide lors de l'inscription.",
+          "Vous êtes responsable de la confidentialité de vos identifiants.",
+          "Vous vous engagez à ne pas créer plusieurs comptes ou à usurper l'identité d'autrui.",
+          "Nous nous réservons le droit de suspendre ou supprimer tout compte en cas d'utilisation abusive."
+        ]
+      },
+      "service": {
+        "title": "4. Description et limites du service",
+        "items": [
+          "PriceWatch surveille automatiquement les prix à intervalles définis.",
+          "Les prix affichés proviennent de sites tiers ; PriceWatch ne garantit pas leur exactitude en temps réel.",
+          "Le service peut être temporairement indisponible pour maintenance.",
+          "Certains sites peuvent bloquer le scraping ; PriceWatch ne peut garantir la surveillance de tous les produits.",
+          "PriceWatch n'est pas un site marchand et ne réalise aucune transaction d'achat en votre nom."
+        ]
+      },
+      "usage": {
+        "title": "5. Utilisation acceptable",
+        "content": "Vous vous engagez à utiliser le service de manière légale et à ne pas tenter de surcharger, pirater ou altérer le service."
+      },
+      "ip": {
+        "title": "6. Propriété intellectuelle",
+        "content": "Le code source, le design et les marques de PriceWatch sont la propriété de l'éditeur. Les données de prix appartiennent aux sites sources respectifs."
+      },
+      "liability": {
+        "title": "7. Limitation de responsabilité",
+        "content": "PriceWatch est fourni \"tel quel\". L'éditeur ne saurait être tenu responsable des décisions d'achat prises sur la base des informations affichées, ni des interruptions de service."
+      },
+      "termination": {
+        "title": "8. Résiliation",
+        "content": "Vous pouvez supprimer votre compte à tout moment depuis vos Paramètres. L'éditeur peut résilier votre accès en cas de violation des présentes CGU."
+      },
+      "changes": {
+        "title": "9. Modifications",
+        "content": "Les présentes CGU peuvent être modifiées. Vous serez informé par e-mail de tout changement substantiel."
+      },
+      "law": {
+        "title": "10. Droit applicable",
+        "content": "Les présentes CGU sont soumises au droit français. En cas de litige, les tribunaux français seront seuls compétents."
+      }
+    }
+  },
+  "legal": {
+    "title": "Mentions légales",
+    "sections": {
+      "editor": {
+        "title": "Éditeur du site",
+        "name": "Nom / Raison sociale :",
+        "address": "Adresse :",
+        "email": "Contact :"
+      },
+      "host": {
+        "title": "Hébergement",
+        "name": "Hébergeur :",
+        "address": "Adresse :",
+        "url": "Site web :"
+      },
+      "ip": {
+        "title": "Propriété intellectuelle",
+        "content": "L'ensemble du contenu de ce site (textes, code source, images, marques) est protégé par le droit de la propriété intellectuelle. Toute reproduction partielle ou totale sans autorisation écrite est interdite."
+      },
+      "data": {
+        "title": "Données personnelles",
+        "content": "Conformément au RGPD, vous disposez d'un droit d'accès, de rectification et de suppression de vos données. Consultez notre Politique de confidentialité pour plus d'informations."
+      },
+      "cookies": {
+        "title": "Cookies",
+        "content": "Ce site utilise le stockage local (localStorage) pour maintenir votre session. Aucun cookie publicitaire n'est utilisé."
+      }
+    }
+  },
+  "about": {
+    "title": "À propos de PriceWatch",
+    "subtitle": "Votre assistant pour ne jamais rater une bonne affaire",
+    "description": "PriceWatch est une application de surveillance de prix vous permettant de suivre automatiquement l'évolution des prix sur les principaux sites de e-commerce français et de recevoir une alerte dès que le prix de votre produit passe sous votre seuil cible.",
+    "howItWorks": {
+      "title": "Comment ça fonctionne ?",
+      "steps": [
+        "Ajoutez l'URL d'un produit que vous souhaitez suivre et définissez votre prix cible.",
+        "PriceWatch vérifie automatiquement le prix selon la fréquence que vous choisissez (toutes les 6h, 12h ou 24h).",
+        "Dès que le prix descend sous votre seuil, vous recevez une alerte par e-mail ou webhook."
+      ]
+    },
+    "supportedSites": {
+      "title": "Sites supportés"
+    },
+    "tech": {
+      "title": "Technologies",
+      "content": "PriceWatch est construit avec Python/FastAPI côté backend, React/TypeScript côté frontend, et PostgreSQL pour la base de données. Le scraping utilise BeautifulSoup et Playwright."
+    },
+    "contact": {
+      "title": "Contact",
+      "content": "Pour toute question ou suggestion, contactez-nous à :"
+    }
+  },
+  "cookieBanner": {
+    "message": "PriceWatch utilise le stockage local pour maintenir votre session de connexion (tokens JWT). Aucun cookie publicitaire n'est utilisé.",
+    "accept": "Accepter",
+    "decline": "Refuser",
+    "learnMore": "En savoir plus"
+  },
+  "settings": {
+    "gdpr": {
+      "title": "Mes données (RGPD)",
+      "description": "Conformément au RGPD, vous pouvez exporter ou supprimer toutes vos données personnelles.",
+      "exportTitle": "Exporter mes données",
+      "exportDescription": "Téléchargez un fichier JSON contenant toutes vos données : compte, produits suivis, historique des prix et préférences.",
+      "exportButton": "Télécharger mes données",
+      "exportLoading": "Préparation de l'export...",
+      "exportSuccess": "Export téléchargé avec succès",
+      "exportError": "Erreur lors de l'export",
+      "deleteTitle": "Supprimer mon compte",
+      "deleteDescription": "La suppression de votre compte est définitive. Toutes vos données (produits, historique, préférences) seront effacées.",
+      "deleteButton": "Supprimer mon compte",
+      "deleteModal": {
+        "title": "Confirmer la suppression",
+        "warning": "Cette action est irréversible. Toutes vos données seront supprimées définitivement.",
+        "passwordLabel": "Confirmez avec votre mot de passe",
+        "passwordPlaceholder": "Votre mot de passe actuel",
+        "googleNote": "Votre compte est lié à Google. Aucun mot de passe requis.",
+        "confirm": "Supprimer définitivement",
+        "cancel": "Annuler"
+      },
+      "deleteSuccess": "Votre compte a été supprimé",
+      "deleteError": "Erreur lors de la suppression"
+    }
+  },
+  "register": {
+    "termsAccept": "J'accepte les",
+    "termsLink": "Conditions Générales d'Utilisation",
+    "and": "et la",
+    "privacyLink": "Politique de confidentialité",
+    "termsRequired": "Vous devez accepter les CGU et la politique de confidentialité"
+  }
+}
