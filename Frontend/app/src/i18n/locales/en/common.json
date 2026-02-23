@@ -13,7 +13,9 @@
     "allRightsReserved": "All rights reserved",
     "about": "About",
     "support": "Support",
-    "privacy": "Privacy"
+    "privacy": "Privacy",
+    "terms": "Terms",
+    "legalNotices": "Legal Notice"
   },
   "buttons": {
     "save": "Save",

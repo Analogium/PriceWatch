@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api.endpoints import admin, auth, health, preferences, products
+from app.api.endpoints import admin, auth, health, preferences, products, users
 from app.core.config import settings
 from app.core.logging_config import get_logger, setup_logging
 from app.db.base import Base, engine
@@ -72,6 +72,7 @@ app.add_middleware(
 app.include_router(auth.router, prefix=f"{settings.API_V1_PREFIX}/auth", tags=["Authentication"])
 app.include_router(products.router, prefix=f"{settings.API_V1_PREFIX}/products", tags=["Products"])
 app.include_router(preferences.router, prefix=f"{settings.API_V1_PREFIX}/users", tags=["User Preferences"])
+app.include_router(users.router, prefix=f"{settings.API_V1_PREFIX}/users", tags=["Users"])
 app.include_router(admin.router, prefix=f"{settings.API_V1_PREFIX}/admin", tags=["Administration"])
 app.include_router(health.router, prefix="/health", tags=["Health"])
 

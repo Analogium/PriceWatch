@@ -22,6 +22,12 @@ const ProductAdd = lazy(() => import('./pages/products/ProductAdd'));
 const ProductEdit = lazy(() => import('./pages/products/ProductEdit'));
 const Settings = lazy(() => import('./pages/settings/Settings'));
 
+// Legal & info pages
+const PrivacyPolicy = lazy(() => import('./pages/legal/PrivacyPolicy'));
+const TermsOfService = lazy(() => import('./pages/legal/TermsOfService'));
+const LegalNotices = lazy(() => import('./pages/legal/LegalNotices'));
+const About = lazy(() => import('./pages/about/About'));
+
 // Error pages
 const NotFound = lazy(() => import('./pages/errors/NotFound'));
 
@@ -81,6 +87,23 @@ export const router = createBrowserRouter([
         element: <Settings />,
       },
     ],
+  },
+  // Legal & info pages (public, no auth required)
+  {
+    path: '/privacy',
+    element: <PrivacyPolicy />,
+  },
+  {
+    path: '/terms',
+    element: <TermsOfService />,
+  },
+  {
+    path: '/legal',
+    element: <LegalNotices />,
+  },
+  {
+    path: '/about',
+    element: <About />,
   },
   // 404
   {

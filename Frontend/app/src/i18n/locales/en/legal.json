@@ -1,0 +1,224 @@
+{
+  "privacy": {
+    "title": "Privacy Policy",
+    "lastUpdated": "Last updated: {{date}}",
+    "intro": "This privacy policy describes how PriceWatch collects, uses, and protects your personal data in compliance with the General Data Protection Regulation (GDPR) and applicable data protection law.",
+    "sections": {
+      "controller": {
+        "title": "1. Data Controller",
+        "content": "The data controller is:"
+      },
+      "dataCollected": {
+        "title": "2. Data Collected",
+        "intro": "We collect the following data:",
+        "items": [
+          "Email address (upon registration)",
+          "Password (hashed via bcrypt, never stored in plaintext)",
+          "Google ID (if using Google OAuth sign-in)",
+          "Tracked product URLs and target prices",
+          "Price history records",
+          "Notification preferences"
+        ]
+      },
+      "purposes": {
+        "title": "3. Purposes of Processing",
+        "items": [
+          "Creating and managing your user account",
+          "Automatic monitoring of your products' prices",
+          "Sending email alerts when prices drop",
+          "Sending webhook notifications (if configured)",
+          "Improving the service"
+        ]
+      },
+      "legalBasis": {
+        "title": "4. Legal Basis",
+        "content": "Processing is based on the performance of the contract (Terms of Service) you accept upon registration, and on your consent for marketing communications."
+      },
+      "retention": {
+        "title": "5. Data Retention",
+        "content": "Your data is retained as long as your account is active. It is deleted within 30 days of account deletion."
+      },
+      "subprocessors": {
+        "title": "6. Sub-processors",
+        "intro": "We use the following sub-processors:",
+        "items": [
+          "Brevo (formerly Sendinblue) — transactional email delivery",
+          "Google LLC — OAuth authentication (if you use \"Sign in with Google\")"
+        ]
+      },
+      "rights": {
+        "title": "7. Your Rights (GDPR)",
+        "intro": "Under GDPR, you have the following rights:",
+        "items": [
+          "Right of access to your data",
+          "Right to rectification",
+          "Right to erasure (\"right to be forgotten\")",
+          "Right to data portability",
+          "Right to object to processing"
+        ],
+        "exercise": "To exercise these rights, go to your Settings or contact us at:"
+      },
+      "security": {
+        "title": "8. Security",
+        "content": "We implement appropriate technical and organisational measures to protect your data: password hashing, JWT tokens, HTTPS connections, restricted database access."
+      },
+      "cookies": {
+        "title": "9. Cookies and Local Storage",
+        "content": "PriceWatch uses your browser's localStorage to maintain your login session (JWT tokens). No advertising or third-party tracking cookies are used."
+      },
+      "contact": {
+        "title": "10. Contact",
+        "content": "For any questions about this policy, contact us at:"
+      }
+    }
+  },
+  "terms": {
+    "title": "Terms of Service",
+    "lastUpdated": "Last updated: {{date}}",
+    "sections": {
+      "object": {
+        "title": "1. Purpose",
+        "content": "PriceWatch is an online service that monitors product prices on French e-commerce sites and sends alerts when prices drop. These Terms of Service govern access to and use of the service."
+      },
+      "acceptance": {
+        "title": "2. Acceptance",
+        "content": "By creating an account, you accept these Terms of Service in their entirety. If you do not accept these terms, you may not use the service."
+      },
+      "account": {
+        "title": "3. User Account",
+        "items": [
+          "You must provide a valid email address upon registration.",
+          "You are responsible for keeping your credentials confidential.",
+          "You agree not to create multiple accounts or impersonate others.",
+          "We reserve the right to suspend or delete any account in cases of misuse."
+        ]
+      },
+      "service": {
+        "title": "4. Service Description and Limitations",
+        "items": [
+          "PriceWatch automatically monitors prices at defined intervals.",
+          "Prices displayed come from third-party sites; PriceWatch does not guarantee real-time accuracy.",
+          "The service may be temporarily unavailable for maintenance.",
+          "Some sites may block scraping; PriceWatch cannot guarantee monitoring of all products.",
+          "PriceWatch is not a marketplace and does not make any purchases on your behalf."
+        ]
+      },
+      "usage": {
+        "title": "5. Acceptable Use",
+        "content": "You agree to use the service lawfully and not to attempt to overload, hack, or otherwise disrupt the service."
+      },
+      "ip": {
+        "title": "6. Intellectual Property",
+        "content": "The source code, design, and trademarks of PriceWatch are the property of the publisher. Price data belongs to the respective source sites."
+      },
+      "liability": {
+        "title": "7. Limitation of Liability",
+        "content": "PriceWatch is provided \"as is\". The publisher cannot be held liable for purchase decisions made based on displayed information, nor for service interruptions."
+      },
+      "termination": {
+        "title": "8. Termination",
+        "content": "You may delete your account at any time from your Settings. The publisher may terminate your access in the event of a breach of these Terms."
+      },
+      "changes": {
+        "title": "9. Changes",
+        "content": "These Terms may be amended. You will be notified by email of any material changes."
+      },
+      "law": {
+        "title": "10. Governing Law",
+        "content": "These Terms are governed by French law. In case of dispute, French courts shall have exclusive jurisdiction."
+      }
+    }
+  },
+  "legal": {
+    "title": "Legal Notice",
+    "sections": {
+      "editor": {
+        "title": "Site Publisher",
+        "name": "Name / Company:",
+        "address": "Address:",
+        "email": "Contact:"
+      },
+      "host": {
+        "title": "Hosting",
+        "name": "Host:",
+        "address": "Address:",
+        "url": "Website:"
+      },
+      "ip": {
+        "title": "Intellectual Property",
+        "content": "All content on this site (texts, source code, images, trademarks) is protected by intellectual property law. Any partial or full reproduction without written permission is prohibited."
+      },
+      "data": {
+        "title": "Personal Data",
+        "content": "In accordance with GDPR, you have the right to access, rectify, and delete your data. See our Privacy Policy for more information."
+      },
+      "cookies": {
+        "title": "Cookies",
+        "content": "This site uses localStorage to maintain your session. No advertising cookies are used."
+      }
+    }
+  },
+  "about": {
+    "title": "About PriceWatch",
+    "subtitle": "Your assistant to never miss a great deal",
+    "description": "PriceWatch is a price monitoring application that lets you automatically track price changes on major French e-commerce sites and receive an alert as soon as the price of your product drops below your target threshold.",
+    "howItWorks": {
+      "title": "How does it work?",
+      "steps": [
+        "Add the URL of a product you want to track and set your target price.",
+        "PriceWatch automatically checks the price at the frequency you choose (every 6h, 12h, or 24h).",
+        "As soon as the price drops below your threshold, you receive an alert by email or webhook."
+      ]
+    },
+    "supportedSites": {
+      "title": "Supported Sites"
+    },
+    "tech": {
+      "title": "Technology",
+      "content": "PriceWatch is built with Python/FastAPI on the backend, React/TypeScript on the frontend, and PostgreSQL for the database. Scraping uses BeautifulSoup and Playwright."
+    },
+    "contact": {
+      "title": "Contact",
+      "content": "For any questions or suggestions, contact us at:"
+    }
+  },
+  "cookieBanner": {
+    "message": "PriceWatch uses localStorage to maintain your login session (JWT tokens). No advertising cookies are used.",
+    "accept": "Accept",
+    "decline": "Decline",
+    "learnMore": "Learn more"
+  },
+  "settings": {
+    "gdpr": {
+      "title": "My Data (GDPR)",
+      "description": "Under GDPR, you can export or delete all your personal data.",
+      "exportTitle": "Export my data",
+      "exportDescription": "Download a JSON file containing all your data: account, tracked products, price history, and preferences.",
+      "exportButton": "Download my data",
+      "exportLoading": "Preparing export...",
+      "exportSuccess": "Export downloaded successfully",
+      "exportError": "Error during export",
+      "deleteTitle": "Delete my account",
+      "deleteDescription": "Account deletion is permanent. All your data (products, history, preferences) will be erased.",
+      "deleteButton": "Delete my account",
+      "deleteModal": {
+        "title": "Confirm deletion",
+        "warning": "This action is irreversible. All your data will be permanently deleted.",
+        "passwordLabel": "Confirm with your password",
+        "passwordPlaceholder": "Your current password",
+        "googleNote": "Your account is linked to Google. No password required.",
+        "confirm": "Delete permanently",
+        "cancel": "Cancel"
+      },
+      "deleteSuccess": "Your account has been deleted",
+      "deleteError": "Error during deletion"
+    }
+  },
+  "register": {
+    "termsAccept": "I accept the",
+    "termsLink": "Terms of Service",
+    "and": "and the",
+    "privacyLink": "Privacy Policy",
+    "termsRequired": "You must accept the Terms of Service and Privacy Policy"
+  }
+}

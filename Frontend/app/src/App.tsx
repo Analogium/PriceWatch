@@ -7,6 +7,7 @@ import { AuthProvider } from './contexts/AuthContext';
 import { ToastProvider } from './contexts/ToastContext';
 import { PriceCheckProvider } from './contexts/PriceCheckContext';
 import { ErrorBoundary } from './components/common';
+import CookieBanner from './components/CookieBanner';
 import { router } from './router';
 import { queryClient } from './lib/queryClient';
 import './index.css';
@@ -21,6 +22,7 @@ function App() {
               <ToastProvider>
                 <PriceCheckProvider>
                   <RouterProvider router={router} />
+                  <CookieBanner />
                 </PriceCheckProvider>
               </ToastProvider>
             </AuthProvider>

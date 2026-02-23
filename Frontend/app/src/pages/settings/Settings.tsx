@@ -1,21 +1,30 @@
 import { useState, useEffect } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router';
 import { Card, Button, Toggle, Select, Input, Spinner, Breadcrumb } from '@/components/ui';
-import { preferencesApi } from '@/api';
+import { preferencesApi, usersApi } from '@/api';
 import type { UserPreferences, UserPreferencesUpdate, WebhookType } from '@/types';
 import type { Language } from '@/types/preferences';
 import { WEBHOOK_TYPES } from '@/utils';
 import { useToast } from '@/contexts/ToastContext';
+import { useAuth } from '@/hooks/useAuth';
 import i18n from '@/i18n';
 
 type PreferencesFormData = Omit<UserPreferences, 'id' | 'user_id'>;
 
 export default function Settings() {
   const { t } = useTranslation('settings');
+  const { t: tl } = useTranslation('legal');
+  const navigate = useNavigate();
+  const { logout, user } = useAuth();
   const [preferences, setPreferences] = useState<UserPreferences | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deletePassword, setDeletePassword] = useState('');
   const { success, error, info } = useToast();
 
   const {
@@ -107,6 +116,44 @@ export default function Settings() {
       error(t('saveError'));
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const handleExportData = async () => {
+    try {
+      setIsExporting(true);
+      const blob = await usersApi.exportData();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'pricewatch_data.json';
+      a.click();
+      URL.revokeObjectURL(url);
+      success(tl('settings.gdpr.exportSuccess'));
+    } catch {
+      error(tl('settings.gdpr.exportError'));
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    try {
+      setIsDeleting(true);
+      const isGoogleOnly = user?.auth_provider === 'google';
+      await usersApi.deleteAccount(isGoogleOnly ? undefined : deletePassword);
+      success(tl('settings.gdpr.deleteSuccess'));
+      logout();
+      navigate('/');
+    } catch (err: unknown) {
+      const message =
+        err && typeof err === 'object' && 'response' in err
+          ? (err.response as { data?: { detail?: string } })?.data?.detail
+          : undefined;
+      error(message || tl('settings.gdpr.deleteError'));
+    } finally {
+      setIsDeleting(false);
+      setIsDeleteModalOpen(false);
     }
   };
 
@@ -317,6 +364,66 @@ export default function Settings() {
           </div>
         </Card>
 
+        {/* Section RGPD */}
+        <Card>
+          <div className="space-y-6">
+            <div>
+              <div className="flex items-center gap-2 mb-4">
+                <span className="material-symbols-outlined text-primary-600">shield_person</span>
+                <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
+                  {tl('settings.gdpr.title')}
+                </h2>
+              </div>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
+                {tl('settings.gdpr.description')}
+              </p>
+            </div>
+
+            {/* Export */}
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+              <div>
+                <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                  {tl('settings.gdpr.exportTitle')}
+                </p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                  {tl('settings.gdpr.exportDescription')}
+                </p>
+              </div>
+              <Button
+                type="button"
+                variant="secondary"
+                isLoading={isExporting}
+                onClick={handleExportData}
+                className="shrink-0"
+              >
+                <span className="material-symbols-outlined">download</span>
+                {tl('settings.gdpr.exportButton')}
+              </Button>
+            </div>
+
+            {/* Delete */}
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-4 bg-red-50 dark:bg-red-950 rounded-lg border border-red-100 dark:border-red-900">
+              <div>
+                <p className="text-sm font-medium text-red-700 dark:text-red-400">
+                  {tl('settings.gdpr.deleteTitle')}
+                </p>
+                <p className="text-xs text-red-500 dark:text-red-500 mt-0.5">
+                  {tl('settings.gdpr.deleteDescription')}
+                </p>
+              </div>
+              <Button
+                type="button"
+                variant="danger"
+                onClick={() => setIsDeleteModalOpen(true)}
+                className="shrink-0"
+              >
+                <span className="material-symbols-outlined">delete_forever</span>
+                {tl('settings.gdpr.deleteButton')}
+              </Button>
+            </div>
+          </div>
+        </Card>
+
         {/* Actions */}
         <div className="flex justify-end gap-3">
           <Button
@@ -338,6 +445,65 @@ export default function Settings() {
           </Button>
         </div>
       </form>
+
+      {/* Delete account modal */}
+      {isDeleteModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-md w-full p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <span className="material-symbols-outlined text-red-600 text-2xl">warning</span>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                {tl('settings.gdpr.deleteModal.title')}
+              </h3>
+            </div>
+
+            <p className="text-sm text-red-600 dark:text-red-400 mb-4">
+              {tl('settings.gdpr.deleteModal.warning')}
+            </p>
+
+            {user?.auth_provider === 'google' ? (
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-4 italic">
+                {tl('settings.gdpr.deleteModal.googleNote')}
+              </p>
+            ) : (
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                  {tl('settings.gdpr.deleteModal.passwordLabel')}
+                </label>
+                <input
+                  type="password"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-red-500"
+                  placeholder={tl('settings.gdpr.deleteModal.passwordPlaceholder')}
+                  value={deletePassword}
+                  onChange={(e) => setDeletePassword(e.target.value)}
+                />
+              </div>
+            )}
+
+            <div className="flex gap-3 justify-end">
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={() => {
+                  setIsDeleteModalOpen(false);
+                  setDeletePassword('');
+                }}
+                disabled={isDeleting}
+              >
+                {tl('settings.gdpr.deleteModal.cancel')}
+              </Button>
+              <Button
+                type="button"
+                variant="danger"
+                isLoading={isDeleting}
+                onClick={handleDeleteAccount}
+              >
+                {tl('settings.gdpr.deleteModal.confirm')}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -41,6 +41,9 @@ MESSAGES = {
     "user_promoted": "User {email} promoted to admin",
     "admin_revoked": "Admin privileges revoked from user {email}",
     "user_deleted": "User {email} and all associated data deleted successfully",
+    # User self-service (GDPR)
+    "password_required_for_deletion": "Password is required to delete your account",
+    "incorrect_password": "Incorrect password",
     # Cookies
     "invalid_json_format": "Invalid JSON format. Expected a JSON array of cookies.",
     "failed_to_read_file": "Failed to read file: {error}",

@@ -55,3 +55,7 @@ class PasswordResetConfirm(BaseModel):
 
 class EmailVerification(BaseModel):
     token: str
+
+
+class DeleteAccountRequest(BaseModel):
+    password: Optional[str] = None
