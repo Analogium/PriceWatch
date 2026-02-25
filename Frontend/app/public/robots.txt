@@ -11,5 +11,24 @@ Disallow: /settings
 Disallow: /verify-email
 Disallow: /reset-password
 
+# Block AI training crawlers
+User-agent: GPTBot
+Disallow: /
+
+User-agent: Google-Extended
+Disallow: /
+
+User-agent: CCBot
+Disallow: /
+
+User-agent: anthropic-ai
+Disallow: /
+
+User-agent: Claude-Web
+Disallow: /
+
+User-agent: PerplexityBot
+Disallow: /
+
 # Sitemap
-Sitemap: https://pricewatch.fr/sitemap.xml
+Sitemap: https://pricewatch.it.com/sitemap.xml

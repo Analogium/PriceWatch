@@ -26,7 +26,11 @@ export default function CookieBanner() {
 
         <p className="text-sm text-gray-700 flex-1">
           {t('cookieBanner.message')}{' '}
-          <a href="/privacy" className="text-primary-600 hover:underline font-medium">
+          <a
+            href="/privacy"
+            className="text-primary-600 hover:underline font-medium"
+            aria-label={t('cookieBanner.learnMoreAriaLabel')}
+          >
             {t('cookieBanner.learnMore')}
           </a>
         </p>
