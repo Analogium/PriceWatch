@@ -1,10 +1,17 @@
 import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router';
-import { useAuth } from '@/hooks/useAuth';
+import { Link, useNavigate } from 'react-router';
 
 export default function LegalNotices() {
   const { t } = useTranslation('legal');
-  const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
+
+  const handleBack = () => {
+    if (window.history.length > 1) {
+      navigate(-1);
+    } else {
+      navigate(localStorage.getItem('access_token') ? '/dashboard' : '/');
+    }
+  };
 
   const ownerName = import.meta.env.VITE_LEGAL_OWNER_NAME || '[NOM / RAISON SOCIALE]';
   const ownerAddress = import.meta.env.VITE_LEGAL_OWNER_ADDRESS || '[ADRESSE]';
@@ -18,13 +25,13 @@ export default function LegalNotices() {
       <div className="max-w-3xl mx-auto px-4 py-12">
         {/* Header */}
         <div className="mb-8">
-          <Link
-            to={isAuthenticated ? '/dashboard' : '/'}
+          <button
+            onClick={handleBack}
             className="inline-flex items-center gap-1 text-sm text-primary-600 hover:text-primary-700 mb-6"
           >
             <span className="material-symbols-outlined text-lg">arrow_back</span>
             PriceWatch
-          </Link>
+          </button>
           <h1 className="text-3xl font-bold text-gray-900">{t('legal.title')}</h1>
         </div>
 

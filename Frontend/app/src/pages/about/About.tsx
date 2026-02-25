@@ -1,6 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router';
-import { useAuth } from '@/hooks/useAuth';
+import { useNavigate } from 'react-router';
 
 const CONTACT_EMAIL = import.meta.env.VITE_LEGAL_OWNER_EMAIL || '[EMAIL DE CONTACT]';
 
@@ -15,7 +14,15 @@ const SUPPORTED_SITES = [
 
 export default function About() {
   const { t } = useTranslation('legal');
-  const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
+
+  const handleBack = () => {
+    if (window.history.length > 1) {
+      navigate(-1);
+    } else {
+      navigate(localStorage.getItem('access_token') ? '/dashboard' : '/');
+    }
+  };
 
   const steps: string[] = t('about.howItWorks.steps', { returnObjects: true }) as string[];
 
@@ -24,13 +31,13 @@ export default function About() {
       <div className="max-w-3xl mx-auto px-4 py-12">
         {/* Header */}
         <div className="mb-8">
-          <Link
-            to={isAuthenticated ? '/dashboard' : '/'}
+          <button
+            onClick={handleBack}
             className="inline-flex items-center gap-1 text-sm text-primary-600 hover:text-primary-700 mb-6"
           >
             <span className="material-symbols-outlined text-lg">arrow_back</span>
             PriceWatch
-          </Link>
+          </button>
           <div className="flex items-center gap-3 mb-3">
             <span className="material-symbols-outlined text-primary-600 text-4xl">monitoring</span>
             <h1 className="text-3xl font-bold text-gray-900">{t('about.title')}</h1>
