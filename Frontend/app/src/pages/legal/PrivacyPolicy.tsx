@@ -1,11 +1,13 @@
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
+import { useAuth } from '@/hooks/useAuth';
 
 const LAST_UPDATED = '23/02/2026';
 const CONTACT_EMAIL = import.meta.env.VITE_LEGAL_OWNER_EMAIL || '[EMAIL DE CONTACT]';
 
 export default function PrivacyPolicy() {
   const { t } = useTranslation('legal');
+  const { isAuthenticated } = useAuth();
 
   const dataItems: string[] = t('privacy.sections.dataCollected.items', {
     returnObjects: true,
@@ -26,7 +28,7 @@ export default function PrivacyPolicy() {
         {/* Header */}
         <div className="mb-8">
           <Link
-            to="/"
+            to={isAuthenticated ? '/dashboard' : '/'}
             className="inline-flex items-center gap-1 text-sm text-primary-600 hover:text-primary-700 mb-6"
           >
             <span className="material-symbols-outlined text-lg">arrow_back</span>

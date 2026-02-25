@@ -1,10 +1,12 @@
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
+import { useAuth } from '@/hooks/useAuth';
 
 const LAST_UPDATED = '23/02/2026';
 
 export default function TermsOfService() {
   const { t } = useTranslation('legal');
+  const { isAuthenticated } = useAuth();
 
   const accountItems: string[] = t('terms.sections.account.items', {
     returnObjects: true,
@@ -30,7 +32,7 @@ export default function TermsOfService() {
         {/* Header */}
         <div className="mb-8">
           <Link
-            to="/"
+            to={isAuthenticated ? '/dashboard' : '/'}
             className="inline-flex items-center gap-1 text-sm text-primary-600 hover:text-primary-700 mb-6"
           >
             <span className="material-symbols-outlined text-lg">arrow_back</span>
