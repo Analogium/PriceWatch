@@ -186,7 +186,8 @@
     "message": "PriceWatch utilise le stockage local pour maintenir votre session de connexion (tokens JWT). Aucun cookie publicitaire n'est utilisé.",
     "accept": "Accepter",
     "decline": "Refuser",
-    "learnMore": "En savoir plus"
+    "learnMore": "En savoir plus",
+    "learnMoreAriaLabel": "En savoir plus sur notre politique de confidentialité"
   },
   "settings": {
     "gdpr": {

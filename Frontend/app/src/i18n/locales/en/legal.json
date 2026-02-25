@@ -186,7 +186,8 @@
     "message": "PriceWatch uses localStorage to maintain your login session (JWT tokens). No advertising cookies are used.",
     "accept": "Accept",
     "decline": "Decline",
-    "learnMore": "Learn more"
+    "learnMore": "Learn more",
+    "learnMoreAriaLabel": "Learn more about our privacy policy"
   },
   "settings": {
     "gdpr": {

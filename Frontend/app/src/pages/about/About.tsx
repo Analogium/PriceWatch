@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
+import { useAuth } from '@/hooks/useAuth';
 
 const CONTACT_EMAIL = import.meta.env.VITE_LEGAL_OWNER_EMAIL || '[EMAIL DE CONTACT]';
 
@@ -14,6 +15,7 @@ const SUPPORTED_SITES = [
 
 export default function About() {
   const { t } = useTranslation('legal');
+  const { isAuthenticated } = useAuth();
 
   const steps: string[] = t('about.howItWorks.steps', { returnObjects: true }) as string[];
 
@@ -23,7 +25,7 @@ export default function About() {
         {/* Header */}
         <div className="mb-8">
           <Link
-            to="/"
+            to={isAuthenticated ? '/dashboard' : '/'}
             className="inline-flex items-center gap-1 text-sm text-primary-600 hover:text-primary-700 mb-6"
           >
             <span className="material-symbols-outlined text-lg">arrow_back</span>

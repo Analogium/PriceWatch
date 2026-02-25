@@ -1,8 +1,10 @@
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
+import { useAuth } from '@/hooks/useAuth';
 
 export default function LegalNotices() {
   const { t } = useTranslation('legal');
+  const { isAuthenticated } = useAuth();
 
   const ownerName = import.meta.env.VITE_LEGAL_OWNER_NAME || '[NOM / RAISON SOCIALE]';
   const ownerAddress = import.meta.env.VITE_LEGAL_OWNER_ADDRESS || '[ADRESSE]';
@@ -17,7 +19,7 @@ export default function LegalNotices() {
         {/* Header */}
         <div className="mb-8">
           <Link
-            to="/"
+            to={isAuthenticated ? '/dashboard' : '/'}
             className="inline-flex items-center gap-1 text-sm text-primary-600 hover:text-primary-700 mb-6"
           >
             <span className="material-symbols-outlined text-lg">arrow_back</span>
